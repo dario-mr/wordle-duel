@@ -2,9 +2,9 @@ import type { ErrorResponseDto } from './types';
 
 export class WdsApiError extends Error {
   status: number;
-  code?: string; // todo not optional
+  code: string;
 
-  constructor(args: { status: number; code?: string; message: string }) {
+  constructor(args: { status: number; code: string; message: string }) {
     super(args.message);
     this.name = 'WdsApiError';
     this.status = args.status;
@@ -32,7 +32,7 @@ export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> 
   });
 
   if (!res.ok) {
-    let code: string | undefined;
+    let code = 'UNEXPECTED_ERROR';
     let message = `Request failed with status ${String(res.status)}`;
 
     try {

@@ -16,7 +16,6 @@ export function useRoomQuery(roomId: string | undefined) {
       return getRoom(roomId);
     },
     enabled: Boolean(roomId),
-    refetchInterval: roomId ? 5000 : false,
   });
 }
 

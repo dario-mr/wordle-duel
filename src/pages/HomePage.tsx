@@ -1,10 +1,13 @@
-import { Alert, Button, Code, Heading, HStack, Input, Stack, Text } from '@chakra-ui/react';
+import { Alert, Button, Heading, HStack, Input, NativeSelect, Stack } from '@chakra-ui/react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { WdsApiError } from '../api/wdsClient';
 import { roomQueryKey, useCreateRoomMutation, useJoinRoomMutation } from '../query/roomQueries';
+import { LANGUAGE_OPTIONS } from '../constants';
 import { usePlayerStore } from '../state/playerStore';
+
+type LanguageCode = (typeof LANGUAGE_OPTIONS)[number]['value'];
 
 function ErrorAlert(props: { title: string; message: string }) {
   return (
@@ -22,10 +25,9 @@ export function HomePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const playerId = usePlayerStore((s) => s.playerId);
   const ensurePlayerId = usePlayerStore((s) => s.ensurePlayerId);
-  const effectivePlayerId = useMemo(() => playerId ?? ensurePlayerId(), [ensurePlayerId, playerId]);
 
+  const [language, setLanguage] = useState<LanguageCode>(LANGUAGE_OPTIONS[0].value);
   const [roomIdToJoin, setRoomIdToJoin] = useState('');
 
   const createMutation = useCreateRoomMutation();
@@ -43,10 +45,26 @@ export function HomePage() {
 
   return (
     <Stack gap={6}>
-      <Heading size="lg">Wordle Duel</Heading>
-      <Text>
-        Your player id: <Code>{effectivePlayerId}</Code>
-      </Text>
+      <Heading size="lg">Welcome to Wordle Duel!</Heading>
+
+      <Stack gap={2}>
+        <Heading size="sm">Language</Heading>
+        <NativeSelect.Root maxW="240px">
+          <NativeSelect.Field
+            value={language}
+            onChange={(e) => {
+              setLanguage(e.target.value as LanguageCode);
+            }}
+            aria-label="Language"
+          >
+            {LANGUAGE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </NativeSelect.Field>
+        </NativeSelect.Root>
+      </Stack>
 
       {createMutation.error ? (
         <ErrorAlert title="Create room failed" message={displayError(createMutation.error)} />
@@ -61,16 +79,22 @@ export function HomePage() {
         <Button
           colorPalette="teal"
           loading={createMutation.isPending}
-          onClick={async () => {
-            const room = await createMutation.mutateAsync({
-              playerId: ensurePlayerId(),
-              language: 'IT',
-            });
-            queryClient.setQueryData(roomQueryKey(room.id), room);
-            navigate(`/rooms/${room.id}`);
+          onClick={() => {
+            createMutation.mutate(
+              {
+                playerId: ensurePlayerId(),
+                language,
+              },
+              {
+                onSuccess: (room) => {
+                  queryClient.setQueryData(roomQueryKey(room.id), room);
+                  void navigate(`/rooms/${room.id}`);
+                },
+              },
+            );
           }}
         >
-          Create room (IT)
+          Create room ({language})
         </Button>
       </Stack>
 
@@ -90,13 +114,19 @@ export function HomePage() {
             variant="outline"
             loading={joinMutation.isPending}
             disabled={!roomIdToJoin}
-            onClick={async () => {
-              const joined = await joinMutation.mutateAsync({
-                roomId: roomIdToJoin,
-                playerId: ensurePlayerId(),
-              });
-              queryClient.setQueryData(roomQueryKey(joined.id), joined);
-              navigate(`/rooms/${joined.id}`);
+            onClick={() => {
+              joinMutation.mutate(
+                {
+                  roomId: roomIdToJoin,
+                  playerId: ensurePlayerId(),
+                },
+                {
+                  onSuccess: (joined) => {
+                    queryClient.setQueryData(roomQueryKey(joined.id), joined);
+                    void navigate(`/rooms/${joined.id}`);
+                  },
+                },
+              );
             }}
           >
             Join

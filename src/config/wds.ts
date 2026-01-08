@@ -1,29 +1,12 @@
-function requireEnv(name: string): string {
-  const value = (import.meta.env as Record<string, unknown>)[name];
-  if (typeof value === 'string' && value.trim().length > 0) {
-    return value;
-  }
-  throw new Error(`Missing required env var: ${name}`);
-}
-
-export function getWdsBaseUrl(): string {
-  return requireEnv('VITE_WDS_BASE_URL');
-}
+import { PROD_API_V1_BASE_PATH, PROD_WS_PATH } from '../constants.ts';
 
 export function getRestApiV1BaseUrl(): string {
-  if (import.meta.env.DEV) {
-    return '/api/v1/';
-  }
-  return new URL('./api/v1/', getWdsBaseUrl()).toString();
+  return import.meta.env.DEV ? '/api/v1/' : PROD_API_V1_BASE_PATH;
 }
 
 export function getWsBrokerUrl(): string {
-  const wsHttpUrl = new URL('./ws', getWdsBaseUrl());
+  const wsHttpUrl = new URL(import.meta.env.DEV ? '/ws' : PROD_WS_PATH, window.location.origin);
   wsHttpUrl.protocol = wsHttpUrl.protocol === 'https:' ? 'wss:' : 'ws:';
 
   return wsHttpUrl.toString();
-}
-
-export function getShareRoomUrl(roomId: string): string {
-  return new URL(`${import.meta.env.BASE_URL}rooms/${roomId}`, window.location.origin).toString();
 }

@@ -1,8 +1,5 @@
-- theme picker (dark / light)
-- player should only see himself in the room, not the opponent
-- why app keeps polling room state endpoint?
-- when round has `"finished": true`, players can submit a new guess, that will initiate the next round
-- add profile icon on the top right of the navbar, clicking it opens an overlay with your playerId
-- invalid guess error should be display below guess textbox, not at the top of the room
-- language picker is a dropdown
-- check `localhost:8088` duplication
+- add localization
+- bad: when round ends, the first player does not see the result before the new round starts, also solution is never displayed
+- major refactor into smaller components
+- improve `useRoomTopic` to use ws payload, instead of just invalidating room query
+- unit tests wherever possible
