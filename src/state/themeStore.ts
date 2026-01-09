@@ -16,9 +16,6 @@ function normalizeTheme(value: string | null): ThemeMode | null {
 }
 
 function getPreferredTheme(): ThemeMode {
-  if (typeof window === 'undefined') {
-    return 'light';
-  }
   try {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   } catch {
@@ -50,7 +47,7 @@ interface ThemeState {
 }
 
 export const useThemeStore = create<ThemeState>((set, get) => ({
-  theme: typeof window !== 'undefined' ? readInitialTheme() : 'light',
+  theme: readInitialTheme(),
   setTheme: (theme) => {
     persistTheme(theme);
     set({ theme });

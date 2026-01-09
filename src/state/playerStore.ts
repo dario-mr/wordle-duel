@@ -33,7 +33,7 @@ interface PlayerState {
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
-  playerId: typeof window !== 'undefined' ? readInitialPlayerId() : null,
+  playerId: readInitialPlayerId(),
   ensurePlayerId: () => {
     const existing = get().playerId;
     if (existing) {

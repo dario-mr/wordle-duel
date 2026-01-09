@@ -2,10 +2,11 @@ import { Alert, Button, Heading, HStack, Input, NativeSelect, Stack } from '@cha
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { WdsApiError } from '../api/wdsClient';
+import { getErrorMessage } from '../api/errors';
 import { Card } from '../components/Card';
 import { LANGUAGE_OPTIONS } from '../constants';
-import { roomQueryKey, useCreateRoomMutation, useJoinRoomMutation } from '../query/roomQueries';
+import { JoinRoomButton } from '../components/JoinRoomButton';
+import { roomQueryKey, useCreateRoomMutation } from '../query/roomQueries';
 import { usePlayerStore } from '../state/playerStore';
 
 type LanguageCode = (typeof LANGUAGE_OPTIONS)[number]['value'];
@@ -32,17 +33,6 @@ export function HomePage() {
   const [roomIdToJoin, setRoomIdToJoin] = useState('');
 
   const createMutation = useCreateRoomMutation();
-  const joinMutation = useJoinRoomMutation();
-
-  const displayError = (err: unknown): string => {
-    if (err instanceof WdsApiError) {
-      return err.message;
-    }
-    if (err instanceof Error) {
-      return err.message;
-    }
-    return 'Unknown error';
-  };
 
   return (
     <Stack gap={5}>
@@ -51,11 +41,7 @@ export function HomePage() {
       </Heading>
 
       {createMutation.error ? (
-        <ErrorAlert title="Create room failed" message={displayError(createMutation.error)} />
-      ) : null}
-
-      {joinMutation.error ? (
-        <ErrorAlert title="Join room failed" message={displayError(joinMutation.error)} />
+        <ErrorAlert title="Create room failed" message={getErrorMessage(createMutation.error)} />
       ) : null}
 
       <Card>
@@ -115,30 +101,13 @@ export function HomePage() {
               autoCapitalize="off"
               autoCorrect="off"
             />
-            <Button
-              bg="fg.accent"
-              color="fg"
-              _hover={{ filter: 'brightness(0.9)' }}
-              _active={{ filter: 'brightness(0.9)' }}
-              loading={joinMutation.isPending}
-              disabled={!roomIdToJoin}
-              onClick={() => {
-                joinMutation.mutate(
-                  {
-                    roomId: roomIdToJoin,
-                    playerId: ensurePlayerId(),
-                  },
-                  {
-                    onSuccess: (joined) => {
-                      queryClient.setQueryData(roomQueryKey(joined.id), joined);
-                      void navigate(`/rooms/${joined.id}`);
-                    },
-                  },
-                );
+            <JoinRoomButton
+              roomId={roomIdToJoin}
+              getPlayerId={ensurePlayerId}
+              onJoined={(joinedRoomId) => {
+                void navigate(`/rooms/${joinedRoomId}`);
               }}
-            >
-              Join
-            </Button>
+            />
           </HStack>
         </Stack>
       </Card>

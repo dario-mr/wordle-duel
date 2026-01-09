@@ -1,10 +1,11 @@
 import { Alert, Button, Code, HStack, Input, Spinner, Stack, Text } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getErrorMessage } from '../api/errors';
 import { WdsApiError } from '../api/wdsClient';
 import { WORD_LENGTH } from '../constants';
+import { JoinRoomButton } from '../components/JoinRoomButton';
 import {
-  useJoinRoomMutation,
   useReadyForNextRoundMutation,
   useRoomQuery,
   useSubmitGuessMutation,
@@ -41,13 +42,58 @@ export function RoomPage() {
   const effectivePlayerId = useMemo(() => playerId ?? ensurePlayerId(), [ensurePlayerId, playerId]);
 
   const { data: room, isLoading, error } = useRoomQuery(roomId);
-  const joinMutation = useJoinRoomMutation();
 
   useRoomTopic(roomId);
 
   const [guessState, setGuessState] = useState<{ roundNumber?: number; value: string }>({
     value: '',
   });
+
+  const [hasCopiedRoomId, setHasCopiedRoomId] = useState(false);
+
+  const copyRoomLink = () => {
+    if (!roomId) {
+      return;
+    }
+
+    const url = window.location.href;
+
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setHasCopiedRoomId(true);
+        window.setTimeout(() => {
+          setHasCopiedRoomId(false);
+        }, 2000);
+      })
+      .catch(() => {
+        setHasCopiedRoomId(false);
+        window.prompt('Copy this room link:', url);
+      });
+  };
+
+  const shareRoomLink = async () => {
+    if (!roomId) {
+      return;
+    }
+
+    const url = window.location.href;
+
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          url,
+          title: 'Wordle Duel',
+          text: 'Join my Wordle Duel room',
+        });
+        return;
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return;
+        }
+      }
+    }
+  };
 
   const submitGuessMutation = useSubmitGuessMutation({
     roomId: roomId ?? '',
@@ -58,7 +104,6 @@ export function RoomPage() {
   const myRoundStatus = currentRound?.statusByPlayerId[effectivePlayerId];
   const me = room?.players.find((p) => p.id === effectivePlayerId);
   const opponent = room?.players.find((p) => p.id !== effectivePlayerId);
-
   const currentRoundNumber = currentRound?.roundNumber;
   const endedRound = currentRound?.roundStatus === 'ENDED' ? currentRound : null;
   const isRoundEnded = Boolean(endedRound);
@@ -89,41 +134,69 @@ export function RoomPage() {
       isRoundEnded
     );
 
-  const displayError = (err: unknown): string => {
-    if (err instanceof WdsApiError) {
-      return err.message;
-    }
-    if (err instanceof Error) {
-      return err.message;
-    }
-    return 'Unknown error';
-  };
-
   if (room && !me) {
-    return <Text>You are not registered as a player in this room.</Text>;
+    if (room.players.length === 1) {
+      return (
+        <Stack gap={6} minH="50vh" align="center" justify="center" textAlign="center">
+          <Text fontSize="2xl" fontWeight="semibold">
+            Join this room
+          </Text>
+          <Text fontSize="md" color="fg.info">
+            A player is waiting for an opponent.
+          </Text>
+          <JoinRoomButton roomId={roomId} getPlayerId={() => effectivePlayerId} />
+        </Stack>
+      );
+    }
+
+    return (
+      <Text fontSize="xl" fontWeight="semibold" textAlign="center">
+        You are not a player in this room.
+      </Text>
+    );
   }
 
   return (
     <Stack gap={6}>
       {isLoading ? (
-        <HStack>
+        <HStack align="center" justify="center" alignItems="center">
           <Spinner />
           <Text>Loading room...</Text>
         </HStack>
       ) : null}
 
-      {error ? <ErrorAlert title="Room error" message={displayError(error)} /> : null}
-      {joinMutation.error ? (
-        <ErrorAlert title="Join error" message={displayError(joinMutation.error)} />
-      ) : null}
+      {error ? <ErrorAlert title="Room error" message={getErrorMessage(error)} /> : null}
 
       {room ? (
         room.status === 'WAITING_FOR_PLAYERS' ? (
-          <Stack gap={1} align="flex-start">
-            <Text fontSize="sm">Waiting for opponent...</Text>
-            <Text fontSize="sm">
-              Room ID: <Code>{roomId}</Code>
+          <Stack gap={5} minH="50vh" align="center" justify="center" textAlign="center">
+            <Text fontSize="2xl" fontWeight="semibold">
+              Waiting for opponent...
             </Text>
+            <Text fontSize="md" color="fg.info">
+              Share this room link with a friend to join.
+            </Text>
+            <HStack gap={3} flexWrap="wrap" justify="center">
+              <Button
+                bg="fg.primary"
+                size="sm"
+                color="fg"
+                disabled={!roomId}
+                onClick={copyRoomLink}
+              >
+                {hasCopiedRoomId ? 'Copied' : 'Copy link'}
+              </Button>
+
+              <Button
+                size="sm"
+                bg="fg.accent"
+                color="fg"
+                disabled={!roomId}
+                onClick={() => void shareRoomLink()}
+              >
+                Share
+              </Button>
+            </HStack>
           </Stack>
         ) : (
           <Stack gap={4}>
@@ -167,7 +240,7 @@ export function RoomPage() {
                   {readyForNextRoundMutation.error ? (
                     <ErrorAlert
                       title="Ready rejected"
-                      message={displayError(readyForNextRoundMutation.error)}
+                      message={getErrorMessage(readyForNextRoundMutation.error)}
                     />
                   ) : null}
                 </Stack>
@@ -185,9 +258,6 @@ export function RoomPage() {
                     <Input
                       value={guess}
                       onChange={(e) => {
-                        if (typeof currentRoundNumber !== 'number') {
-                          return;
-                        }
                         setGuessState({
                           roundNumber: currentRoundNumber,
                           value: normalizeGuess(e.target.value),
@@ -214,9 +284,6 @@ export function RoomPage() {
                           { word },
                           {
                             onSuccess: () => {
-                              if (typeof currentRoundNumber !== 'number') {
-                                return;
-                              }
                               setGuessState({ roundNumber: currentRoundNumber, value: '' });
                             },
                           },
@@ -229,7 +296,7 @@ export function RoomPage() {
                   {shouldShowGuessRejectedError ? (
                     <ErrorAlert
                       title="Guess rejected"
-                      message={displayError(submitGuessMutation.error)}
+                      message={getErrorMessage(submitGuessMutation.error)}
                     />
                   ) : null}
                 </>
