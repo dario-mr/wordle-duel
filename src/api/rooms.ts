@@ -3,6 +3,7 @@ import { fetchJson } from './wdsClient';
 import type {
   CreateRoomRequest,
   JoinRoomRequest,
+  ReadyForNextRoundRequest,
   RoomDto,
   SubmitGuessRequest,
   SubmitGuessResponse,
@@ -40,6 +41,16 @@ export function submitGuess(args: {
   body: SubmitGuessRequest;
 }): Promise<SubmitGuessResponse> {
   return fetchJson(apiUrl(`/rooms/${encodeURIComponent(args.roomId)}/guess`), {
+    method: 'POST',
+    body: JSON.stringify(args.body),
+  });
+}
+
+export function readyForNextRound(args: {
+  roomId: string;
+  body: ReadyForNextRoundRequest;
+}): Promise<RoomDto> {
+  return fetchJson(apiUrl(`/rooms/${encodeURIComponent(args.roomId)}/ready`), {
     method: 'POST',
     body: JSON.stringify(args.body),
   });

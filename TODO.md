@@ -1,5 +1,4 @@
 - add localization
-- bad: when round ends, the first player does not see the result before the new round starts, also solution is never displayed
 - major refactor into smaller components
 - improve `useRoomTopic` to use ws payload, instead of just invalidating room query
 - unit tests wherever possible

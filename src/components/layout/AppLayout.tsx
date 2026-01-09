@@ -7,7 +7,7 @@ export function AppLayout() {
     <Flex direction="column" minH="100vh">
       <Navbar />
       <Box as="main" flex="1">
-        <Container maxW="container.md" py={5}>
+        <Container maxW="container.md" py={3}>
           <Outlet />
         </Container>
       </Box>

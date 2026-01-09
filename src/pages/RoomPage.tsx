@@ -1,113 +1,17 @@
-import {
-  Alert,
-  Badge,
-  Box,
-  Button,
-  Code,
-  HStack,
-  Input,
-  Spinner,
-  Stack,
-  Text,
-} from '@chakra-ui/react';
+import { Alert, Button, Code, HStack, Input, Spinner, Stack, Text } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import type { GuessLetterStatus, PlayerDto, RoomDto } from '../api/types';
 import { WdsApiError } from '../api/wdsClient';
 import { WORD_LENGTH } from '../constants';
-import { useJoinRoomMutation, useRoomQuery, useSubmitGuessMutation } from '../query/roomQueries';
+import {
+  useJoinRoomMutation,
+  useReadyForNextRoundMutation,
+  useRoomQuery,
+  useSubmitGuessMutation,
+} from '../query/roomQueries';
 import { usePlayerStore } from '../state/playerStore';
+import { PlayerBoard } from '../components/room/PlayerBoard';
 import { useRoomTopic } from '../ws/useRoomTopic';
-
-interface Cell {
-  letter: string;
-  status?: GuessLetterStatus;
-}
-
-function statusColor(status: GuessLetterStatus): string {
-  switch (status) {
-    case 'CORRECT':
-      return 'green.500';
-    case 'PRESENT':
-      return 'yellow.500';
-    case 'ABSENT':
-      return 'gray.600';
-  }
-}
-
-function LetterCell(props: { letter: string; status?: GuessLetterStatus }) {
-  return (
-    <Box
-      w={12}
-      h={12}
-      borderWidth="1px"
-      borderColor="gray.300"
-      bg={props.status ? statusColor(props.status) : 'transparent'}
-      color={props.status ? 'white' : 'inherit'}
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      fontWeight="bold"
-      borderRadius="md"
-    >
-      {props.letter}
-    </Box>
-  );
-}
-
-function GuessRow(props: { word: string; letters?: Cell[] }) {
-  const letters = useMemo<Cell[]>(() => {
-    if (props.letters?.length === WORD_LENGTH) {
-      return props.letters;
-    }
-    return props.word
-      .padEnd(WORD_LENGTH, ' ')
-      .slice(0, WORD_LENGTH)
-      .split('')
-      .map((ch) => ({ letter: ch }));
-  }, [props.letters, props.word]);
-
-  return (
-    <HStack gap={2} justify="center">
-      {letters.map((l, idx) => (
-        <LetterCell key={idx} letter={l.letter} status={l.status} />
-      ))}
-    </HStack>
-  );
-}
-
-function PlayerBoard(props: { player: PlayerDto; opponent?: PlayerDto; room: RoomDto }) {
-  const round = props.room.currentRound;
-  const guesses = round?.guessesByPlayerId[props.player.id] ?? [];
-  const maxAttempts = round?.maxAttempts ?? 6;
-
-  const rows = Array.from({ length: maxAttempts }, (_, index) => {
-    const guess = guesses.at(index);
-    if (!guess) {
-      return { key: `empty-${String(index)}`, word: '', letters: undefined as Cell[] | undefined };
-    }
-    return {
-      key: `guess-${String(guess.attemptNumber)}`,
-      word: guess.word,
-      letters: guess.letters,
-    };
-  });
-
-  return (
-    <Stack gap={3} align="center">
-      <HStack justify="center">
-        <Badge>My score: {props.player.score}</Badge>
-        {props.opponent ? <Badge>Opponent's score: {props.opponent.score}</Badge> : null}
-      </HStack>
-
-      <Stack gap={2} align="center">
-        {rows.map((row) => (
-          <GuessRow key={row.key} word={row.word} letters={row.letters} />
-        ))}
-      </Stack>
-    </Stack>
-  );
-}
 
 function normalizeGuess(raw: string): string {
   return raw
@@ -141,24 +45,49 @@ export function RoomPage() {
 
   useRoomTopic(roomId);
 
-  const [guess, setGuess] = useState('');
+  const [guessState, setGuessState] = useState<{ roundNumber?: number; value: string }>({
+    value: '',
+  });
 
   const submitGuessMutation = useSubmitGuessMutation({
     roomId: roomId ?? '',
     playerId: effectivePlayerId,
   });
 
-  const myRoundStatus = room?.currentRound?.statusByPlayerId[effectivePlayerId];
+  const currentRound = room?.currentRound ?? null;
+  const myRoundStatus = currentRound?.statusByPlayerId[effectivePlayerId];
   const me = room?.players.find((p) => p.id === effectivePlayerId);
   const opponent = room?.players.find((p) => p.id !== effectivePlayerId);
-  const isRoundFinished = room?.currentRound?.finished === true;
+
+  const currentRoundNumber = currentRound?.roundNumber;
+  const endedRound = currentRound?.roundStatus === 'ENDED' ? currentRound : null;
+  const isRoundEnded = Boolean(endedRound);
+
+  const guess =
+    typeof currentRoundNumber === 'number' && guessState.roundNumber === currentRoundNumber
+      ? guessState.value
+      : '';
+
+  const readyForNextRoundMutation = useReadyForNextRoundMutation({
+    roomId: roomId ?? '',
+    playerId: effectivePlayerId,
+  });
 
   const canSubmit =
     Boolean(roomId) &&
     room?.status === 'IN_PROGRESS' &&
-    (myRoundStatus === 'PLAYING' || isRoundFinished) &&
+    currentRound?.roundStatus === 'PLAYING' &&
+    myRoundStatus === 'PLAYING' &&
     guess.length === WORD_LENGTH &&
     !submitGuessMutation.isPending;
+
+  const shouldShowGuessRejectedError =
+    submitGuessMutation.error &&
+    !(
+      submitGuessMutation.error instanceof WdsApiError &&
+      submitGuessMutation.error.code === 'ROUND_FINISHED' &&
+      isRoundEnded
+    );
 
   const displayError = (err: unknown): string => {
     if (err instanceof WdsApiError) {
@@ -203,59 +132,108 @@ export function RoomPage() {
             <Stack gap={3}>
               {room.status !== 'IN_PROGRESS' ? (
                 <Text fontSize="sm">Game not in progress yet.</Text>
+              ) : endedRound ? (
+                <Stack gap={2} align="center">
+                  <Text fontSize="sm">
+                    Round ended.
+                    {endedRound.solution ? (
+                      <>
+                        {' '}
+                        Solution: <Code>{endedRound.solution}</Code>
+                      </>
+                    ) : null}
+                  </Text>
+
+                  {myRoundStatus === 'READY' ? (
+                    <Text fontSize="sm">Waiting for opponent...</Text>
+                  ) : (
+                    <Button
+                      colorPalette="teal"
+                      loading={readyForNextRoundMutation.isPending}
+                      disabled={!roomId || readyForNextRoundMutation.isPending}
+                      onClick={() => {
+                        if (!roomId) {
+                          return;
+                        }
+                        readyForNextRoundMutation.mutate({
+                          roundNumber: endedRound.roundNumber,
+                        });
+                      }}
+                    >
+                      Ready for next round
+                    </Button>
+                  )}
+
+                  {readyForNextRoundMutation.error ? (
+                    <ErrorAlert
+                      title="Ready rejected"
+                      message={displayError(readyForNextRoundMutation.error)}
+                    />
+                  ) : null}
+                </Stack>
               ) : myRoundStatus && myRoundStatus !== 'PLAYING' ? (
-                <Text fontSize="sm">
-                  You {myRoundStatus.toLowerCase()} this round.
-                  <br />
-                  {isRoundFinished
-                    ? 'Enter a new guess to start the next round.'
-                    : 'Wait for the other player to complete his round.'}
+                <Text fontSize="sm" textAlign="center">
+                  You {myRoundStatus.toLowerCase()} this round. Waiting for opponent...
                 </Text>
               ) : null}
 
-              <HStack py={3}>
-                <Input
-                  value={guess}
-                  onChange={(e) => {
-                    setGuess(normalizeGuess(e.target.value));
-                  }}
-                  placeholder="ABCDE"
-                  maxLength={WORD_LENGTH}
-                  disabled={
-                    room.status !== 'IN_PROGRESS' ||
-                    (!isRoundFinished && myRoundStatus !== 'PLAYING')
-                  }
-                  autoCapitalize="characters"
-                  autoCorrect="off"
-                />
-                <Button
-                  colorPalette="teal"
-                  disabled={!canSubmit}
-                  loading={submitGuessMutation.isPending}
-                  onClick={() => {
-                    if (!roomId) {
-                      return;
-                    }
-                    const word = normalizeGuess(guess);
-                    submitGuessMutation.mutate(
-                      { word },
-                      {
-                        onSuccess: () => {
-                          setGuess('');
-                        },
-                      },
-                    );
-                  }}
-                >
-                  Submit
-                </Button>
-              </HStack>
-              {submitGuessMutation.error ? (
-                <ErrorAlert
-                  title="Guess rejected"
-                  message={displayError(submitGuessMutation.error)}
-                />
-              ) : null}
+              {room.status === 'IN_PROGRESS' &&
+              myRoundStatus &&
+              myRoundStatus !== 'PLAYING' ? null : (
+                <>
+                  <HStack py={3}>
+                    <Input
+                      value={guess}
+                      onChange={(e) => {
+                        if (typeof currentRoundNumber !== 'number') {
+                          return;
+                        }
+                        setGuessState({
+                          roundNumber: currentRoundNumber,
+                          value: normalizeGuess(e.target.value),
+                        });
+                      }}
+                      placeholder="ABCDE"
+                      maxLength={WORD_LENGTH}
+                      disabled={
+                        room.status !== 'IN_PROGRESS' || isRoundEnded || myRoundStatus !== 'PLAYING'
+                      }
+                      autoCapitalize="characters"
+                      autoCorrect="off"
+                    />
+                    <Button
+                      colorPalette="teal"
+                      disabled={!canSubmit}
+                      loading={submitGuessMutation.isPending}
+                      onClick={() => {
+                        if (!roomId) {
+                          return;
+                        }
+                        const word = normalizeGuess(guess);
+                        submitGuessMutation.mutate(
+                          { word },
+                          {
+                            onSuccess: () => {
+                              if (typeof currentRoundNumber !== 'number') {
+                                return;
+                              }
+                              setGuessState({ roundNumber: currentRoundNumber, value: '' });
+                            },
+                          },
+                        );
+                      }}
+                    >
+                      Submit
+                    </Button>
+                  </HStack>
+                  {shouldShowGuessRejectedError ? (
+                    <ErrorAlert
+                      title="Guess rejected"
+                      message={displayError(submitGuessMutation.error)}
+                    />
+                  ) : null}
+                </>
+              )}
             </Stack>
           </Stack>
         )

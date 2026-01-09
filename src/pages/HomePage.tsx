@@ -3,8 +3,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { WdsApiError } from '../api/wdsClient';
-import { roomQueryKey, useCreateRoomMutation, useJoinRoomMutation } from '../query/roomQueries';
+import { Card } from '../components/Card';
 import { LANGUAGE_OPTIONS } from '../constants';
+import { roomQueryKey, useCreateRoomMutation, useJoinRoomMutation } from '../query/roomQueries';
 import { usePlayerStore } from '../state/playerStore';
 
 type LanguageCode = (typeof LANGUAGE_OPTIONS)[number]['value'];
@@ -44,27 +45,10 @@ export function HomePage() {
   };
 
   return (
-    <Stack gap={6}>
-      <Heading size="lg">Welcome to Wordle Duel!</Heading>
-
-      <Stack gap={2}>
-        <Heading size="sm">Language</Heading>
-        <NativeSelect.Root maxW="240px">
-          <NativeSelect.Field
-            value={language}
-            onChange={(e) => {
-              setLanguage(e.target.value as LanguageCode);
-            }}
-            aria-label="Language"
-          >
-            {LANGUAGE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </NativeSelect.Field>
-        </NativeSelect.Root>
-      </Stack>
+    <Stack gap={5}>
+      <Heading size="lg" textAlign="center">
+        Welcome to Wordle Duel!
+      </Heading>
 
       {createMutation.error ? (
         <ErrorAlert title="Create room failed" message={displayError(createMutation.error)} />
@@ -74,65 +58,90 @@ export function HomePage() {
         <ErrorAlert title="Join room failed" message={displayError(joinMutation.error)} />
       ) : null}
 
-      <Stack gap={3}>
-        <Heading size="md">Create room</Heading>
-        <Button
-          colorPalette="teal"
-          loading={createMutation.isPending}
-          onClick={() => {
-            createMutation.mutate(
-              {
-                playerId: ensurePlayerId(),
-                language,
-              },
-              {
-                onSuccess: (room) => {
-                  queryClient.setQueryData(roomQueryKey(room.id), room);
-                  void navigate(`/rooms/${room.id}`);
-                },
-              },
-            );
-          }}
-        >
-          Create room ({language})
-        </Button>
-      </Stack>
-
-      <Stack gap={3}>
-        <Heading size="md">Join room</Heading>
-        <HStack>
-          <Input
-            value={roomIdToJoin}
-            onChange={(e) => {
-              setRoomIdToJoin(e.target.value.trim());
-            }}
-            placeholder="Room ID"
-            autoCapitalize="off"
-            autoCorrect="off"
-          />
+      <Card>
+        <Stack gap={3}>
+          <Heading size="md">Create room</Heading>
+          <NativeSelect.Root maxW="240px">
+            <NativeSelect.Field
+              value={language}
+              onChange={(e) => {
+                setLanguage(e.target.value as LanguageCode);
+              }}
+              aria-label="Language"
+            >
+              {LANGUAGE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </NativeSelect.Field>
+          </NativeSelect.Root>
           <Button
-            variant="outline"
-            loading={joinMutation.isPending}
-            disabled={!roomIdToJoin}
+            bg="fg.primary"
+            color="fg"
+            _hover={{ filter: 'brightness(0.9)' }}
+            _active={{ filter: 'brightness(0.9)' }}
+            loading={createMutation.isPending}
             onClick={() => {
-              joinMutation.mutate(
+              createMutation.mutate(
                 {
-                  roomId: roomIdToJoin,
                   playerId: ensurePlayerId(),
+                  language,
                 },
                 {
-                  onSuccess: (joined) => {
-                    queryClient.setQueryData(roomQueryKey(joined.id), joined);
-                    void navigate(`/rooms/${joined.id}`);
+                  onSuccess: (room) => {
+                    queryClient.setQueryData(roomQueryKey(room.id), room);
+                    void navigate(`/rooms/${room.id}`);
                   },
                 },
               );
             }}
           >
-            Join
+            Create room
           </Button>
-        </HStack>
-      </Stack>
+        </Stack>
+      </Card>
+
+      <Card borderLeftColor="fg.accent">
+        <Stack gap={3}>
+          <Heading size="md">Join room</Heading>
+          <HStack>
+            <Input
+              value={roomIdToJoin}
+              onChange={(e) => {
+                setRoomIdToJoin(e.target.value.trim());
+              }}
+              placeholder="Room ID"
+              autoCapitalize="off"
+              autoCorrect="off"
+            />
+            <Button
+              bg="fg.accent"
+              color="fg"
+              _hover={{ filter: 'brightness(0.9)' }}
+              _active={{ filter: 'brightness(0.9)' }}
+              loading={joinMutation.isPending}
+              disabled={!roomIdToJoin}
+              onClick={() => {
+                joinMutation.mutate(
+                  {
+                    roomId: roomIdToJoin,
+                    playerId: ensurePlayerId(),
+                  },
+                  {
+                    onSuccess: (joined) => {
+                      queryClient.setQueryData(roomQueryKey(joined.id), joined);
+                      void navigate(`/rooms/${joined.id}`);
+                    },
+                  },
+                );
+              }}
+            >
+              Join
+            </Button>
+          </HStack>
+        </Stack>
+      </Card>
     </Stack>
   );
 }

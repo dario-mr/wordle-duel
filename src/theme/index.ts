@@ -16,6 +16,9 @@ const config = defineConfig({
           purple: { value: '#bd93f9' },
           red: { value: '#ff5555' },
           yellow: { value: '#f1fa8c' },
+          card: { value: '#1A1D24' },
+          primary: { value: '#078f84' },
+          accent: { value: '#1f8df8' },
         },
       },
     },
@@ -52,6 +55,9 @@ const config = defineConfig({
           info: {
             value: { _light: '{colors.blue.50}', _dark: '{colors.dracula.background}' },
           },
+          card: {
+            value: { _light: '{colors.green.50}', _dark: '{colors.dracula.card}' },
+          },
         },
         fg: {
           DEFAULT: {
@@ -77,6 +83,12 @@ const config = defineConfig({
           },
           info: {
             value: { _light: '{colors.blue.600}', _dark: '{colors.dracula.cyan}' },
+          },
+          primary: {
+            value: { _light: '{colors.teal.400}', _dark: '{colors.dracula.primary}' },
+          },
+          accent: {
+            value: { _light: '{colors.blue.400}', _dark: '{colors.dracula.accent}' },
           },
         },
         border: {
