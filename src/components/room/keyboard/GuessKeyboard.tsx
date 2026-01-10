@@ -1,10 +1,12 @@
-import { Button, HStack, Stack } from '@chakra-ui/react';
+import { Grid, Stack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
+import type { GuessLetterStatus } from '../../../api/types';
 import { WORD_LENGTH } from '../../../constants';
 import { ErrorAlert } from '../../common/ErrorAlert';
+import { KeyboardKey } from './KeyboardKey';
+import { KeyboardLetterKeys } from './KeyboardLetterKeys';
 import { KeyboardRow } from './KeyboardRow';
-import { KEY_ROWS } from './layout';
-import { ACTION_KEY_BUTTON_PROPS } from './styles';
+import { ACTION_KEY_COL_SPAN, KEY_ROWS, KEYBOARD_TOTAL_COLUMNS } from './layout';
 import { useGuessKeyboardInput } from './useGuessKeyboardInput';
 
 export function GuessKeyboard(props: {
@@ -12,6 +14,7 @@ export function GuessKeyboard(props: {
   disabled: boolean;
   canSubmit: boolean;
   isSubmitting: boolean;
+  letterStatusByLetter?: Partial<Record<string, GuessLetterStatus>>;
   onChange: (nextValue: string) => void;
   onSubmit: (word: string) => void;
   errorMessage?: string;
@@ -32,12 +35,13 @@ export function GuessKeyboard(props: {
   const isWordFull = value.length >= WORD_LENGTH;
 
   return (
-    <Stack gap={3} py={3} w="100%" px={{ base: 2, md: 0 }}>
-      <Stack gap={2} w="100%" maxW="36rem" mx="auto">
+    <Stack gap={3} w="100%">
+      <Stack gap={1.5} w="100%" maxW="36rem" mx="auto">
         <KeyboardRow
           letters={KEY_ROWS[0]}
           isBlocked={isBlocked}
           isWordFull={isWordFull}
+          letterStatusByLetter={props.letterStatusByLetter}
           onPress={appendLetter}
         />
 
@@ -45,35 +49,43 @@ export function GuessKeyboard(props: {
           letters={KEY_ROWS[1]}
           isBlocked={isBlocked}
           isWordFull={isWordFull}
+          letterStatusByLetter={props.letterStatusByLetter}
           onPress={appendLetter}
         />
 
-        <HStack gap={{ base: 0.5, md: 1 }} justify="center" w="100%">
-          <Button
-            {...ACTION_KEY_BUTTON_PROPS}
+        <Grid
+          gap={{ base: 0.5, md: 1 }}
+          justifyContent="center"
+          templateColumns={`repeat(${String(KEYBOARD_TOTAL_COLUMNS)}, 1fr)`}
+          w="100%"
+        >
+          {/* Enter button */}
+          <KeyboardKey
+            colSpan={ACTION_KEY_COL_SPAN}
             onClick={submit}
             disabled={isBlocked || !canSubmit}
             loading={isSubmitting}
           >
             {t('room.guess.enter')}
-          </Button>
+          </KeyboardKey>
 
-          <KeyboardRow
+          {/* 3rd keyboard row (letters) */}
+          <KeyboardLetterKeys
             letters={KEY_ROWS[2]}
-            isBlocked={isBlocked}
-            isWordFull={isWordFull}
+            isDisabled={isBlocked || isWordFull}
+            letterStatusByLetter={props.letterStatusByLetter}
             onPress={appendLetter}
-            wrap={false}
           />
 
-          <Button
-            {...ACTION_KEY_BUTTON_PROPS}
+          {/* Delete button */}
+          <KeyboardKey
+            colSpan={ACTION_KEY_COL_SPAN}
             onClick={backspace}
             disabled={isBlocked || value.length === 0}
           >
             ⌫
-          </Button>
-        </HStack>
+          </KeyboardKey>
+        </Grid>
       </Stack>
 
       {errorMessage ? (

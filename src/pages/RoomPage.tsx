@@ -1,8 +1,9 @@
 import { HStack, Spinner, Stack, Text } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { getErrorMessage } from '../api/errors';
+import type { GuessLetterStatus } from '../api/types';
 import { WdsApiError } from '../api/wdsClient';
 import { WORD_LENGTH } from '../constants';
 import { ErrorAlert } from '../components/common/ErrorAlert';
@@ -65,6 +66,34 @@ export function RoomPage() {
 
   const me = room?.players.find((p) => p.id === effectivePlayerId);
   const opponent = room?.players.find((p) => p.id !== effectivePlayerId);
+
+  const letterStatusByLetter = useMemo<Partial<Record<string, GuessLetterStatus>>>(() => {
+    if (!me || !currentRound) {
+      return {};
+    }
+
+    const guesses = currentRound.guessesByPlayerId[me.id] ?? [];
+    const strength: Record<GuessLetterStatus, number> = {
+      ABSENT: 0,
+      PRESENT: 1,
+      CORRECT: 2,
+    };
+
+    const result: Partial<Record<string, GuessLetterStatus>> = {};
+
+    for (const guess of guesses) {
+      for (const { letter, status } of guess.letters) {
+        const normalizedLetter = letter.toUpperCase();
+        const prevStatus = result[normalizedLetter];
+
+        if (!prevStatus || strength[status] > strength[prevStatus]) {
+          result[normalizedLetter] = status;
+        }
+      }
+    }
+
+    return result;
+  }, [currentRound, me]);
 
   const showGuessForm =
     room?.status === 'IN_PROGRESS' && (!myRoundStatus || myRoundStatus === 'PLAYING');
@@ -169,6 +198,7 @@ export function RoomPage() {
       {showGuessForm ? (
         <GuessKeyboard
           value={guess}
+          letterStatusByLetter={letterStatusByLetter}
           onChange={(nextValue) => {
             setGuessState({ roundNumber: currentRoundNumber, value: nextValue });
           }}

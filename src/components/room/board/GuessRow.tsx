@@ -2,6 +2,7 @@ import { Box, HStack } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import type { GuessLetterStatus } from '../../../api/types';
 import { WORD_LENGTH } from '../../../constants';
+import { getLetterColorByStatus } from '../../../utils/getLetterColorByStatus.ts';
 
 export interface Cell {
   letter: string;
@@ -36,7 +37,7 @@ function LetterCell(props: { letter: string; status?: GuessLetterStatus }) {
       h={12}
       borderWidth="1px"
       borderColor="gray.300"
-      bg={props.status ? statusColor(props.status) : 'transparent'}
+      bg={props.status ? getLetterColorByStatus(props.status) : 'transparent'}
       color={props.status ? 'white' : 'inherit'}
       display="flex"
       alignItems="center"
@@ -47,15 +48,4 @@ function LetterCell(props: { letter: string; status?: GuessLetterStatus }) {
       {props.letter}
     </Box>
   );
-}
-
-function statusColor(status: GuessLetterStatus): string {
-  switch (status) {
-    case 'CORRECT':
-      return 'green.500';
-    case 'PRESENT':
-      return 'yellow.500';
-    case 'ABSENT':
-      return 'gray.600';
-  }
 }
