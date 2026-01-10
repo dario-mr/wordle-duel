@@ -1,5 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { RoomDto, SubmitGuessResponse } from '../api/types';
+import {
+  useMutation,
+  type UseMutationOptions,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import type { CreateRoomRequest, RoomDto, SubmitGuessResponse } from '../api/types';
 import { createRoom, getRoom, joinRoom, readyForNextRound, submitGuess } from '../api/rooms';
 import { WdsApiError } from '../api/wdsClient';
 
@@ -20,16 +25,39 @@ export function useRoomQuery(roomId: string | undefined) {
   });
 }
 
-export function useCreateRoomMutation() {
+export function useCreateRoomMutation(
+  options?: UseMutationOptions<RoomDto, unknown, CreateRoomRequest>,
+) {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: createRoom,
+    ...options,
+    onSuccess: (room, variables, context, mutation) => {
+      queryClient.setQueryData<RoomDto>(roomQueryKey(room.id), room);
+      options?.onSuccess?.(room, variables, context, mutation);
+    },
   });
 }
 
-export function useJoinRoomMutation() {
+interface JoinRoomVariables {
+  roomId: string;
+  playerId: string;
+}
+
+export function useJoinRoomMutation(
+  options?: UseMutationOptions<RoomDto, unknown, JoinRoomVariables>,
+) {
+  const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: ({ roomId, playerId }: { roomId: string; playerId: string }) =>
+    mutationFn: ({ roomId, playerId }: JoinRoomVariables) =>
       joinRoom({ roomId, body: { playerId } }),
+    ...options,
+    onSuccess: (room, variables, context, mutation) => {
+      queryClient.setQueryData<RoomDto>(roomQueryKey(room.id), room);
+      options?.onSuccess?.(room, variables, context, mutation);
+    },
   });
 }
 
