@@ -1,7 +1,7 @@
 import { Box, HStack } from '@chakra-ui/react';
 import { useMemo } from 'react';
-import type { GuessLetterStatus } from '../../api/types';
-import { WORD_LENGTH } from '../../constants';
+import type { GuessLetterStatus } from '../../../api/types';
+import { WORD_LENGTH } from '../../../constants';
 
 export interface Cell {
   letter: string;

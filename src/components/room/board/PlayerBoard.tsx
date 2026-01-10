@@ -1,10 +1,15 @@
 import { Separator, Stack, Text } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import type { PlayerDto, RoomDto, RoundStatus } from '../../api/types';
+import type { PlayerDto, RoomDto, RoundStatus } from '../../../api/types';
 import { type Cell, GuessRow } from './GuessRow';
-import { PlayerStatsBar } from './PlayerStatsBar';
+import { PlayerStatsBar } from './../PlayerStatsBar';
 
-export function PlayerBoard(props: { player: PlayerDto; opponent?: PlayerDto; room: RoomDto }) {
+export function PlayerBoard(props: {
+  player: PlayerDto;
+  opponent?: PlayerDto;
+  room: RoomDto;
+  currentGuess?: string;
+}) {
   const { t } = useTranslation();
 
   const round = props.room.currentRound;
@@ -14,7 +19,13 @@ export function PlayerBoard(props: { player: PlayerDto; opponent?: PlayerDto; ro
   const rows = Array.from({ length: maxAttempts }, (_, index) => {
     const guess = guesses.at(index);
     if (!guess) {
-      return { key: `empty-${String(index)}`, word: '', letters: undefined as Cell[] | undefined };
+      const isNextPlayableRow = index === guesses.length;
+      const showCurrentGuess = isNextPlayableRow && Boolean(props.currentGuess);
+      return {
+        key: showCurrentGuess ? 'current-guess' : `empty-${String(index)}`,
+        word: showCurrentGuess ? (props.currentGuess ?? '') : '',
+        letters: undefined as Cell[] | undefined,
+      };
     }
     return {
       key: `guess-${String(guess.attemptNumber)}`,

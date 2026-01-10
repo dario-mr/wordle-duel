@@ -70,6 +70,7 @@ export default {
     guess: {
       placeholder: 'ABCDE',
       rejectedTitle: 'Tentativo rifiutato',
+      enter: 'Invio',
     },
     playerStats: {
       me: 'Io',

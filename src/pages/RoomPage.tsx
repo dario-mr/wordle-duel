@@ -6,8 +6,8 @@ import { getErrorMessage } from '../api/errors';
 import { WdsApiError } from '../api/wdsClient';
 import { WORD_LENGTH } from '../constants';
 import { ErrorAlert } from '../components/common/ErrorAlert';
-import { GuessForm } from '../components/room/GuessForm';
-import { PlayerBoard } from '../components/room/PlayerBoard';
+import { GuessKeyboard } from '../components/room/keyboard/GuessKeyboard';
+import { PlayerBoard } from '../components/room/board/PlayerBoard';
 import { RoomJoinGate } from '../components/room/RoomJoinGate';
 import { RoomSharePanel } from '../components/room/RoomSharePanel';
 import { RoundStatusPanel } from '../components/room/RoundStatusPanel';
@@ -143,7 +143,12 @@ export function RoomPage() {
 
   return (
     <Stack gap={4}>
-      <PlayerBoard player={me} opponent={opponent} room={room} />
+      <PlayerBoard
+        player={me}
+        opponent={opponent}
+        room={room}
+        currentGuess={showGuessForm ? guess : ''}
+      />
 
       {showRoundStatusPanel ? (
         <RoundStatusPanel
@@ -162,7 +167,7 @@ export function RoomPage() {
       ) : null}
 
       {showGuessForm ? (
-        <GuessForm
+        <GuessKeyboard
           value={guess}
           onChange={(nextValue) => {
             setGuessState({ roundNumber: currentRoundNumber, value: nextValue });
