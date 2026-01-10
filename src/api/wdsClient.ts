@@ -1,3 +1,4 @@
+import { i18n } from '../i18n';
 import type { ErrorResponseDto } from './types';
 
 export class WdsApiError extends Error {
@@ -33,7 +34,7 @@ export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> 
 
   if (!res.ok) {
     let code = 'UNEXPECTED_ERROR';
-    let message = `Request failed with status ${String(res.status)}`;
+    let message = i18n.t('errors.requestFailedWithStatus', { status: res.status });
 
     try {
       const raw = (await res.json()) as unknown;

@@ -1,5 +1,6 @@
 import { Heading, HStack, Input, Stack, Text } from '@chakra-ui/react';
 import { useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../common/Card';
 import { JoinRoomButton } from '../common/JoinRoomButton';
 
@@ -7,6 +8,7 @@ export function JoinRoomCard(props: {
   getPlayerId: () => string;
   onJoined: (roomId: string) => void;
 }) {
+  const { t } = useTranslation();
   const [roomIdInput, setRoomIdInput] = useState('');
   const joinButtonId = useId();
 
@@ -22,11 +24,11 @@ export function JoinRoomCard(props: {
           document.getElementById(joinButtonId)?.click();
         }}
       >
-        <Heading size="md">Join room</Heading>
+        <Heading size="md">{t('home.joinRoom.title')}</Heading>
 
         <Stack gap={1}>
           <Text fontSize="sm" fontWeight="medium">
-            Room ID
+            {t('home.joinRoom.roomIdLabel')}
           </Text>
           <HStack>
             <Input
@@ -34,7 +36,7 @@ export function JoinRoomCard(props: {
               onChange={(e) => {
                 setRoomIdInput(e.target.value);
               }}
-              placeholder="Room ID"
+              placeholder={t('home.joinRoom.roomIdPlaceholder')}
               autoCapitalize="off"
               autoCorrect="off"
             />

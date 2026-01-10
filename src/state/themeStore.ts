@@ -1,8 +1,7 @@
 import { create } from 'zustand';
+import { STORAGE_KEYS } from './storageKeys';
 
 export type ThemeMode = 'light' | 'dark';
-
-const STORAGE_KEY = 'wds.theme';
 
 function normalizeTheme(value: string | null): ThemeMode | null {
   if (!value) {
@@ -25,7 +24,7 @@ function getPreferredTheme(): ThemeMode {
 
 function readInitialTheme(): ThemeMode {
   try {
-    const value = localStorage.getItem(STORAGE_KEY);
+    const value = localStorage.getItem(STORAGE_KEYS.theme);
     return normalizeTheme(value) ?? getPreferredTheme();
   } catch {
     return getPreferredTheme();
@@ -34,7 +33,7 @@ function readInitialTheme(): ThemeMode {
 
 function persistTheme(theme: ThemeMode) {
   try {
-    localStorage.setItem(STORAGE_KEY, theme);
+    localStorage.setItem(STORAGE_KEYS.theme, theme);
   } catch {
     // ignore
   }

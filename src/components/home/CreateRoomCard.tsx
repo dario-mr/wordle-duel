@@ -1,5 +1,6 @@
 import { Heading, NativeSelect, Stack, Text } from '@chakra-ui/react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getErrorMessage } from '../../api/errors';
 import { LANGUAGE_OPTIONS } from '../../constants';
 import { useCreateRoomMutation } from '../../query/roomQueries';
@@ -13,6 +14,7 @@ export function CreateRoomCard(props: {
   getPlayerId: () => string;
   onCreated: (roomId: string) => void;
 }) {
+  const { t } = useTranslation();
   const [language, setLanguage] = useState<LanguageCode>(LANGUAGE_OPTIONS[0].value);
   const createMutation = useCreateRoomMutation();
 
@@ -36,15 +38,18 @@ export function CreateRoomCard(props: {
           );
         }}
       >
-        <Heading size="md">Create room</Heading>
+        <Heading size="md">{t('home.createRoom.title')}</Heading>
 
         {createMutation.error ? (
-          <ErrorAlert title="Create room failed" message={getErrorMessage(createMutation.error)} />
+          <ErrorAlert
+            title={t('home.createRoom.failedTitle')}
+            message={getErrorMessage(createMutation.error)}
+          />
         ) : null}
 
         <Stack gap={1} maxW="240px">
           <Text fontSize="sm" fontWeight="medium">
-            Language
+            {t('home.createRoom.roomLanguageLabel')}
           </Text>
           <NativeSelect.Root>
             <NativeSelect.Field
@@ -53,11 +58,11 @@ export function CreateRoomCard(props: {
               onChange={(e) => {
                 setLanguage(e.target.value as LanguageCode);
               }}
-              aria-label="Language"
+              aria-label={t('home.createRoom.roomLanguageAriaLabel')}
             >
               {LANGUAGE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </option>
               ))}
             </NativeSelect.Field>
@@ -69,7 +74,7 @@ export function CreateRoomCard(props: {
           disabled={createMutation.isPending}
           type="submit"
         >
-          Create room
+          {t('home.createRoom.button')}
         </PrimaryButton>
       </Stack>
     </Card>

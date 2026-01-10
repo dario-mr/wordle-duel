@@ -1,4 +1,5 @@
 import { Stack, Text } from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
 import type { RoomDto } from '../../api/types';
 import { JoinRoomButton } from '../common/JoinRoomButton';
 
@@ -7,14 +8,15 @@ export function RoomJoinGate(props: {
   roomId: string | undefined;
   getPlayerId: () => string;
 }) {
+  const { t } = useTranslation();
   if (props.room.players.length === 1) {
     return (
       <Stack gap={6} minH="50vh" align="center" justify="center" textAlign="center">
         <Text fontSize="2xl" fontWeight="semibold">
-          Join this room
+          {t('room.joinGate.joinThisRoom')}
         </Text>
         <Text fontSize="md" color="fg.info">
-          A player is waiting for an opponent.
+          {t('room.joinGate.waitingForOpponent')}
         </Text>
         <JoinRoomButton roomId={props.roomId} getPlayerId={props.getPlayerId} />
       </Stack>
@@ -23,7 +25,7 @@ export function RoomJoinGate(props: {
 
   return (
     <Text fontSize="xl" fontWeight="semibold" textAlign="center">
-      You are not a player in this room.
+      {t('room.joinGate.notAPlayer')}
     </Text>
   );
 }

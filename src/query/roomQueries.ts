@@ -7,6 +7,7 @@ import {
 import type { CreateRoomRequest, RoomDto, SubmitGuessResponse } from '../api/types';
 import { createRoom, getRoom, joinRoom, readyForNextRound, submitGuess } from '../api/rooms';
 import { WdsApiError } from '../api/wdsClient';
+import { i18n } from '../i18n';
 
 export function roomQueryKey(roomId: string) {
   return ['room', roomId] as const;
@@ -17,7 +18,7 @@ export function useRoomQuery(roomId: string | undefined) {
     queryKey: roomId ? roomQueryKey(roomId) : ['room', 'missing'],
     queryFn: () => {
       if (!roomId) {
-        throw new Error('Missing roomId');
+        throw new Error(i18n.t('errors.missingRoomId'));
       }
       return getRoom(roomId);
     },

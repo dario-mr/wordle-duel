@@ -1,8 +1,10 @@
 import { Box, Flex, Heading } from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ProfileDialog } from '../navbar/ProfileDialog';
 
 export function Navbar() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -14,7 +16,7 @@ export function Navbar() {
           _hover={{ textDecoration: 'underline' }}
           onClick={() => void navigate('/')}
         >
-          Wordle Duel
+          {t('app.name')}
         </Heading>
 
         <ProfileDialog />

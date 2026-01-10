@@ -1,9 +1,12 @@
 import { Separator, Stack, Text } from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
 import type { PlayerDto, RoomDto, RoundStatus } from '../../api/types';
 import { type Cell, GuessRow } from './GuessRow';
 import { PlayerStatsBar } from './PlayerStatsBar';
 
 export function PlayerBoard(props: { player: PlayerDto; opponent?: PlayerDto; room: RoomDto }) {
+  const { t } = useTranslation();
+
   const round = props.room.currentRound;
   const guesses = round?.guessesByPlayerId[props.player.id] ?? [];
   const maxAttempts = round?.maxAttempts ?? 6;
@@ -20,11 +23,24 @@ export function PlayerBoard(props: { player: PlayerDto; opponent?: PlayerDto; ro
     };
   });
 
+  const roundStatusLabel = (roundStatus: RoundStatus): string => {
+    switch (roundStatus) {
+      case 'PLAYING':
+        return t('room.round.statusPlaying');
+      case 'ENDED':
+        return t('room.round.statusEnded');
+    }
+  };
+
+  const roundNumberText =
+    typeof round?.roundNumber === 'number' ? String(round.roundNumber) : t('room.playerStats.dash');
+
+  const roundStatusSuffix = round?.roundStatus ? `(${roundStatusLabel(round.roundStatus)})` : '';
+
   return (
     <Stack gap={3} align="center">
       <Text fontWeight="bold">
-        Round {round?.roundNumber ?? '—'}{' '}
-        {round?.roundStatus ? '(' + roundStatusText(round.roundStatus) + ')' : ''}
+        {t('room.round.title', { roundNumber: roundNumberText })} {roundStatusSuffix}
       </Text>
       <PlayerStatsBar player={props.player} opponent={props.opponent} room={props.room} />
       <Separator w="100%" />
@@ -36,13 +52,4 @@ export function PlayerBoard(props: { player: PlayerDto; opponent?: PlayerDto; ro
       </Stack>
     </Stack>
   );
-}
-
-function roundStatusText(roundStatus: RoundStatus): string {
-  switch (roundStatus) {
-    case 'PLAYING':
-      return 'in progress';
-    case 'ENDED':
-      return 'ended';
-  }
 }

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function useRoomLinkShare(roomId: string | undefined) {
+  const { t } = useTranslation();
   const [hasCopiedRoomLink, setHasCopiedRoomLink] = useState(false);
   const hideCopiedTimeoutIdRef = useRef<number | null>(null);
 
@@ -34,9 +36,9 @@ export function useRoomLinkShare(roomId: string | undefined) {
       }, 2000);
     } catch {
       setHasCopiedRoomLink(false);
-      window.prompt('Copy this room link:', url);
+      window.prompt(t('room.share.copyPromptTitle'), url);
     }
-  }, [roomId]);
+  }, [roomId, t]);
 
   const shareRoomLink = useCallback(async () => {
     if (!roomId) {
@@ -53,8 +55,8 @@ export function useRoomLinkShare(roomId: string | undefined) {
     try {
       await navigator.share({
         url,
-        title: 'Wordle Duel',
-        text: 'Join my Wordle Duel room',
+        title: t('app.name'),
+        text: t('room.share.shareText'),
       });
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') {
@@ -63,7 +65,7 @@ export function useRoomLinkShare(roomId: string | undefined) {
 
       await copyRoomLink();
     }
-  }, [copyRoomLink, roomId]);
+  }, [copyRoomLink, roomId, t]);
 
   return {
     hasCopiedRoomLink,

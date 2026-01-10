@@ -1,5 +1,6 @@
 import { HStack, Spinner, Stack, Text } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { getErrorMessage } from '../api/errors';
 import { WdsApiError } from '../api/wdsClient';
@@ -19,6 +20,7 @@ import { usePlayerStore } from '../state/playerStore';
 import { useRoomTopic } from '../ws/useRoomTopic';
 
 export function RoomPage() {
+  const { t } = useTranslation();
   const { roomId } = useParams();
 
   const playerId = usePlayerStore((s) => s.playerId);
@@ -96,7 +98,7 @@ export function RoomPage() {
   if (!roomId) {
     return (
       <Stack gap={6} align="center" justify="center" minH="50vh" textAlign="center">
-        <ErrorAlert title="Invalid room link" message="Missing room id in URL." />
+        <ErrorAlert title={t('room.invalidLinkTitle')} message={t('room.invalidLinkMessage')} />
       </Stack>
     );
   }
@@ -106,7 +108,7 @@ export function RoomPage() {
       <Stack gap={6}>
         <HStack align="center" justify="center" alignItems="center">
           <Spinner />
-          <Text>Loading room...</Text>
+          <Text>{t('common.loadingRoom')}</Text>
         </HStack>
       </Stack>
     );
@@ -115,7 +117,7 @@ export function RoomPage() {
   if (error) {
     return (
       <Stack gap={6}>
-        <ErrorAlert title="Room error" message={getErrorMessage(error)} />
+        <ErrorAlert title={t('room.errorTitle')} message={getErrorMessage(error)} />
       </Stack>
     );
   }
@@ -124,8 +126,8 @@ export function RoomPage() {
     return (
       <Stack gap={6}>
         <ErrorAlert
-          title="Unexpected room state"
-          message={`Room data is missing for roomId=${roomId}. Please refresh and try again.`}
+          title={t('room.unexpectedStateTitle')}
+          message={t('room.unexpectedStateMessage', { roomId })}
         />
       </Stack>
     );

@@ -1,4 +1,5 @@
 import { Button, Code, Stack, Text } from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
 import type { RoomDto, RoundDto, RoundPlayerStatus } from '../../api/types';
 import { getErrorMessage } from '../../api/errors';
 import { ErrorAlert } from '../common/ErrorAlert';
@@ -11,8 +12,10 @@ export function RoundStatusPanel(props: {
   isReadyPending: boolean;
   readyError: unknown;
 }) {
+  const { t } = useTranslation();
+
   if (props.room.status !== 'IN_PROGRESS') {
-    return <Text fontSize="sm">Game not in progress yet.</Text>;
+    return <Text fontSize="sm">{t('room.round.notInProgressYet')}</Text>;
   }
 
   if (props.endedRound) {
@@ -21,17 +24,17 @@ export function RoundStatusPanel(props: {
     return (
       <Stack gap={2} align="center">
         <Text fontSize="sm">
-          Round ended.
+          {t('room.round.ended')}
           {endedRound.solution ? (
             <>
               {' '}
-              Solution: <Code>{endedRound.solution}</Code>
+              {t('room.round.solution')} <Code>{endedRound.solution}</Code>
             </>
           ) : null}
         </Text>
 
         {props.myRoundStatus === 'READY' ? (
-          <Text fontSize="sm">Waiting for opponent...</Text>
+          <Text fontSize="sm">{t('room.round.waitingForOpponent')}</Text>
         ) : (
           <Button
             colorPalette="teal"
@@ -41,21 +44,31 @@ export function RoundStatusPanel(props: {
               props.onReadyNextRound(endedRound.roundNumber);
             }}
           >
-            Ready for next round
+            {t('room.round.readyForNextRound')}
           </Button>
         )}
 
         {props.readyError ? (
-          <ErrorAlert title="Ready rejected" message={getErrorMessage(props.readyError)} />
+          <ErrorAlert
+            title={t('room.round.readyRejected')}
+            message={getErrorMessage(props.readyError)}
+          />
         ) : null}
       </Stack>
     );
   }
 
   if (props.myRoundStatus && props.myRoundStatus !== 'PLAYING') {
+    const statusKey =
+      props.myRoundStatus === 'WON'
+        ? 'room.round.youWonThisRound'
+        : props.myRoundStatus === 'LOST'
+          ? 'room.round.youLostThisRound'
+          : 'room.round.youReadyThisRound';
+
     return (
       <Text fontSize="sm" textAlign="center">
-        You {props.myRoundStatus.toLowerCase()} this round. Waiting for opponent...
+        {t(statusKey)}
       </Text>
     );
   }

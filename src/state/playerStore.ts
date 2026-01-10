@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-
-const STORAGE_KEY = 'wds.playerId';
+import { STORAGE_KEYS } from './storageKeys';
 
 function generatePlayerId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -11,7 +10,7 @@ function generatePlayerId(): string {
 
 function readInitialPlayerId(): string | null {
   try {
-    const value = localStorage.getItem(STORAGE_KEY);
+    const value = localStorage.getItem(STORAGE_KEYS.playerId);
     return value && value.trim().length > 0 ? value : null;
   } catch {
     return null;
@@ -20,7 +19,7 @@ function readInitialPlayerId(): string | null {
 
 function persistPlayerId(playerId: string) {
   try {
-    localStorage.setItem(STORAGE_KEY, playerId);
+    localStorage.setItem(STORAGE_KEYS.playerId, playerId);
   } catch {
     // ignore
   }

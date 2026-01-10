@@ -1,5 +1,6 @@
 import { type ButtonProps, Stack } from '@chakra-ui/react';
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getErrorMessage } from '../../api/errors.ts';
 import { useJoinRoomMutation } from '../../query/roomQueries';
 import { AccentButton } from './BrandButton';
@@ -11,6 +12,7 @@ export function JoinRoomButton(props: {
   onJoined?: (roomId: string) => void;
   buttonProps?: Omit<ButtonProps, 'onClick' | 'loading' | 'disabled'>;
 }) {
+  const { t } = useTranslation();
   const joinMutation = useJoinRoomMutation();
 
   const lastErrorToastIdRef = useRef<string | null>(null);
@@ -29,7 +31,7 @@ export function JoinRoomButton(props: {
 
     lastErrorToastIdRef.current = toaster.create({
       type: 'error',
-      title: 'Join room failed',
+      title: t('toasts.joinRoomFailed'),
       description: message,
       duration: 3500,
       closable: true,
@@ -60,7 +62,7 @@ export function JoinRoomButton(props: {
         }}
         {...props.buttonProps}
       >
-        Join
+        {t('common.join')}
       </AccentButton>
     </Stack>
   );

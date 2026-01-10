@@ -1,0 +1,110 @@
+export default {
+  app: {
+    name: 'Wordle Duel',
+  },
+  common: {
+    language: 'Lingua',
+    theme: 'Tema',
+    light: 'Chiaro',
+    dark: 'Scuro',
+    loadingRoom: 'Caricamento stanza...',
+    join: 'Entra',
+    submit: 'Invia',
+    copied: 'Copiato',
+    copyLink: 'Copia link',
+    share: 'Condividi',
+  },
+  errors: {
+    unknown: 'Errore sconosciuto',
+    rootElementNotFound: 'Elemento root #root non trovato',
+    missingRoomId: 'roomId mancante',
+    requestFailedWithStatus: 'Richiesta fallita con stato {{status}}',
+  },
+  home: {
+    welcome: 'Benvenuto su Wordle Duel!',
+    createRoom: {
+      title: 'Crea stanza',
+      failedTitle: 'Creazione stanza fallita',
+      button: 'Crea stanza',
+      roomLanguageLabel: 'Lingua della stanza',
+      roomLanguageAriaLabel: 'Lingua della stanza',
+    },
+    joinRoom: {
+      title: 'Entra in una stanza',
+      roomIdLabel: 'ID stanza',
+      roomIdPlaceholder: 'ID stanza',
+    },
+  },
+  room: {
+    invalidLinkTitle: 'Link stanza non valido',
+    invalidLinkMessage: "ID stanza mancante nell'URL.",
+    errorTitle: 'Errore stanza',
+    unexpectedStateTitle: 'Stato stanza inatteso',
+    unexpectedStateMessage:
+      'Mancano i dati della stanza per roomId={{roomId}}. Aggiorna la pagina e riprova.',
+    share: {
+      waitingTitle: "In attesa dell'avversario...",
+      shareHint: 'Condividi questo link con un amico per farlo entrare.',
+      copyPromptTitle: 'Copia questo link della stanza:',
+      shareText: 'Entra nella mia stanza di Wordle Duel',
+    },
+    joinGate: {
+      joinThisRoom: 'Entra in questa stanza',
+      waitingForOpponent: 'Un giocatore aspetta un avversario.',
+      notAPlayer: 'Non sei un giocatore in questa stanza.',
+    },
+    round: {
+      title: 'Round {{roundNumber}}',
+      statusPlaying: 'in corso',
+      statusEnded: 'terminato',
+      notInProgressYet: 'La partita non è ancora iniziata.',
+      ended: 'Round terminato.',
+      solution: 'Soluzione:',
+      waitingForOpponent: "In attesa dell'avversario...",
+      readyForNextRound: 'Pronto per il prossimo round',
+      readyRejected: 'Pronto rifiutato',
+      youWonThisRound: "Hai vinto questo round. In attesa dell'avversario...",
+      youLostThisRound: "Hai perso questo round. In attesa dell'avversario...",
+      youReadyThisRound: "Sei pronto. In attesa dell'avversario...",
+    },
+    guess: {
+      placeholder: 'ABCDE',
+      rejectedTitle: 'Tentativo rifiutato',
+    },
+    playerStats: {
+      me: 'Io',
+      opponent: 'Avversario',
+      score: 'Punteggio:',
+      status: 'Stato:',
+      dash: '—',
+      statusPlaying: 'In corso',
+      statusWon: 'Vinto',
+      statusLost: 'Perso',
+      statusReady: 'Pronto',
+      statusUnknown: 'Sconosciuto',
+    },
+  },
+  locales: {
+    en: 'Inglese',
+    it: 'Italiano',
+  },
+  nav: {
+    openProfileAria: 'Apri profilo',
+  },
+  profile: {
+    title: 'Profilo',
+    yourPlayerId: 'Il tuo ID giocatore:',
+    loadingPlayerId: '...',
+    uiLanguage: 'Lingua',
+    uiLanguageAria: 'Lingua',
+  },
+  notFound: {
+    message: 'Pagina non trovata.',
+  },
+  toasts: {
+    joinRoomFailed: 'Accesso alla stanza fallito',
+  },
+  roomLanguage: {
+    it: 'Italiano (IT)',
+  },
+} as const;
