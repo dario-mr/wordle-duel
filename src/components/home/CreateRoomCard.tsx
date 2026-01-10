@@ -17,6 +17,8 @@ export function CreateRoomCard(props: {
   const { t } = useTranslation();
   const [language, setLanguage] = useState<LanguageCode>(LANGUAGE_OPTIONS[0].value);
   const createMutation = useCreateRoomMutation();
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const languageSelectorEnabled = LANGUAGE_OPTIONS.length > 1;
 
   return (
     <Card>
@@ -51,7 +53,7 @@ export function CreateRoomCard(props: {
           <Text fontSize="sm" fontWeight="medium">
             {t('home.createRoom.roomLanguageLabel')}
           </Text>
-          <NativeSelect.Root>
+          <NativeSelect.Root disabled={!languageSelectorEnabled}>
             <NativeSelect.Field
               id="create-room-language"
               value={language}
