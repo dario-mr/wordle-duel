@@ -21,6 +21,9 @@ RUN printf '%s\n' \
   '  root /usr/share/nginx/html;' \
   '  index index.html;' \
   '' \
+  '  location = /health { add_header Cache-Control "no-store" always; try_files /health.json =404; }' \
+  '  location = /info   { add_header Cache-Control "no-store" always; try_files /info.json =404; }' \
+  '' \
   '  location /assets/ { add_header Cache-Control "public, max-age=31536000, immutable"; try_files $uri =404; }' \
   '  location /icons/  { add_header Cache-Control "public, max-age=86400"; try_files $uri =404; }' \
   '  location = /favicon.ico { try_files $uri =404; }' \
