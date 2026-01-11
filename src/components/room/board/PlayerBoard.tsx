@@ -56,7 +56,7 @@ export function PlayerBoard(props: {
       <PlayerStatsBar player={props.player} opponent={props.opponent} room={props.room} />
       <Separator w="100%" />
 
-      <Stack gap={2} align="center">
+      <Stack gap={1} align="center">
         {rows.map((row) => (
           <GuessRow key={row.key} word={row.word} letters={row.letters} />
         ))}

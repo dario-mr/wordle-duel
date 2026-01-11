@@ -22,7 +22,7 @@ export function GuessRow(props: { word: string; letters?: Cell[] }) {
   }, [props.letters, props.word]);
 
   return (
-    <HStack gap={2} justify="center">
+    <HStack gap={1} justify="center">
       {letters.map((l, idx) => (
         <LetterCell key={idx} letter={l.letter} status={l.status} />
       ))}
@@ -33,8 +33,7 @@ export function GuessRow(props: { word: string; letters?: Cell[] }) {
 function LetterCell(props: { letter: string; status?: GuessLetterStatus }) {
   return (
     <Box
-      w={12}
-      h={12}
+      boxSize="3.25rem"
       borderWidth="1px"
       borderColor="gray.300"
       bg={props.status ? getLetterColorByStatus(props.status) : 'transparent'}
@@ -43,7 +42,7 @@ function LetterCell(props: { letter: string; status?: GuessLetterStatus }) {
       alignItems="center"
       justifyContent="center"
       fontWeight="bold"
-      borderRadius="md"
+      borderRadius="sm"
     >
       {props.letter}
     </Box>

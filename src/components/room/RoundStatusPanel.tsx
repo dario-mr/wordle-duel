@@ -66,11 +66,7 @@ export function RoundStatusPanel(props: {
           ? 'room.round.youLostThisRound'
           : 'room.round.youReadyThisRound';
 
-    return (
-      <Text fontSize="sm" textAlign="center">
-        {t(statusKey)}
-      </Text>
-    );
+    return <Text textAlign="center">{t(statusKey)}</Text>;
   }
 
   return null;

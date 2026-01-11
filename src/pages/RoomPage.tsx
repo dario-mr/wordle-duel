@@ -171,7 +171,7 @@ export function RoomPage() {
   }
 
   return (
-    <Stack gap={4}>
+    <Stack gap={2}>
       <PlayerBoard
         player={me}
         opponent={opponent}

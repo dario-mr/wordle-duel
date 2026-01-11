@@ -63,8 +63,8 @@ export default {
       waitingForOpponent: 'Waiting for opponent...',
       readyForNextRound: 'Ready for next round',
       readyRejected: 'Ready rejected',
-      youWonThisRound: 'You won this round. Waiting for opponent...',
-      youLostThisRound: 'You lost this round. Waiting for opponent...',
+      youWonThisRound: 'You won! 🏆',
+      youLostThisRound: 'You lost...',
       youReadyThisRound: 'You are ready. Waiting for opponent...',
     },
     guess: {
