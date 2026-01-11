@@ -36,7 +36,6 @@ function LetterCell(props: { letter: string; status?: GuessLetterStatus }) {
     <Box
       boxSize="3.25rem"
       borderWidth="1px"
-      borderColor="gray.300"
       bg={props.status ? getLetterColorByStatus(props.status) : 'transparent'}
       color={props.status ? 'white' : 'inherit'}
       display="flex"
