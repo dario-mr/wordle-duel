@@ -2,7 +2,6 @@ import { Grid, Stack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import type { GuessLetterStatus } from '../../../api/types';
 import { WORD_LENGTH } from '../../../constants';
-import { ErrorAlert } from '../../common/ErrorAlert';
 import { KeyboardKey } from './KeyboardKey';
 import { KeyboardLetterKeys } from './KeyboardLetterKeys';
 import { KeyboardRow } from './KeyboardRow';
@@ -17,12 +16,10 @@ export function GuessKeyboard(props: {
   letterStatusByLetter?: Partial<Record<string, GuessLetterStatus>>;
   onChange: (nextValue: string) => void;
   onSubmit: (word: string) => void;
-  errorMessage?: string;
 }) {
   const { t } = useTranslation();
 
-  const { value, disabled, canSubmit, isSubmitting, onChange, onSubmit, errorMessage } = props;
-
+  const { value, disabled, canSubmit, isSubmitting, onChange, onSubmit } = props;
   const { isBlocked, submit, backspace, appendLetter } = useGuessKeyboardInput({
     value,
     disabled,
@@ -31,7 +28,6 @@ export function GuessKeyboard(props: {
     onChange,
     onSubmit,
   });
-
   const isWordFull = value.length >= WORD_LENGTH;
 
   return (
@@ -87,10 +83,6 @@ export function GuessKeyboard(props: {
           </KeyboardKey>
         </Grid>
       </Stack>
-
-      {errorMessage ? (
-        <ErrorAlert title={t('room.guess.rejectedTitle')} message={errorMessage} />
-      ) : null}
     </Stack>
   );
 }

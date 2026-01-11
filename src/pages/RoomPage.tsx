@@ -1,10 +1,9 @@
 import { HStack, Separator, Spinner, Stack, Text } from '@chakra-ui/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { getErrorMessage } from '../api/errors';
 import type { GuessLetterStatus } from '../api/types';
-import { WdsApiError } from '../api/wdsClient';
 import { WORD_LENGTH } from '../constants';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import { GuessKeyboard } from '../components/room/keyboard/GuessKeyboard';
@@ -20,6 +19,7 @@ import {
 import { usePlayerStore } from '../state/playerStore';
 import { useRoomTopic } from '../ws/useRoomTopic';
 import { RoundPanel } from '../components/room/round/RoundPanel.tsx';
+import { toaster } from '../components/common/toasterInstance.ts';
 
 export function RoomPage() {
   const { t } = useTranslation();
@@ -113,17 +113,29 @@ export function RoomPage() {
     guess.length === WORD_LENGTH &&
     !submitGuessMutation.isPending;
 
-  const shouldShowGuessRejectedError =
-    submitGuessMutation.error &&
-    !(
-      submitGuessMutation.error instanceof WdsApiError &&
-      submitGuessMutation.error.code === 'ROUND_FINISHED' &&
-      isRoundEnded
-    );
+  // todo extract common toast lifecycle in hook/component?
+  const lastErrorToastIdRef = useRef<string | null>(null);
 
-  const guessRejectedMessage = shouldShowGuessRejectedError
-    ? getErrorMessage(submitGuessMutation.error)
-    : undefined;
+  const dismissErrorToast = () => {
+    if (!lastErrorToastIdRef.current) {
+      return;
+    }
+
+    toaster.dismiss(lastErrorToastIdRef.current);
+    lastErrorToastIdRef.current = null;
+  };
+
+  const showErrorToast = (message: string) => {
+    dismissErrorToast();
+
+    lastErrorToastIdRef.current = toaster.create({
+      type: 'warning',
+      title: t('room.guess.rejectedTitle'),
+      description: message,
+      duration: 3500,
+      closable: true,
+    });
+  };
 
   if (!roomId) {
     return (
@@ -210,7 +222,6 @@ export function RoomPage() {
           disabled={isRoundEnded || myRoundStatus !== 'PLAYING'}
           canSubmit={canSubmit}
           isSubmitting={submitGuessMutation.isPending}
-          errorMessage={guessRejectedMessage}
           onSubmit={(word) => {
             if (!roomId || !effectivePlayerId) {
               return;
@@ -220,6 +231,9 @@ export function RoomPage() {
               {
                 onSuccess: () => {
                   setGuessState({ roundNumber: currentRoundNumber, value: '' });
+                },
+                onError: (err) => {
+                  showErrorToast(getErrorMessage(err));
                 },
               },
             );
