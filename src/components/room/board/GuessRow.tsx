@@ -9,6 +9,7 @@ export interface Cell {
   status?: GuessLetterStatus;
 }
 
+// todo when a guess is submitted, render letter by letter (left-right) with an animation
 export function GuessRow(props: { word: string; letters?: Cell[] }) {
   const letters = useMemo<Cell[]>(() => {
     if (props.letters?.length === WORD_LENGTH) {
@@ -42,6 +43,7 @@ function LetterCell(props: { letter: string; status?: GuessLetterStatus }) {
       alignItems="center"
       justifyContent="center"
       fontWeight="bold"
+      fontSize="2xl"
       borderRadius="sm"
     >
       {props.letter}

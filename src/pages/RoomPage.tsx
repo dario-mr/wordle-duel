@@ -1,4 +1,4 @@
-import { HStack, Spinner, Stack, Text } from '@chakra-ui/react';
+import { HStack, Separator, Spinner, Stack, Text } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -11,7 +11,7 @@ import { GuessKeyboard } from '../components/room/keyboard/GuessKeyboard';
 import { PlayerBoard } from '../components/room/board/PlayerBoard';
 import { RoomJoinGate } from '../components/room/RoomJoinGate';
 import { RoomSharePanel } from '../components/room/RoomSharePanel';
-import { RoundStatusPanel } from '../components/room/RoundStatusPanel';
+import { RoundStatusPanel } from '../components/room/round/RoundStatusPanel';
 import {
   useReadyForNextRoundMutation,
   useRoomQuery,
@@ -19,6 +19,7 @@ import {
 } from '../query/roomQueries';
 import { usePlayerStore } from '../state/playerStore';
 import { useRoomTopic } from '../ws/useRoomTopic';
+import { RoundPanel } from '../components/room/round/RoundPanel.tsx';
 
 export function RoomPage() {
   const { t } = useTranslation();
@@ -95,7 +96,7 @@ export function RoomPage() {
     return result;
   }, [currentRound, me]);
 
-  const showGuessForm =
+  const showGuessKeyboard =
     room?.status === 'IN_PROGRESS' && (!myRoundStatus || myRoundStatus === 'PLAYING');
 
   const showRoundStatusPanel =
@@ -171,12 +172,16 @@ export function RoomPage() {
   }
 
   return (
-    <Stack gap={2}>
+    <Stack gap={3}>
+      <RoundPanel player={me} opponent={opponent} room={room} />
+
+      <Separator />
+
       <PlayerBoard
         player={me}
         opponent={opponent}
         room={room}
-        currentGuess={showGuessForm ? guess : ''}
+        currentGuess={showGuessKeyboard ? guess : ''}
       />
 
       {showRoundStatusPanel ? (
@@ -195,7 +200,7 @@ export function RoomPage() {
         />
       ) : null}
 
-      {showGuessForm ? (
+      {showGuessKeyboard ? (
         <GuessKeyboard
           value={guess}
           letterStatusByLetter={letterStatusByLetter}

@@ -1,6 +1,6 @@
 import { Badge, HStack, Text, VStack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import type { PlayerDto, RoomDto, RoundPlayerStatus } from '../../api/types';
+import type { PlayerDto, RoomDto, RoundPlayerStatus } from '../../../api/types';
 
 export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto; room: RoomDto }) {
   const { t } = useTranslation();

@@ -1,8 +1,8 @@
 import { Button, Code, Stack, Text } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import type { RoomDto, RoundDto, RoundPlayerStatus } from '../../api/types';
-import { getErrorMessage } from '../../api/errors';
-import { ErrorAlert } from '../common/ErrorAlert';
+import type { RoomDto, RoundDto, RoundPlayerStatus } from '../../../api/types';
+import { getErrorMessage } from '../../../api/errors';
+import { ErrorAlert } from '../../common/ErrorAlert';
 
 export function RoundStatusPanel(props: {
   room: RoomDto;

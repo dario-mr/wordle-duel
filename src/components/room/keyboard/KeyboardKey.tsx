@@ -7,10 +7,9 @@ const KEY_BUTTON_PROPS = {
   variant: 'subtle',
   w: '100%',
   minW: '0',
-  px: { base: 0, sm: 2 },
   h: 14,
   minH: 14,
-  fontSize: { base: 'md', sm: 'lg' },
+  fontSize: 'lg',
   fontWeight: 'bold',
   whiteSpace: 'nowrap',
 } as const;
