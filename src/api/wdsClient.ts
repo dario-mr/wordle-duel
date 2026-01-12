@@ -13,14 +13,6 @@ export class WdsApiError extends Error {
   }
 }
 
-function isErrorResponseDto(value: unknown): value is ErrorResponseDto {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-  const record = value as Record<string, unknown>;
-  return typeof record.code === 'string' && typeof record.message === 'string';
-}
-
 export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
   if (!headers.has('Content-Type')) {
@@ -53,4 +45,12 @@ export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> 
     return null as T;
   }
   return (await res.json()) as T;
+}
+
+function isErrorResponseDto(value: unknown): value is ErrorResponseDto {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  return typeof record.code === 'string' && typeof record.message === 'string';
 }

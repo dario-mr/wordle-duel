@@ -14,15 +14,13 @@ export function Toaster() {
             )}
 
             <Stack gap="1" flex="1" maxWidth="100%">
-              {toast.title ? <Toast.Title>{toast.title}</Toast.Title> : null}
-              {toast.description ? (
-                <Toast.Description>{toast.description}</Toast.Description>
-              ) : null}
+              {toast.title && <Toast.Title>{toast.title}</Toast.Title>}
+              {toast.description && <Toast.Description>{toast.description}</Toast.Description>}
             </Stack>
 
-            {toast.action ? <Toast.ActionTrigger>{toast.action.label}</Toast.ActionTrigger> : null}
+            {toast.action && <Toast.ActionTrigger>{toast.action.label}</Toast.ActionTrigger>}
 
-            {toast.closable ? <Toast.CloseTrigger /> : null}
+            {toast.closable && <Toast.CloseTrigger />}
           </Toast.Root>
         )}
       </ChakraToaster>

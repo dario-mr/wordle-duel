@@ -196,7 +196,7 @@ export function RoomPage() {
         currentGuess={showGuessKeyboard ? guess : ''}
       />
 
-      {showRoundStatusPanel ? (
+      {showRoundStatusPanel && (
         <RoundStatusPanel
           room={room}
           endedRound={endedRound}
@@ -210,9 +210,9 @@ export function RoomPage() {
             readyForNextRoundMutation.mutate({ roundNumber });
           }}
         />
-      ) : null}
+      )}
 
-      {showGuessKeyboard ? (
+      {showGuessKeyboard && (
         <GuessKeyboard
           value={guess}
           letterStatusByLetter={letterStatusByLetter}
@@ -239,7 +239,7 @@ export function RoomPage() {
             );
           }}
         />
-      ) : null}
+      )}
     </Stack>
   );
 }

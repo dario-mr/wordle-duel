@@ -1,6 +1,7 @@
 import { Stack } from '@chakra-ui/react';
 import type { PlayerDto, RoomDto } from '../../../api/types';
 import { type Cell, GuessRow } from './GuessRow';
+import { MAX_GUESS_ATTEMPTS } from '../../../constants.ts';
 
 export function PlayerBoard(props: {
   player: PlayerDto;
@@ -10,7 +11,7 @@ export function PlayerBoard(props: {
 }) {
   const round = props.room.currentRound;
   const guesses = round?.guessesByPlayerId[props.player.id] ?? [];
-  const maxAttempts = round?.maxAttempts ?? 6;
+  const maxAttempts = round?.maxAttempts ?? MAX_GUESS_ATTEMPTS;
 
   const rows = Array.from({ length: maxAttempts }, (_, index) => {
     const guess = guesses.at(index);

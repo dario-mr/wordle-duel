@@ -23,7 +23,7 @@ export function KeyboardRow(props: {
       templateColumns={`repeat(${String(KEYBOARD_TOTAL_COLUMNS)}, 1fr)`}
       w="100%"
     >
-      {leftSpacer > 0 ? <GridItem colSpan={leftSpacer} /> : null}
+      {leftSpacer > 0 && <GridItem colSpan={leftSpacer} />}
 
       <KeyboardLetterKeys
         letters={props.letters}
@@ -32,7 +32,7 @@ export function KeyboardRow(props: {
         onPress={props.onPress}
       />
 
-      {rightSpacer > 0 ? <GridItem colSpan={rightSpacer} /> : null}
+      {rightSpacer > 0 && <GridItem colSpan={rightSpacer} />}
     </Grid>
   );
 }
