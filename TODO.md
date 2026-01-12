@@ -1,2 +1,5 @@
 - improve `useRoomTopic` to use ws payload, instead of just invalidating room query
 - unit tests wherever possible
+- You won/lost visible even after round ends
+- Solution only visible if you lost
+- Player's name?

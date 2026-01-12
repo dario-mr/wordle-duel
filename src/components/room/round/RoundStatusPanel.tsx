@@ -10,7 +10,7 @@ export function RoundStatusPanel(props: {
   myRoundStatus: RoundPlayerStatus | undefined;
   onReadyNextRound: (roundNumber: number) => void;
   isReadyPending: boolean;
-  readyError: unknown;
+  readyError: Error | null;
 }) {
   const { t } = useTranslation();
 
@@ -18,56 +18,59 @@ export function RoundStatusPanel(props: {
     return <Text fontSize="sm">{t('room.round.notInProgressYet')}</Text>;
   }
 
-  if (props.endedRound) {
-    const endedRound = props.endedRound;
+  const endedRound = props.endedRound;
 
-    return (
-      <Stack gap={2} align="center">
-        <Text fontSize="sm">
-          {t('room.round.ended')}
-          {endedRound.solution ? (
-            <>
-              {' '}
+  return (
+    <Stack gap={2} align="center">
+      {/* player status (WON/LOST/READY) */}
+      {props.myRoundStatus && props.myRoundStatus !== 'PLAYING' && (
+        <Text textAlign="center">{t(getEndedRoundTextKey(props.myRoundStatus))}</Text>
+      )}
+
+      {/* ended round panel */}
+      {endedRound && (
+        <Stack gap={2} align="center">
+          {endedRound.solution && props.myRoundStatus === 'LOST' && (
+            <Text fontSize="sm">
               {t('room.round.solution')} <Code>{endedRound.solution}</Code>
-            </>
-          ) : null}
-        </Text>
+            </Text>
+          )}
 
-        {props.myRoundStatus === 'READY' ? (
-          <Text fontSize="sm">{t('room.round.waitingForOpponent')}</Text>
-        ) : (
-          <Button
-            colorPalette="teal"
-            loading={props.isReadyPending}
-            disabled={props.isReadyPending}
-            onClick={() => {
-              props.onReadyNextRound(endedRound.roundNumber);
-            }}
-          >
-            {t('room.round.readyForNextRound')}
-          </Button>
-        )}
+          {props.myRoundStatus !== 'READY' && (
+            <Button
+              colorPalette="teal"
+              loading={props.isReadyPending}
+              disabled={props.isReadyPending}
+              onClick={() => {
+                props.onReadyNextRound(endedRound.roundNumber);
+              }}
+            >
+              {t('room.round.readyForNextRound')}
+            </Button>
+          )}
 
-        {props.readyError ? (
-          <ErrorAlert
-            title={t('room.round.readyRejected')}
-            message={getErrorMessage(props.readyError)}
-          />
-        ) : null}
-      </Stack>
-    );
+          {props.readyError && (
+            <ErrorAlert
+              title={t('room.round.readyRejected')}
+              message={getErrorMessage(props.readyError)}
+            />
+          )}
+        </Stack>
+      )}
+    </Stack>
+  );
+}
+
+function getEndedRoundTextKey(status: RoundPlayerStatus): string {
+  switch (status) {
+    case 'WON':
+      return 'room.round.youWonThisRound';
+    case 'LOST':
+      return 'room.round.youLostThisRound';
+    case 'READY':
+      return 'room.round.youReadyThisRound';
+    default:
+      // not relevant in this scenario (not playing)
+      return '';
   }
-
-  if (props.myRoundStatus && props.myRoundStatus !== 'PLAYING') {
-    const statusKey =
-      props.myRoundStatus === 'WON'
-        ? 'room.round.youWonThisRound'
-        : props.myRoundStatus === 'LOST'
-          ? 'room.round.youLostThisRound'
-          : 'room.round.youReadyThisRound';
-
-    return <Text textAlign="center">{t(statusKey)}</Text>;
-  }
-
-  return null;
 }

@@ -58,7 +58,6 @@ export default {
       statusPlaying: 'in corso',
       statusEnded: 'terminato',
       notInProgressYet: 'La partita non è ancora iniziata.',
-      ended: 'Round terminato.',
       solution: 'Soluzione:',
       waitingForOpponent: "In attesa dell'avversario...",
       readyForNextRound: 'Pronto per il prossimo round',
