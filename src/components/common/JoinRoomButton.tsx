@@ -1,10 +1,9 @@
 import { type ButtonProps, Stack } from '@chakra-ui/react';
-import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getErrorMessage } from '../../api/errors.ts';
 import { useJoinRoomMutation } from '../../query/roomQueries';
 import { AccentButton } from './BrandButton';
-import { toaster } from './toasterInstance';
+import { useSingleToast } from '../../hooks/useSingleToast';
 
 export function JoinRoomButton(props: {
   roomId: string | undefined;
@@ -14,22 +13,10 @@ export function JoinRoomButton(props: {
 }) {
   const { t } = useTranslation();
   const joinMutation = useJoinRoomMutation();
-
-  const lastErrorToastIdRef = useRef<string | null>(null);
-
-  const dismissErrorToast = () => {
-    if (!lastErrorToastIdRef.current) {
-      return;
-    }
-
-    toaster.dismiss(lastErrorToastIdRef.current);
-    lastErrorToastIdRef.current = null;
-  };
+  const { show: showToast, dismiss: dismissErrorToast } = useSingleToast();
 
   const showErrorToast = (message: string) => {
-    dismissErrorToast();
-
-    lastErrorToastIdRef.current = toaster.create({
+    showToast({
       type: 'error',
       title: t('toasts.joinRoomFailed'),
       description: message,

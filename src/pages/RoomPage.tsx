@@ -1,5 +1,5 @@
 import { HStack, Separator, Spinner, Stack, Text } from '@chakra-ui/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { getErrorMessage } from '../api/errors';
@@ -19,7 +19,7 @@ import {
 import { usePlayerStore } from '../state/playerStore';
 import { useRoomTopic } from '../ws/useRoomTopic';
 import { RoundPanel } from '../components/room/round/RoundPanel.tsx';
-import { toaster } from '../components/common/toasterInstance.ts';
+import { useSingleToast } from '../hooks/useSingleToast';
 
 export function RoomPage() {
   const { t } = useTranslation();
@@ -113,22 +113,9 @@ export function RoomPage() {
     guess.length === WORD_LENGTH &&
     !submitGuessMutation.isPending;
 
-  // todo extract common toast lifecycle in hook/component?
-  const lastErrorToastIdRef = useRef<string | null>(null);
-
-  const dismissErrorToast = () => {
-    if (!lastErrorToastIdRef.current) {
-      return;
-    }
-
-    toaster.dismiss(lastErrorToastIdRef.current);
-    lastErrorToastIdRef.current = null;
-  };
-
+  const { show: showToast } = useSingleToast();
   const showErrorToast = (message: string) => {
-    dismissErrorToast();
-
-    lastErrorToastIdRef.current = toaster.create({
+    showToast({
       type: 'warning',
       title: t('room.guess.rejectedTitle'),
       description: message,
