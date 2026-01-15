@@ -1,7 +1,7 @@
 import { Box, Flex, Heading } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { ProfileDialog } from '../navbar/ProfileDialog';
+import { ProfilePopover } from '../navbar/profile/ProfilePopover.tsx';
 
 export function Navbar() {
   const { t } = useTranslation();
@@ -19,7 +19,7 @@ export function Navbar() {
           {t('app.name')}
         </Heading>
 
-        <ProfileDialog />
+        <ProfilePopover />
       </Flex>
     </Box>
   );

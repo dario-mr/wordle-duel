@@ -1,0 +1,75 @@
+import { Heading, Stack } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { beginGoogleLogin, getCurrentUser, subscribeCurrentUser } from '../api/auth';
+import { AccentButton, PrimaryButton } from '../components/common/BrandButton';
+import { STORAGE_KEYS } from '../state/storageKeys';
+import { sanitizeReturnTo } from '../utils/sanitizeReturnTo';
+
+export function LoginPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+
+  const [me, setMe] = useState(() => getCurrentUser());
+
+  useEffect(() => {
+    return subscribeCurrentUser(() => {
+      setMe(getCurrentUser());
+    });
+  }, []);
+
+  const returnToParam = params.get('returnTo');
+
+  useEffect(() => {
+    if (me) {
+      void navigate('/', { replace: true });
+    }
+  }, [me, navigate]);
+
+  useEffect(() => {
+    const sanitizedReturnTo = sanitizeReturnTo(returnToParam);
+    if (sanitizedReturnTo) {
+      sessionStorage.setItem(STORAGE_KEYS.authReturnTo, sanitizedReturnTo);
+    }
+  }, [returnToParam]);
+
+  if (me) {
+    return null;
+  }
+
+  return (
+    <Stack gap={3} align="center" justify="center" textAlign="center" minH="50vh">
+      <Heading size="lg">{t('login.title')}</Heading>
+
+      <Stack direction={{ base: 'column', sm: 'row' }} gap={2} pt={2}>
+        <PrimaryButton
+          type="button"
+          onClick={() => {
+            const stored = sessionStorage.getItem(STORAGE_KEYS.authReturnTo);
+            const effectiveReturnTo = sanitizeReturnTo(returnToParam ?? stored);
+
+            if (effectiveReturnTo) {
+              sessionStorage.setItem(STORAGE_KEYS.authReturnTo, effectiveReturnTo);
+            } else {
+              sessionStorage.removeItem(STORAGE_KEYS.authReturnTo);
+            }
+
+            beginGoogleLogin();
+          }}
+        >
+          {t('login.loginWithGoogle')}
+        </PrimaryButton>
+
+        <AccentButton
+          onClick={() => {
+            void navigate('/');
+          }}
+        >
+          {t('login.backHome')}
+        </AccentButton>
+      </Stack>
+    </Stack>
+  );
+}

@@ -10,10 +10,7 @@ import { ErrorAlert } from '../common/ErrorAlert';
 
 type LanguageCode = (typeof LANGUAGE_OPTIONS)[number]['value'];
 
-export function CreateRoomCard(props: {
-  getPlayerId: () => string;
-  onCreated: (roomId: string) => void;
-}) {
+export function CreateRoomCard(props: { onCreated: (roomId: string) => void }) {
   const { t } = useTranslation();
   const [language, setLanguage] = useState<LanguageCode>(LANGUAGE_OPTIONS[0].value);
   const createMutation = useCreateRoomMutation();
@@ -29,7 +26,6 @@ export function CreateRoomCard(props: {
           e.preventDefault();
           createMutation.mutate(
             {
-              playerId: props.getPlayerId(),
               language,
             },
             {

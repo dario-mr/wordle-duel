@@ -1,3 +1,3 @@
 - improve `useRoomTopic` to use ws payload, instead of just invalidating room query
 - unit tests wherever possible
-- Player's name?
+- show opponent's name or nickname (to be created)

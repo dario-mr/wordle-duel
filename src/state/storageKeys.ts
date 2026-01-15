@@ -1,5 +1,5 @@
 export const STORAGE_KEYS = {
   locale: 'wds.locale',
-  playerId: 'wds.playerId',
   theme: 'wds.theme',
+  authReturnTo: 'wds.auth.returnTo',
 } as const;

@@ -2,6 +2,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { i18n } from './i18n';
+import { refreshAccessToken } from './auth/tokenManager';
 import { Toaster } from './components/common/toaster';
 import { queryClient } from './query/queryClient';
 import { AppRouter } from './router';
@@ -22,6 +23,10 @@ export function App() {
   useEffect(() => {
     void i18n.changeLanguage(locale);
   }, [locale]);
+
+  useEffect(() => {
+    void refreshAccessToken().catch(() => undefined);
+  }, []);
 
   return (
     <ChakraProvider value={theme}>

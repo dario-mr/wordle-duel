@@ -17,6 +17,18 @@ export default defineConfig(({ mode }) => {
             changeOrigin: true,
             ws: true,
           },
+          '/oauth2': {
+            target: DEV_BACKEND_ORIGIN,
+            changeOrigin: true,
+          },
+          '/auth': {
+            target: DEV_BACKEND_ORIGIN,
+            changeOrigin: true,
+          },
+          '/logout': {
+            target: DEV_BACKEND_ORIGIN,
+            changeOrigin: true,
+          },
         }
       : undefined;
 

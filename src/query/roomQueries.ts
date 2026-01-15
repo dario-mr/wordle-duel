@@ -4,9 +4,13 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import type { CreateRoomRequest, RoomDto, SubmitGuessResponse } from '../api/types';
+import {
+  type CreateRoomRequest,
+  type RoomDto,
+  type SubmitGuessResponse,
+  WdsApiError,
+} from '../api/types';
 import { createRoom, getRoom, joinRoom, readyForNextRound, submitGuess } from '../api/rooms';
-import { WdsApiError } from '../api/wdsClient';
 import { i18n } from '../i18n';
 
 export function roomQueryKey(roomId: string) {
@@ -43,7 +47,6 @@ export function useCreateRoomMutation(
 
 interface JoinRoomVariables {
   roomId: string;
-  playerId: string;
 }
 
 export function useJoinRoomMutation(
@@ -52,8 +55,7 @@ export function useJoinRoomMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ roomId, playerId }: JoinRoomVariables) =>
-      joinRoom({ roomId, body: { playerId } }),
+    mutationFn: ({ roomId }: JoinRoomVariables) => joinRoom(roomId),
     ...options,
     onSuccess: (room, variables, context, mutation) => {
       queryClient.setQueryData<RoomDto>(roomQueryKey(room.id), room);
@@ -62,12 +64,12 @@ export function useJoinRoomMutation(
   });
 }
 
-export function useSubmitGuessMutation(args: { roomId: string; playerId: string }) {
+export function useSubmitGuessMutation(args: { roomId: string }) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ word }: { word: string }) =>
-      submitGuess({ roomId: args.roomId, body: { playerId: args.playerId, word } }),
+      submitGuess({ roomId: args.roomId, body: { word } }),
     onSuccess: (data: SubmitGuessResponse) => {
       queryClient.setQueryData<RoomDto>(roomQueryKey(args.roomId), data.room);
     },
@@ -79,14 +81,14 @@ export function useSubmitGuessMutation(args: { roomId: string; playerId: string 
   });
 }
 
-export function useReadyForNextRoundMutation(args: { roomId: string; playerId: string }) {
+export function useReadyForNextRoundMutation(args: { roomId: string }) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ roundNumber }: { roundNumber: number }) =>
       readyForNextRound({
         roomId: args.roomId,
-        body: { playerId: args.playerId, roundNumber },
+        body: { roundNumber },
       }),
     onSuccess: (data: RoomDto) => {
       queryClient.setQueryData<RoomDto>(roomQueryKey(args.roomId), data);

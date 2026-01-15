@@ -7,7 +7,6 @@ import { useSingleToast } from '../../hooks/useSingleToast';
 
 export function JoinRoomButton(props: {
   roomId: string | undefined;
-  getPlayerId: () => string;
   onJoined?: (roomId: string) => void;
   buttonProps?: Omit<ButtonProps, 'onClick' | 'loading' | 'disabled'>;
 }) {
@@ -35,7 +34,7 @@ export function JoinRoomButton(props: {
             return;
           }
           joinMutation.mutate(
-            { roomId: props.roomId, playerId: props.getPlayerId() },
+            { roomId: props.roomId },
             {
               onSuccess: (joined) => {
                 dismissErrorToast();

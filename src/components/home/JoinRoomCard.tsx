@@ -4,10 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '../common/Card';
 import { JoinRoomButton } from '../common/JoinRoomButton';
 
-export function JoinRoomCard(props: {
-  getPlayerId: () => string;
-  onJoined: (roomId: string) => void;
-}) {
+export function JoinRoomCard(props: { onJoined: (roomId: string) => void }) {
   const { t } = useTranslation();
   const [roomIdInput, setRoomIdInput] = useState('');
   const joinButtonId = useId();
@@ -42,7 +39,6 @@ export function JoinRoomCard(props: {
             />
             <JoinRoomButton
               roomId={roomIdToJoin}
-              getPlayerId={props.getPlayerId}
               onJoined={(joinedRoomId) => {
                 props.onJoined(joinedRoomId);
               }}

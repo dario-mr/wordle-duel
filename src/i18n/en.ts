@@ -18,6 +18,8 @@ export default {
     unknown: 'Unknown error',
     rootElementNotFound: 'Root element #root not found',
     missingRoomId: 'Missing roomId',
+    unauthenticated: 'Please log in to continue',
+    unexpectedResponse: 'Unexpected response from server',
     requestFailedWithStatus: 'Request failed with status {{status}}',
   },
   home: {
@@ -93,16 +95,23 @@ export default {
   },
   profile: {
     title: 'Profile',
-    yourPlayerId: 'Your player ID:',
     loadingPlayerId: '...',
     uiLanguage: 'Language',
     uiLanguageAria: 'Language',
+    loginWithGoogle: 'Login with Google',
+    logout: 'Logout',
+  },
+  login: {
+    title: 'Login required',
+    loginWithGoogle: 'Login with Google',
+    backHome: 'Back to home',
   },
   notFound: {
     message: 'Page not found.',
   },
   toasts: {
     joinRoomFailed: 'Join room failed',
+    logoutFailed: 'Logout failed',
   },
   roomLanguage: {
     it: 'Italiano (IT)',

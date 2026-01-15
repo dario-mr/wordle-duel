@@ -1,4 +1,8 @@
-import { PROD_API_V1_BASE_PATH, PROD_WS_PATH } from '../constants.ts';
+import { PROD_API_V1_BASE_PATH, PROD_BACKEND_BASE_PATH, PROD_WS_PATH } from '../constants.ts';
+
+export function getBackendBasePath(): string {
+  return import.meta.env.DEV ? '/' : PROD_BACKEND_BASE_PATH;
+}
 
 export function getRestApiV1BaseUrl(): string {
   return import.meta.env.DEV ? '/api/v1/' : PROD_API_V1_BASE_PATH;

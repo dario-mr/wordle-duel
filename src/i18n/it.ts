@@ -18,6 +18,8 @@ export default {
     unknown: 'Errore sconosciuto',
     rootElementNotFound: 'Elemento root #root non trovato',
     missingRoomId: 'roomId mancante',
+    unauthenticated: 'Accedi per continuare',
+    unexpectedResponse: 'Risposta inattesa dal server',
     requestFailedWithStatus: 'Richiesta fallita con stato {{status}}',
   },
   home: {
@@ -93,16 +95,23 @@ export default {
   },
   profile: {
     title: 'Profilo',
-    yourPlayerId: 'Il tuo ID giocatore:',
     loadingPlayerId: '...',
     uiLanguage: 'Lingua',
     uiLanguageAria: 'Lingua',
+    loginWithGoogle: 'Accedi con Google',
+    logout: 'Esci',
+  },
+  login: {
+    title: 'Accesso richiesto',
+    loginWithGoogle: 'Accedi con Google',
+    backHome: 'Torna alla home',
   },
   notFound: {
     message: 'Pagina non trovata.',
   },
   toasts: {
     joinRoomFailed: 'Accesso alla stanza fallito',
+    logoutFailed: 'Logout fallito',
   },
   roomLanguage: {
     it: 'Italiano (IT)',

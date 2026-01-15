@@ -2,6 +2,7 @@ import { HStack, Separator, Spinner, Stack, Text } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { getCurrentUser, subscribeCurrentUser } from '../api/auth';
 import { getErrorMessage } from '../api/errors';
 import type { GuessLetterStatus } from '../api/types';
 import { WORD_LENGTH } from '../constants';
@@ -16,7 +17,6 @@ import {
   useRoomQuery,
   useSubmitGuessMutation,
 } from '../query/roomQueries';
-import { usePlayerStore } from '../state/playerStore';
 import { useRoomTopic } from '../ws/useRoomTopic';
 import { RoundPanel } from '../components/room/round/RoundPanel.tsx';
 import { useSingleToast } from '../hooks/useSingleToast';
@@ -25,16 +25,15 @@ export function RoomPage() {
   const { t } = useTranslation();
   const { roomId } = useParams();
 
-  const playerId = usePlayerStore((s) => s.playerId);
-  const ensurePlayerId = usePlayerStore((s) => s.ensurePlayerId);
+  const [meUser, setMeUser] = useState(() => getCurrentUser());
 
   useEffect(() => {
-    if (!playerId) {
-      ensurePlayerId();
-    }
-  }, [ensurePlayerId, playerId]);
+    return subscribeCurrentUser(() => {
+      setMeUser(getCurrentUser());
+    });
+  }, []);
 
-  const effectivePlayerId = playerId ?? '';
+  const myPlayerId = meUser?.id ?? '';
 
   const { data: room, isLoading, error } = useRoomQuery(roomId);
   useRoomTopic(roomId);
@@ -53,20 +52,18 @@ export function RoomPage() {
 
   const submitGuessMutation = useSubmitGuessMutation({
     roomId: roomId ?? '',
-    playerId: effectivePlayerId,
   });
 
   const readyForNextRoundMutation = useReadyForNextRoundMutation({
     roomId: roomId ?? '',
-    playerId: effectivePlayerId,
   });
 
-  const myRoundStatus = currentRound?.statusByPlayerId[effectivePlayerId];
+  const myRoundStatus = currentRound?.statusByPlayerId[myPlayerId];
   const endedRound = currentRound?.roundStatus === 'ENDED' ? currentRound : null;
   const isRoundEnded = Boolean(endedRound);
 
-  const me = room?.players.find((p) => p.id === effectivePlayerId);
-  const opponent = room?.players.find((p) => p.id !== effectivePlayerId);
+  const me = room?.players.find((p) => p.id === myPlayerId);
+  const opponent = room?.players.find((p) => p.id !== myPlayerId);
 
   const letterStatusByLetter = useMemo<Partial<Record<string, GuessLetterStatus>>>(() => {
     if (!me || !currentRound) {
@@ -106,7 +103,7 @@ export function RoomPage() {
 
   const canSubmit =
     Boolean(roomId) &&
-    Boolean(effectivePlayerId) &&
+    Boolean(myPlayerId) &&
     room?.status === 'IN_PROGRESS' &&
     currentRound?.roundStatus === 'PLAYING' &&
     myRoundStatus === 'PLAYING' &&
@@ -163,7 +160,7 @@ export function RoomPage() {
   }
 
   if (!me) {
-    return <RoomJoinGate room={room} roomId={roomId} getPlayerId={ensurePlayerId} />;
+    return <RoomJoinGate room={room} roomId={roomId} />;
   }
 
   if (room.status === 'WAITING_FOR_PLAYERS') {
@@ -191,7 +188,7 @@ export function RoomPage() {
           isReadyPending={readyForNextRoundMutation.isPending}
           readyError={readyForNextRoundMutation.error}
           onReadyNextRound={(roundNumber) => {
-            if (!roomId || !effectivePlayerId) {
+            if (!roomId) {
               return;
             }
             readyForNextRoundMutation.mutate({ roundNumber });
@@ -210,7 +207,7 @@ export function RoomPage() {
           canSubmit={canSubmit}
           isSubmitting={submitGuessMutation.isPending}
           onSubmit={(word) => {
-            if (!roomId || !effectivePlayerId) {
+            if (!roomId) {
               return;
             }
             submitGuessMutation.mutate(
