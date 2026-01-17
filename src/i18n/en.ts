@@ -107,7 +107,7 @@ export default {
     backHome: 'Back to home',
   },
   notFound: {
-    message: 'Page not found.',
+    message: 'Page not found',
   },
   toasts: {
     joinRoomFailed: 'Join room failed',

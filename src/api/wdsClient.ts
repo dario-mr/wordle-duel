@@ -2,7 +2,7 @@ import { i18n } from '../i18n';
 import { redirectToLogin } from '../auth/redirectToLogin';
 import { type ErrorResponseDto, WdsApiError } from './types';
 import { apiFetch } from './apiFetch';
-import { isRedirectResponse } from '../utils/httpUtils';
+import { isRedirectResponse, isUnauthenticatedResponse } from '../utils/httpUtils';
 import { getValidAccessToken, refreshAccessToken } from '../auth/tokenManager';
 
 export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -53,7 +53,7 @@ async function parseApiError(res: Response): Promise<WdsApiError> {
 
   const contentType = getContentType(res);
   if (contentType.includes('text/html')) {
-    return res.status === 401 || res.status === 403 || isRedirectResponse(res)
+    return isUnauthenticatedResponse(res)
       ? makeUnauthenticatedError()
       : makeUnexpectedResponseError(res.status);
   }

@@ -3,6 +3,19 @@ import { STORAGE_KEYS } from './storageKeys';
 
 export type ThemeMode = 'light' | 'dark';
 
+export const useThemeStore = create<ThemeState>((set, get) => ({
+  theme: readInitialTheme(),
+  setTheme: (theme) => {
+    persistTheme(theme);
+    set({ theme });
+  },
+  toggleTheme: () => {
+    const next: ThemeMode = get().theme === 'dark' ? 'light' : 'dark';
+    persistTheme(next);
+    set({ theme: next });
+  },
+}));
+
 function normalizeTheme(value: string | null): ThemeMode | null {
   if (!value) {
     return null;
@@ -18,7 +31,7 @@ function getPreferredTheme(): ThemeMode {
   try {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   } catch {
-    return 'light';
+    return 'dark';
   }
 }
 
@@ -44,16 +57,3 @@ interface ThemeState {
   setTheme: (theme: ThemeMode) => void;
   toggleTheme: () => void;
 }
-
-export const useThemeStore = create<ThemeState>((set, get) => ({
-  theme: readInitialTheme(),
-  setTheme: (theme) => {
-    persistTheme(theme);
-    set({ theme });
-  },
-  toggleTheme: () => {
-    const next: ThemeMode = get().theme === 'dark' ? 'light' : 'dark';
-    persistTheme(next);
-    set({ theme: next });
-  },
-}));

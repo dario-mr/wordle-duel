@@ -24,6 +24,7 @@ export function useRoomQuery(roomId: string | undefined) {
       if (!roomId) {
         throw new Error(i18n.t('errors.missingRoomId'));
       }
+      // todo when clicking logout in ProfilePopover, this is triggered for some reason
       return getRoom(roomId);
     },
     enabled: Boolean(roomId),
