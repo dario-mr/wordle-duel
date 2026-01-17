@@ -1,3 +1,15 @@
+export class WdsApiError extends Error {
+  status: number;
+  code: string;
+
+  constructor(args: { status: number; code: string; message: string }) {
+    super(args.message);
+    this.name = 'WdsApiError';
+    this.status = args.status;
+    this.code = args.code;
+  }
+}
+
 export type Language = 'IT';
 
 export type RoomStatus = 'WAITING_FOR_PLAYERS' | 'IN_PROGRESS' | 'CLOSED';
@@ -47,21 +59,14 @@ export interface ErrorResponseDto {
 }
 
 export interface CreateRoomRequest {
-  playerId: string;
   language: Language;
 }
 
-export interface JoinRoomRequest {
-  playerId: string;
-}
-
 export interface SubmitGuessRequest {
-  playerId: string;
   word: string;
 }
 
 export interface ReadyForNextRoundRequest {
-  playerId: string;
   roundNumber: number;
 }
 

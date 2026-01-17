@@ -1,22 +1,13 @@
 import { getRestApiV1BaseUrl } from '../config/wds';
-import { fetchJson } from './wdsClient';
 import type {
   CreateRoomRequest,
-  JoinRoomRequest,
   ReadyForNextRoundRequest,
   RoomDto,
   SubmitGuessRequest,
   SubmitGuessResponse,
 } from './types';
-
-function apiUrl(path: string): string {
-  const apiBase = getRestApiV1BaseUrl();
-  const base = apiBase.startsWith('http')
-    ? apiBase
-    : new URL(apiBase, window.location.origin).toString();
-
-  return new URL(path.replace(/^\//, ''), base).toString();
-}
+import { fetchJson } from './wdsClient';
+import { joinUrl } from './url';
 
 export function createRoom(body: CreateRoomRequest): Promise<RoomDto> {
   return fetchJson(apiUrl('/rooms'), {
@@ -25,22 +16,21 @@ export function createRoom(body: CreateRoomRequest): Promise<RoomDto> {
   });
 }
 
-export function joinRoom(args: { roomId: string; body: JoinRoomRequest }): Promise<RoomDto> {
-  return fetchJson(apiUrl(`/rooms/${encodeURIComponent(args.roomId)}/join`), {
+export function joinRoom(roomId: string): Promise<RoomDto> {
+  return fetchJson(roomUrl(roomId, '/join'), {
     method: 'POST',
-    body: JSON.stringify(args.body),
   });
 }
 
 export function getRoom(roomId: string): Promise<RoomDto> {
-  return fetchJson(apiUrl(`/rooms/${encodeURIComponent(roomId)}`));
+  return fetchJson(roomUrl(roomId));
 }
 
 export function submitGuess(args: {
   roomId: string;
   body: SubmitGuessRequest;
 }): Promise<SubmitGuessResponse> {
-  return fetchJson(apiUrl(`/rooms/${encodeURIComponent(args.roomId)}/guess`), {
+  return fetchJson(roomUrl(args.roomId, '/guess'), {
     method: 'POST',
     body: JSON.stringify(args.body),
   });
@@ -50,8 +40,16 @@ export function readyForNextRound(args: {
   roomId: string;
   body: ReadyForNextRoundRequest;
 }): Promise<RoomDto> {
-  return fetchJson(apiUrl(`/rooms/${encodeURIComponent(args.roomId)}/ready`), {
+  return fetchJson(roomUrl(args.roomId, '/ready'), {
     method: 'POST',
     body: JSON.stringify(args.body),
   });
+}
+
+function apiUrl(path: string): string {
+  return joinUrl(getRestApiV1BaseUrl(), path);
+}
+
+function roomUrl(roomId: string, suffix = ''): string {
+  return apiUrl(`/rooms/${encodeURIComponent(roomId)}${suffix}`);
 }

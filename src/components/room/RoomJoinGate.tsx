@@ -3,11 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { RoomDto } from '../../api/types';
 import { JoinRoomButton } from '../common/JoinRoomButton';
 
-export function RoomJoinGate(props: {
-  room: RoomDto;
-  roomId: string | undefined;
-  getPlayerId: () => string;
-}) {
+export function RoomJoinGate(props: { room: RoomDto; roomId: string | undefined }) {
   const { t } = useTranslation();
   if (props.room.players.length === 1) {
     return (
@@ -18,7 +14,7 @@ export function RoomJoinGate(props: {
         <Text fontSize="md" color="fg.info">
           {t('room.joinGate.waitingForOpponent')}
         </Text>
-        <JoinRoomButton roomId={props.roomId} getPlayerId={props.getPlayerId} />
+        <JoinRoomButton roomId={props.roomId} />
       </Stack>
     );
   }
