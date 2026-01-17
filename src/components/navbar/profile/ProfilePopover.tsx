@@ -63,13 +63,16 @@ export function ProfilePopover() {
 
     setLogoutPending(true);
 
-    void logout()
-      .then(() => {
+    const runLogout = async () => {
+      try {
+        await logout(); // clears token + notifies listeners
         setOpen(false);
-        queryClient.clear();
+
+        await queryClient.cancelQueries({ queryKey: ['room'] });
+        queryClient.removeQueries({ queryKey: ['room'] });
+
         void navigate('/');
-      })
-      .catch((err: unknown) => {
+      } catch (err: unknown) {
         showToast({
           type: 'warning',
           title: t('toasts.logoutFailed'),
@@ -77,10 +80,12 @@ export function ProfilePopover() {
           duration: 3000,
           closable: true,
         });
-      })
-      .finally(() => {
+      } finally {
         setLogoutPending(false);
-      });
+      }
+    };
+
+    void runLogout();
   };
 
   return (
