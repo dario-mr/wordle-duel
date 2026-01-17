@@ -1,7 +1,7 @@
 import { getCookieValue } from '../utils/cookies';
 
-const CSRF_COOKIE_NAME = 'XSRF-TOKEN';
-const CSRF_HEADER_NAME = 'X-XSRF-TOKEN';
+const CSRF_COOKIE_NAME = 'WD-XSRF-TOKEN';
+const CSRF_HEADER_NAME = 'X-WD-XSRF-TOKEN';
 
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
