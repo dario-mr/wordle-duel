@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { getCurrentUser, subscribeCurrentUser } from '../api/auth';
 import { getErrorMessage } from '../api/errors';
-import type { GuessLetterStatus } from '../api/types';
-import { WORD_LENGTH } from '../constants';
+import { type GuessLetterStatus, WdsApiError } from '../api/types';
+import { UNAUTHENTICATED_CODE, WORD_LENGTH } from '../constants';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import { GuessKeyboard } from '../components/room/keyboard/GuessKeyboard';
 import { PlayerBoard } from '../components/room/board/PlayerBoard';
@@ -35,7 +35,7 @@ export function RoomPage() {
 
   const myPlayerId = meUser?.id ?? '';
 
-  const { data: room, isPending, error } = useRoomQuery(roomId);
+  const { data: room, isLoading, isFetching, isSuccess, error } = useRoomQuery(roomId);
   useRoomTopic(roomId);
 
   const [guessState, setGuessState] = useState<{ roundNumber?: number; value: string }>({
@@ -129,7 +129,7 @@ export function RoomPage() {
     );
   }
 
-  if (isPending) {
+  if (isLoading || isFetching) {
     return (
       <Stack gap={6}>
         <HStack align="center" justify="center" alignItems="center">
@@ -141,11 +141,19 @@ export function RoomPage() {
   }
 
   if (error) {
+    if (error instanceof WdsApiError && error.code === UNAUTHENTICATED_CODE) {
+      return null; // redirectToLogin() already navigates
+    }
+
     return (
       <Stack gap={6}>
         <ErrorAlert title={t('room.errorTitle')} message={getErrorMessage(error)} />
       </Stack>
     );
+  }
+
+  if (!isSuccess) {
+    return null;
   }
 
   if (!me) {

@@ -4,6 +4,7 @@ import { type ErrorResponseDto, WdsApiError } from './types';
 import { apiFetch } from './apiFetch';
 import { isRedirectResponse, isUnauthenticatedResponse } from '../utils/httpUtils';
 import { getValidAccessToken, refreshAccessToken } from '../auth/tokenManager';
+import { UNAUTHENTICATED_CODE, UNEXPECTED_RESPONSE_CODE } from '../constants.ts';
 
 export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const baseInit = withJsonHeaders(init);
@@ -15,19 +16,19 @@ export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> 
   let res = await doFetch(token);
 
   if (isLoginRedirect(res)) {
-    return await redirectToLoginAndHalt();
+    return redirectToLoginAndHalt();
   }
 
   if (res.status === 401) {
     token = await refreshAccessToken();
     if (!token) {
-      return await redirectToLoginAndHalt();
+      return redirectToLoginAndHalt();
     }
 
     res = await doFetch(token);
 
     if (isLoginRedirect(res) || res.status === 401) {
-      return await redirectToLoginAndHalt();
+      return redirectToLoginAndHalt();
     }
   }
 
@@ -132,31 +133,15 @@ function isLoginRedirect(res: Response): boolean {
   return res.status === 401 || res.status === 403;
 }
 
-async function redirectToLoginAndHalt(): Promise<never> {
-  const redirected = handleUnauthenticated();
-
-  if (redirected) {
-    await new Promise<never>(() => {
-      // Intentionally never resolve/reject.
-    });
-  }
-
+function redirectToLoginAndHalt(): never {
+  redirectToLogin();
   throw makeUnauthenticatedError();
-}
-
-function handleUnauthenticated(): boolean {
-  try {
-    redirectToLogin();
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 function makeUnauthenticatedError(): WdsApiError {
   return new WdsApiError({
     status: 401,
-    code: 'UNAUTHENTICATED',
+    code: UNAUTHENTICATED_CODE,
     message: i18n.t('errors.unauthenticated'),
   });
 }
@@ -164,7 +149,7 @@ function makeUnauthenticatedError(): WdsApiError {
 function makeUnexpectedResponseError(status: number): WdsApiError {
   return new WdsApiError({
     status,
-    code: 'UNEXPECTED_RESPONSE',
+    code: UNEXPECTED_RESPONSE_CODE,
     message: i18n.t('errors.unexpectedResponse'),
   });
 }

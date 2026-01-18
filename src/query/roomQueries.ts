@@ -12,18 +12,15 @@ import {
 } from '../api/types';
 import { createRoom, getRoom, joinRoom, readyForNextRound, submitGuess } from '../api/rooms';
 import { i18n } from '../i18n';
-import { useIsAuthenticated } from '../hooks/useIsAuthenticated';
 
 export function roomQueryKey(roomId: string) {
   return ['room', roomId] as const;
 }
 
 export function useRoomQuery(roomId: string | undefined) {
-  const isAuthed = useIsAuthenticated();
-
   return useQuery({
     queryKey: roomId ? roomQueryKey(roomId) : ['room', 'missing'],
-    enabled: !!roomId && isAuthed,
+    enabled: !!roomId,
     queryFn: () => {
       if (!roomId) {
         throw new Error(i18n.t('errors.missingRoomId'));
