@@ -41,9 +41,6 @@ export default {
     invalidLinkTitle: 'Invalid room link',
     invalidLinkMessage: 'Missing room id in URL.',
     errorTitle: 'Room error',
-    unexpectedStateTitle: 'Unexpected room state',
-    unexpectedStateMessage:
-      'Room data is missing for roomId={{roomId}}. Please refresh and try again.',
     share: {
       waitingTitle: 'Waiting for opponent...',
       shareHint: 'Share this room link with a friend to join.',

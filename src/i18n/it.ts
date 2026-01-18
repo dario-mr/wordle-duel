@@ -41,9 +41,6 @@ export default {
     invalidLinkTitle: 'Link stanza non valido',
     invalidLinkMessage: "ID stanza mancante nell'URL.",
     errorTitle: 'Errore stanza',
-    unexpectedStateTitle: 'Stato stanza inatteso',
-    unexpectedStateMessage:
-      'Mancano i dati della stanza per roomId={{roomId}}. Aggiorna la pagina e riprova.',
     share: {
       waitingTitle: "In attesa dell'avversario...",
       shareHint: 'Condividi questo link con un amico per farlo entrare.',

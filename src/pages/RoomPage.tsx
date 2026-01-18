@@ -35,7 +35,7 @@ export function RoomPage() {
 
   const myPlayerId = meUser?.id ?? '';
 
-  const { data: room, isLoading, error } = useRoomQuery(roomId);
+  const { data: room, isPending, error } = useRoomQuery(roomId);
   useRoomTopic(roomId);
 
   const [guessState, setGuessState] = useState<{ roundNumber?: number; value: string }>({
@@ -129,7 +129,7 @@ export function RoomPage() {
     );
   }
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <Stack gap={6}>
         <HStack align="center" justify="center" alignItems="center">
@@ -144,17 +144,6 @@ export function RoomPage() {
     return (
       <Stack gap={6}>
         <ErrorAlert title={t('room.errorTitle')} message={getErrorMessage(error)} />
-      </Stack>
-    );
-  }
-
-  if (!room) {
-    return (
-      <Stack gap={6}>
-        <ErrorAlert
-          title={t('room.unexpectedStateTitle')}
-          message={t('room.unexpectedStateMessage', { roomId })}
-        />
       </Stack>
     );
   }
