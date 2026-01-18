@@ -32,6 +32,7 @@ export function AccentButton({ bg, color, _hover, _active, ...rest }: ButtonProp
 
 export function GoogleLoginButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation();
+  const googleLogoPath = `${import.meta.env.BASE_URL}google-logo.svg`;
 
   return (
     <Button
@@ -50,7 +51,7 @@ export function GoogleLoginButton({ onClick }: { onClick: () => void }) {
       maxW="400px"
     >
       <HStack gap="10px">
-        <Image src="/google-logo.svg" alt="Google" boxSize="20px" />
+        <Image src={googleLogoPath} alt="Google" boxSize="20px" />
         <Text fontWeight="semibold">{t('profile.loginWithGoogle')}</Text>
       </HStack>
     </Button>
