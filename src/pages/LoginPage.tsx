@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { beginGoogleLogin, getCurrentUser, subscribeCurrentUser } from '../api/auth';
-import { AccentButton, PrimaryButton } from '../components/common/BrandButton';
+import { AccentButton, GoogleLoginButton } from '../components/common/BrandButton';
 import { STORAGE_KEYS } from '../state/storageKeys';
 import { sanitizeReturnTo } from '../utils/sanitizeReturnTo';
 
@@ -44,8 +44,7 @@ export function LoginPage() {
       <Heading size="lg">{t('login.title')}</Heading>
 
       <Stack direction={{ base: 'column', sm: 'row' }} gap={2} pt={2}>
-        <PrimaryButton
-          type="button"
+        <GoogleLoginButton
           onClick={() => {
             const stored = sessionStorage.getItem(STORAGE_KEYS.authReturnTo);
             const effectiveReturnTo = sanitizeReturnTo(returnToParam ?? stored);
@@ -58,9 +57,7 @@ export function LoginPage() {
 
             beginGoogleLogin();
           }}
-        >
-          {t('login.loginWithGoogle')}
-        </PrimaryButton>
+        />
 
         <AccentButton
           onClick={() => {

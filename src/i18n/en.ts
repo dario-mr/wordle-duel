@@ -95,12 +95,12 @@ export default {
     loadingPlayerId: '...',
     uiLanguage: 'Language',
     uiLanguageAria: 'Language',
-    loginWithGoogle: 'Login with Google',
+    loginWithGoogle: 'Sign in with Google',
     logout: 'Logout',
   },
   login: {
     title: 'Login required',
-    loginWithGoogle: 'Login with Google',
+    loginWithGoogle: 'Sign in with Google',
     backHome: 'Back to home',
   },
   notFound: {

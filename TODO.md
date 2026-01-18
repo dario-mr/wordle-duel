@@ -1,3 +1,4 @@
 - improve `useRoomTopic` to use ws payload, instead of just invalidating room query
 - unit tests wherever possible
 - show opponent's name or nickname (to be created)
+- fix in RoomPage introduced new bug: 401 on `/auth/refresh` causes infinite room loading
