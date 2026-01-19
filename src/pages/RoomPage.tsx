@@ -1,4 +1,4 @@
-import { HStack, Separator, Spinner, Stack, Text } from '@chakra-ui/react';
+import { Separator, Stack } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -20,6 +20,7 @@ import {
 import { useRoomTopic } from '../ws/useRoomTopic';
 import { RoundPanel } from '../components/room/round/RoundPanel.tsx';
 import { useSingleToast } from '../hooks/useSingleToast';
+import { RoomSkeleton } from '../components/room/RoomSkeleton.tsx';
 
 export function RoomPage() {
   const { t } = useTranslation();
@@ -130,14 +131,7 @@ export function RoomPage() {
   }
 
   if (isLoading || isFetching) {
-    return (
-      <Stack gap={6}>
-        <HStack align="center" justify="center" alignItems="center">
-          <Spinner />
-          <Text>{t('common.loadingRoom')}</Text>
-        </HStack>
-      </Stack>
-    );
+    return <RoomSkeleton />;
   }
 
   if (error) {
