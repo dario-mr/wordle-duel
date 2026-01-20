@@ -1,10 +1,9 @@
 import { i18n } from '../i18n';
 import { redirectToLogin } from '../auth/redirectToLogin';
-import { type ErrorResponseDto, WdsApiError } from './types';
-import { apiFetch } from './apiFetch';
-import { isRedirectResponse, isUnauthenticatedResponse } from '../utils/httpUtils';
 import { getValidAccessToken, refreshAccessToken } from '../auth/tokenManager';
 import { UNAUTHENTICATED_CODE, UNEXPECTED_RESPONSE_CODE } from '../constants.ts';
+import { apiFetch } from './apiFetch';
+import { type ErrorResponseDto, WdsApiError } from './types';
 
 export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const baseInit = withJsonHeaders(init);
@@ -15,10 +14,6 @@ export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> 
 
   let res = await doFetch(token);
 
-  if (isLoginRedirect(res)) {
-    return redirectToLoginAndHalt();
-  }
-
   if (res.status === 401) {
     token = await refreshAccessToken();
     if (!token) {
@@ -27,7 +22,7 @@ export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> 
 
     res = await doFetch(token);
 
-    if (isLoginRedirect(res) || res.status === 401) {
+    if (res.status === 401) {
       return redirectToLoginAndHalt();
     }
   }
@@ -54,7 +49,7 @@ async function parseApiError(res: Response): Promise<WdsApiError> {
 
   const contentType = getContentType(res);
   if (contentType.includes('text/html')) {
-    return isUnauthenticatedResponse(res)
+    return res.status === 401
       ? makeUnauthenticatedError()
       : makeUnexpectedResponseError(res.status);
   }
@@ -118,19 +113,6 @@ function isErrorResponseDto(value: unknown): value is ErrorResponseDto {
 
 function getContentType(res: Response): string {
   return res.headers.get('content-type') ?? '';
-}
-
-function isLoginRedirect(res: Response): boolean {
-  if (isRedirectResponse(res)) {
-    return true;
-  }
-
-  const contentType = getContentType(res);
-  if (!contentType.includes('text/html')) {
-    return false;
-  }
-
-  return res.status === 401 || res.status === 403;
 }
 
 function redirectToLoginAndHalt(): never {

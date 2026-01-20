@@ -1,7 +1,4 @@
-import { getCookieValue } from '../utils/cookies';
-
-const CSRF_COOKIE_NAME = 'WD-XSRF-TOKEN';
-const CSRF_HEADER_NAME = 'X-WD-XSRF-TOKEN';
+import { CSRF_HEADER_NAME, getXsrfTokenFromCookie } from './csrf';
 
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -24,12 +21,7 @@ export async function apiFetch(
     method,
     headers,
     credentials: 'include',
-    redirect: 'manual',
   });
-}
-
-function getXsrfTokenFromCookie(): string | undefined {
-  return getCookieValue(CSRF_COOKIE_NAME);
 }
 
 function isUnsafeMethod(method: string | undefined): boolean {

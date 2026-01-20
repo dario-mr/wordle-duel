@@ -1,7 +1,6 @@
-import { getBackendBasePath } from '../config/wds';
 import { apiFetch } from '../api/apiFetch';
-import { getCookieValue } from '../utils/cookies';
-import { isRedirectResponse } from '../utils/httpUtils';
+import { getXsrfTokenFromCookie } from '../api/csrf';
+import { getBackendBasePath } from '../config/wds';
 
 const EXPIRY_SAFETY_WINDOW_MS = 30_000;
 const listeners = new Set<() => void>();
@@ -82,11 +81,7 @@ async function doRefresh(): Promise<string | null> {
     },
   });
 
-  if (
-    wasMissingCsrfCookie &&
-    (res.status === 403 || isRedirectResponse(res)) &&
-    getXsrfTokenFromCookie()
-  ) {
+  if (wasMissingCsrfCookie && res.status === 403 && getXsrfTokenFromCookie()) {
     res = await apiFetch(backendUrl('/auth/refresh'), {
       method: 'POST',
       headers: {
@@ -136,8 +131,4 @@ function backendUrl(path: string): string {
   const basePath = getBackendBasePath();
   const base = new URL(basePath, window.location.origin).toString();
   return new URL(path.replace(/^\//, ''), base).toString();
-}
-
-function getXsrfTokenFromCookie(): string | undefined {
-  return getCookieValue('XSRF-TOKEN');
 }

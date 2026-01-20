@@ -130,7 +130,7 @@ export function RoomPage() {
     );
   }
 
-  if (isLoading || isFetching) {
+  if (!room && (isLoading || isFetching)) {
     return <RoomSkeleton />;
   }
 

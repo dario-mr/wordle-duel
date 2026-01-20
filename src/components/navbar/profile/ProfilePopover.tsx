@@ -9,6 +9,7 @@ import { getErrorMessage } from '../../../api/errors';
 import { useSingleToast } from '../../../hooks/useSingleToast';
 import type { UiLocale } from '../../../i18n/resources';
 import { useLocaleStore } from '../../../state/localeStore';
+import { STORAGE_KEYS } from '../../../state/storageKeys';
 import { type ThemeMode, useThemeStore } from '../../../state/themeStore';
 import { AuthActions } from './AuthActions';
 import { LanguageSelect } from './LanguageSelect';
@@ -65,13 +66,16 @@ export function ProfilePopover() {
 
     const runLogout = async () => {
       try {
-        await logout(); // clears token + notifies listeners
         setOpen(false);
 
-        await queryClient.cancelQueries({ queryKey: ['room'] });
-        queryClient.removeQueries({ queryKey: ['room'] });
+        await queryClient.cancelQueries({ queryKey: ['room'], exact: false });
+        queryClient.removeQueries({ queryKey: ['room'], exact: false });
 
-        void navigate('/');
+        sessionStorage.removeItem(STORAGE_KEYS.authReturnTo);
+
+        void navigate('/', { replace: true });
+
+        await logout(); // clears token + notifies listeners
       } catch (err: unknown) {
         showToast({
           type: 'warning',
