@@ -1,6 +1,6 @@
 - improve `useRoomTopic` to use ws payload, instead of just invalidating room query
 - unit tests wherever possible
-- show opponent's name or nickname (to be created)
+- display user's picture from google oauth in ProfileTriggerButton
 - maybe fixed, to check on prod:
   - unexpected logged out, then even homepage was prompting a login
   - Sometimes on refresh I see the login page for a moment

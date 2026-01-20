@@ -17,6 +17,7 @@ export type RoomStatus = 'WAITING_FOR_PLAYERS' | 'IN_PROGRESS' | 'CLOSED';
 export interface PlayerDto {
   id: string;
   score: number;
+  displayName: string;
 }
 
 export type RoundStatus = 'PLAYING' | 'ENDED';

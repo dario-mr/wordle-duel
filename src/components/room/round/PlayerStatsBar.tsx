@@ -9,55 +9,49 @@ export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto;
   const myStatus = round?.statusByPlayerId[props.player.id];
   const opponentStatus = props.opponent ? round?.statusByPlayerId[props.opponent.id] : undefined;
 
+  const DASH = t('room.playerStats.dash');
+  const scoreLabel = t('room.playerStats.score');
+  const statusLabel = t('room.playerStats.status');
+
+  const formatStatus = (status: RoundPlayerStatus | undefined) =>
+    status ? t(roundPlayerStatusTextKey[status]) : DASH;
+
+  const meName = `${props.player.displayName} (${t('room.playerStats.me')})`;
+  const opponentName = props.opponent?.displayName ?? t('room.playerStats.opponent');
+  const opponentScore = props.opponent?.score ?? DASH;
+
   return (
     <HStack w="100%" justify="space-between" wrap="nowrap" gap={10}>
       <VStack align="flex-start" gap={1}>
-        <Text fontWeight="semibold">{t('room.playerStats.me')}</Text>
+        <Text fontWeight="semibold">{meName}</Text>
         <HStack gap={2}>
-          <Text fontSize="sm">{t('room.playerStats.score')}</Text>
+          <Text fontSize="sm">{scoreLabel}</Text>
           <Badge>{props.player.score}</Badge>
         </HStack>
         <HStack gap={2}>
-          <Text fontSize="sm">{t('room.playerStats.status')}</Text>
-          <Badge>
-            {myStatus ? t(getRoundPlayerStatusTextKey(myStatus)) : t('room.playerStats.dash')}
-          </Badge>
+          <Text fontSize="sm">{statusLabel}</Text>
+          <Badge>{formatStatus(myStatus)}</Badge>
         </HStack>
       </VStack>
 
       <VStack align="flex-end" textAlign="right" gap={1}>
-        <Text fontWeight="semibold">{t('room.playerStats.opponent')}</Text>
+        <Text fontWeight="semibold">{opponentName}</Text>
         <HStack gap={2}>
-          <Text fontSize="sm">{t('room.playerStats.score')}</Text>
-          <Badge>{props.opponent ? props.opponent.score : t('room.playerStats.dash')}</Badge>
+          <Text fontSize="sm">{scoreLabel}</Text>
+          <Badge>{opponentScore}</Badge>
         </HStack>
         <HStack gap={2}>
-          <Text fontSize="sm">{t('room.playerStats.status')}</Text>
-          <Badge>
-            {props.opponent
-              ? opponentStatus
-                ? t(getRoundPlayerStatusTextKey(opponentStatus))
-                : t('room.playerStats.dash')
-              : t('room.playerStats.dash')}
-          </Badge>
+          <Text fontSize="sm">{statusLabel}</Text>
+          <Badge>{formatStatus(opponentStatus)}</Badge>
         </HStack>
       </VStack>
     </HStack>
   );
 }
 
-function getRoundPlayerStatusTextKey(status: RoundPlayerStatus): string {
-  switch (status) {
-    case 'PLAYING':
-      return 'room.playerStats.statusPlaying';
-    case 'WON':
-      return 'room.playerStats.statusWon';
-    case 'LOST':
-      return 'room.playerStats.statusLost';
-    case 'READY':
-      return 'room.playerStats.statusReady';
-    default: {
-      return 'room.playerStats.statusUnknown';
-    }
-  }
-}
+const roundPlayerStatusTextKey = {
+  PLAYING: 'room.playerStats.statusPlaying',
+  WON: 'room.playerStats.statusWon',
+  LOST: 'room.playerStats.statusLost',
+  READY: 'room.playerStats.statusReady',
+} satisfies Record<RoundPlayerStatus, string>;
