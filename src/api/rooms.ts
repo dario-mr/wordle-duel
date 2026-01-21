@@ -22,8 +22,8 @@ export function joinRoom(roomId: string): Promise<RoomDto> {
   });
 }
 
-export function getRoom(roomId: string): Promise<RoomDto> {
-  return fetchJson(roomUrl(roomId));
+export function getRoom(roomId: string, init?: RequestInit): Promise<RoomDto> {
+  return fetchJson(roomUrl(roomId), init);
 }
 
 export function submitGuess(args: {

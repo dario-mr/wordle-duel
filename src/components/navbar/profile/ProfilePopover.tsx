@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { beginGoogleLogin, getCurrentUser, logout, subscribeCurrentUser } from '../../../api/auth';
 import { getErrorMessage } from '../../../api/errors';
-import { useMeQuery, meQueryKey } from '../../../query/meQueries';
+import { meQueryKey, useMeQuery } from '../../../query/meQueries';
 import { useSingleToast } from '../../../hooks/useSingleToast';
 import type { UiLocale } from '../../../i18n/resources';
 import { useLocaleStore } from '../../../state/localeStore';
@@ -40,7 +40,7 @@ export function ProfilePopover() {
   const themeMode = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
 
-  const { data: meProfile } = useMeQuery({ enabled: Boolean(me) });
+  const { data: meProfile } = useMeQuery({ enabled: Boolean(me) && !logoutPending });
 
   const profileTitle = meProfile?.fullName ?? t('profile.title');
 
@@ -75,7 +75,6 @@ export function ProfilePopover() {
         queryClient.removeQueries({ queryKey: ['room'], exact: false });
 
         await queryClient.cancelQueries({ queryKey: meQueryKey(), exact: true });
-        queryClient.removeQueries({ queryKey: meQueryKey(), exact: true });
 
         sessionStorage.removeItem(STORAGE_KEYS.authReturnTo);
 

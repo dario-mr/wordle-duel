@@ -21,11 +21,11 @@ export function useRoomQuery(roomId: string | undefined) {
   return useQuery({
     queryKey: roomId ? roomQueryKey(roomId) : ['room', 'missing'],
     enabled: !!roomId,
-    queryFn: () => {
+    queryFn: ({ signal }) => {
       if (!roomId) {
         throw new Error(i18n.t('errors.missingRoomId'));
       }
-      return getRoom(roomId);
+      return getRoom(roomId, { signal });
     },
   });
 }

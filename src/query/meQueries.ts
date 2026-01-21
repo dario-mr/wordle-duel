@@ -8,7 +8,7 @@ export function meQueryKey() {
 export function useMeQuery(args: { enabled: boolean }) {
   return useQuery({
     queryKey: meQueryKey(),
-    queryFn: getMe,
+    queryFn: ({ signal }) => getMe({ signal }),
     enabled: args.enabled,
   });
 }

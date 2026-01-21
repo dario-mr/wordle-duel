@@ -81,7 +81,11 @@ async function doRefresh(): Promise<string | null> {
     },
   });
 
-  if (wasMissingCsrfCookie && res.status === 403 && getXsrfTokenFromCookie()) {
+  const gotCsrfCookie = Boolean(getXsrfTokenFromCookie());
+  const shouldRetryAfterCsrfCookie =
+    wasMissingCsrfCookie && gotCsrfCookie && (res.status === 401 || res.status === 403);
+
+  if (shouldRetryAfterCsrfCookie) {
     res = await apiFetch(backendUrl('/auth/refresh'), {
       method: 'POST',
       headers: {
