@@ -1,8 +1,9 @@
-import { Button, Code, Stack, Text } from '@chakra-ui/react';
+import { Code, Stack, Text } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import type { RoomDto, RoundDto, RoundPlayerStatus } from '../../../api/types';
 import { getErrorMessage } from '../../../api/errors';
 import { ErrorAlert } from '../../common/ErrorAlert';
+import { AccentButton } from '../../common/BrandButton.tsx';
 
 export function RoundStatusPanel(props: {
   room: RoomDto;
@@ -37,8 +38,7 @@ export function RoundStatusPanel(props: {
           )}
 
           {props.myRoundStatus !== 'READY' && (
-            <Button
-              colorPalette="teal"
+            <AccentButton
               loading={props.isReadyPending}
               disabled={props.isReadyPending}
               onClick={() => {
@@ -46,7 +46,7 @@ export function RoundStatusPanel(props: {
               }}
             >
               {t('room.round.readyForNextRound')}
-            </Button>
+            </AccentButton>
           )}
 
           {props.readyError && (

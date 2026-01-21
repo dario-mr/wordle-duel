@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { beginGoogleLogin, getCurrentUser, logout, subscribeCurrentUser } from '../../../api/auth';
 import { getErrorMessage } from '../../../api/errors';
+import { useMeQuery, meQueryKey } from '../../../query/meQueries';
 import { useSingleToast } from '../../../hooks/useSingleToast';
 import type { UiLocale } from '../../../i18n/resources';
 import { useLocaleStore } from '../../../state/localeStore';
@@ -39,7 +40,9 @@ export function ProfilePopover() {
   const themeMode = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
 
-  const profileTitle = me?.name ?? t('profile.title');
+  const { data: meProfile } = useMeQuery({ enabled: Boolean(me) });
+
+  const profileTitle = meProfile?.fullName ?? t('profile.title');
 
   const handleOpenChange = (details: { open: boolean }) => {
     setOpen(details.open);
@@ -71,6 +74,9 @@ export function ProfilePopover() {
         await queryClient.cancelQueries({ queryKey: ['room'], exact: false });
         queryClient.removeQueries({ queryKey: ['room'], exact: false });
 
+        await queryClient.cancelQueries({ queryKey: meQueryKey(), exact: true });
+        queryClient.removeQueries({ queryKey: meQueryKey(), exact: true });
+
         sessionStorage.removeItem(STORAGE_KEYS.authReturnTo);
 
         void navigate('/', { replace: true });
@@ -99,7 +105,7 @@ export function ProfilePopover() {
       positioning={{ placement: 'bottom-end' }}
     >
       <Popover.Trigger asChild>
-        <ProfileTriggerButton />
+        <ProfileTriggerButton pictureUrl={meProfile?.pictureUrl} />
       </Popover.Trigger>
 
       <Popover.Positioner>

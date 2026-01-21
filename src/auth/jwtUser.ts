@@ -3,13 +3,11 @@ import { jwtDecode } from 'jwt-decode';
 export interface JwtUser {
   id: string;
   email: string;
-  name: string;
   roles: string[];
 }
 
 interface AccessTokenClaims {
   sub: string;
-  name?: string;
   uid?: string;
   roles?: string[];
   exp?: number;
@@ -30,7 +28,6 @@ export function getUserFromAccessToken(token: string): JwtUser | null {
     return {
       id: claims.uid,
       email: claims.sub,
-      name: claims.name ?? claims.sub,
       roles: Array.isArray(claims.roles) ? claims.roles : [],
     };
   } catch {

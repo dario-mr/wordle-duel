@@ -85,10 +85,10 @@ const config = defineConfig({
             value: { _light: '{colors.blue.600}', _dark: '{colors.dracula.cyan}' },
           },
           primary: {
-            value: { _light: '{colors.teal.400}', _dark: '{colors.dracula.primary}' },
+            value: { _light: '{colors.blue.400}', _dark: '{colors.dracula.primary}' },
           },
           accent: {
-            value: { _light: '{colors.blue.400}', _dark: '{colors.dracula.accent}' },
+            value: { _light: '{colors.teal.400}', _dark: '{colors.dracula.accent}' },
           },
         },
         border: {

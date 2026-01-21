@@ -86,3 +86,10 @@ export interface RoomEventDto {
   type: RoomEventType;
   payload: unknown;
 }
+
+export interface UserMeDto {
+  id: string;
+  fullName: string;
+  displayName: string;
+  pictureUrl: string | null;
+}
