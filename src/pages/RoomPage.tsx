@@ -117,7 +117,7 @@ export function RoomPage() {
       type: 'warning',
       title: t('room.guess.rejectedTitle'),
       description: message,
-      duration: 3000,
+      duration: 1500,
       closable: true,
     });
   };

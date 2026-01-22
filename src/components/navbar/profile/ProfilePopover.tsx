@@ -40,9 +40,12 @@ export function ProfilePopover() {
   const themeMode = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
 
-  const { data: meProfile } = useMeQuery({ enabled: Boolean(me) && !logoutPending });
+  const isLoggedIn = Boolean(me) && !logoutPending;
+  const { data: meProfile } = useMeQuery({ enabled: isLoggedIn });
 
-  const profileTitle = meProfile?.fullName ?? t('profile.title');
+  const profileTitle = isLoggedIn
+    ? (meProfile?.fullName ?? t('profile.title'))
+    : t('profile.title');
 
   const handleOpenChange = (details: { open: boolean }) => {
     setOpen(details.open);
@@ -66,6 +69,7 @@ export function ProfilePopover() {
     }
 
     setLogoutPending(true);
+    setMe(null);
 
     const runLogout = async () => {
       try {
@@ -75,13 +79,15 @@ export function ProfilePopover() {
         queryClient.removeQueries({ queryKey: ['room'], exact: false });
 
         await queryClient.cancelQueries({ queryKey: meQueryKey(), exact: true });
+        queryClient.removeQueries({ queryKey: meQueryKey(), exact: true });
 
         sessionStorage.removeItem(STORAGE_KEYS.authReturnTo);
 
         void navigate('/', { replace: true });
 
-        await logout(); // clears token + notifies listeners
+        await logout(); // clears access token + notifies listeners
       } catch (err: unknown) {
+        setMe(getCurrentUser());
         showToast({
           type: 'warning',
           title: t('toasts.logoutFailed'),
@@ -104,7 +110,7 @@ export function ProfilePopover() {
       positioning={{ placement: 'bottom-end' }}
     >
       <Popover.Trigger asChild>
-        <ProfileTriggerButton pictureUrl={meProfile?.pictureUrl} />
+        <ProfileTriggerButton pictureUrl={isLoggedIn ? meProfile?.pictureUrl : undefined} />
       </Popover.Trigger>
 
       <Popover.Positioner>
