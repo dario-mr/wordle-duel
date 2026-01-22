@@ -3,4 +3,3 @@
 - maybe fixed, to check on prod:
   - unexpected logged out, then even homepage was prompting a login
   - Sometimes on refresh I see the login page for a moment
-- Improve reveal animation, also add typing and win animation

@@ -9,35 +9,68 @@ export interface Cell {
   status?: GuessLetterStatus;
 }
 
-const DEFAULT_GUESS_REVEAL_DURATION_MS = 550;
-const DEFAULT_GUESS_REVEAL_STAGGER_MS = 325;
+const REVEAL_DURATION_MS = 500;
+const REVEAL_STAGGER_MS = 325;
 
-const letterReveal = keyframes`
+const TYPING_POP_DURATION_MS = 120;
+
+const typingPop = keyframes`
   0% {
-    opacity: 0;
-    transform: perspective(600px) rotateX(90deg)
+    transform: scale(1);
   }
-  40% {
-    opacity: 1;
+  55% {
+    transform: scale(1.18);
   }
   100% {
-    opacity: 1;
-    transform: perspective(600px) rotateX(0deg);
+    transform: scale(1);
   }
 `;
+
+const cellFlip = keyframes`
+  0% {
+    transform: rotateX(0deg);
+  }
+  100% {
+    transform: rotateX(180deg);
+  }
+`;
+
+const TILE_SIZE = '3.25rem';
+
+const tileProps = {
+  width: 'full',
+  height: 'full',
+  borderWidth: '1px',
+  bg: 'transparent',
+  color: 'inherit',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontWeight: 'bold',
+  fontSize: '2xl',
+  borderRadius: 'sm',
+  overflow: 'hidden',
+} as const;
+
+const faceProps = {
+  width: 'full',
+  height: 'full',
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backfaceVisibility: 'hidden',
+} as const;
 
 export function GuessRow({
   word,
   letters: cells,
   animateReveal,
-  revealDurationMs = DEFAULT_GUESS_REVEAL_DURATION_MS,
-  revealStaggerMs = DEFAULT_GUESS_REVEAL_STAGGER_MS,
 }: {
   word: string;
   letters?: Cell[];
   animateReveal?: boolean;
-  revealDurationMs?: number;
-  revealStaggerMs?: number;
 }) {
   const letters: Cell[] =
     cells?.length === WORD_LENGTH
@@ -58,8 +91,8 @@ export function GuessRow({
           letter={l.letter}
           status={l.status}
           animateReveal={shouldAnimateReveal}
-          revealDelayMs={idx * revealStaggerMs}
-          revealDurationMs={revealDurationMs}
+          revealDelayMs={idx * REVEAL_STAGGER_MS}
+          revealDurationMs={REVEAL_DURATION_MS}
         />
       ))}
     </HStack>
@@ -79,58 +112,53 @@ function LetterCell({
   revealDelayMs: number;
   revealDurationMs: number;
 }) {
-  const shouldAnimate = Boolean(animateReveal && status);
   const bg = status ? getLetterColorByStatus(status) : 'transparent';
-  const animation = shouldAnimate
-    ? `${letterReveal} ${String(revealDurationMs)}ms ease-out forwards`
+  const trimmedLetter = letter.trim();
+
+  const shouldAnimateTyping = !status && trimmedLetter.length > 0;
+  const typingAnimation = shouldAnimateTyping
+    ? `${typingPop} ${String(TYPING_POP_DURATION_MS)}ms ease-out`
     : undefined;
-  const animationDelay = shouldAnimate ? `${String(revealDelayMs)}ms` : undefined;
+
+  const shouldAnimateRevealCell = Boolean(animateReveal && status);
+  const revealAnimation = shouldAnimateRevealCell
+    ? `${cellFlip} ${String(revealDurationMs)}ms ease-out forwards`
+    : undefined;
+  const revealAnimationDelay = shouldAnimateRevealCell ? `${String(revealDelayMs)}ms` : undefined;
+
+  // If there is a status, but we're not animating, show the "back" face.
+  const finalTransform = status ? 'rotateX(180deg)' : 'rotateX(0deg)';
 
   return (
-    <Box
-      boxSize="3.25rem"
-      borderWidth="1px"
-      bg="transparent"
-      color="inherit"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      fontWeight="bold"
-      fontSize="2xl"
-      borderRadius="sm"
-      overflow="hidden"
-      position="relative"
-    >
+    <Box boxSize={TILE_SIZE} position="relative" perspective="600px">
       <Box
-        width="full"
-        height="full"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        position="relative"
-        zIndex={2}
+        key={status ? 'revealed' : letter}
+        {...tileProps}
+        willChange={typingAnimation ? 'transform' : undefined}
+        animation={typingAnimation}
       >
-        {letter}
-      </Box>
-
-      {status && (
         <Box
-          aria-hidden
           width="full"
           height="full"
-          position="absolute"
-          inset={0}
-          zIndex={1}
-          bg={bg}
-          backfaceVisibility="hidden"
-          transformOrigin="center"
+          position="relative"
           transformStyle="preserve-3d"
-          willChange={shouldAnimate ? 'transform, opacity' : undefined}
-          opacity={shouldAnimate ? 0 : 1}
-          animation={animation}
-          animationDelay={animationDelay}
-        />
-      )}
+          transformOrigin="center"
+          willChange={shouldAnimateRevealCell ? 'transform' : undefined}
+          transform={shouldAnimateRevealCell ? undefined : finalTransform}
+          animation={revealAnimation}
+          animationDelay={revealAnimationDelay}
+        >
+          {/* Front face (pre-reveal) */}
+          <Box {...faceProps} bg="transparent">
+            {letter}
+          </Box>
+
+          {/* Back face (revealed) */}
+          <Box {...faceProps} bg={bg} transform="rotateX(180deg)">
+            {letter}
+          </Box>
+        </Box>
+      </Box>
     </Box>
   );
 }
