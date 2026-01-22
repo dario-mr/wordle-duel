@@ -20,6 +20,8 @@ export function RoundStatusPanel(props: {
   }
 
   const endedRound = props.endedRound;
+  const currentRound = props.room.currentRound;
+  const solution = currentRound?.solution;
 
   return (
     <Stack gap={2} align="center">
@@ -28,15 +30,16 @@ export function RoundStatusPanel(props: {
         <Text textAlign="center">{t(getEndedRoundTextKey(props.myRoundStatus))}</Text>
       )}
 
+      {/* show solution as soon as player loses */}
+      {solution && props.myRoundStatus === 'LOST' && (
+        <Text fontSize="sm">
+          {t('room.round.solution')} <Code>{solution}</Code>
+        </Text>
+      )}
+
       {/* ended round panel */}
       {endedRound && (
         <Stack gap={2} align="center">
-          {endedRound.solution && props.myRoundStatus === 'LOST' && (
-            <Text fontSize="sm">
-              {t('room.round.solution')} <Code>{endedRound.solution}</Code>
-            </Text>
-          )}
-
           {props.myRoundStatus !== 'READY' && (
             <AccentButton
               loading={props.isReadyPending}
