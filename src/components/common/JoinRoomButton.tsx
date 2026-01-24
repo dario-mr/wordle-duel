@@ -19,7 +19,7 @@ export function JoinRoomButton(props: {
       type: 'error',
       title: t('toasts.joinRoomFailed'),
       description: message,
-      duration: 3000,
+      duration: 2000,
       closable: true,
     });
   };

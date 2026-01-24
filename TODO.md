@@ -1,6 +1,4 @@
 - improve `useRoomTopic` to use ws payload, instead of just invalidating room query
 - unit tests wherever possible
-- maybe fixed, to check on prod:
-  - unexpected logged out, then even homepage was prompting a login
-  - Sometimes on refresh I see the login page for a moment
 - map BE error messages in FE so that they can be localized
+- room history?

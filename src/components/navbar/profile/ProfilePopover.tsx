@@ -92,7 +92,7 @@ export function ProfilePopover() {
           type: 'warning',
           title: t('toasts.logoutFailed'),
           description: getErrorMessage(err),
-          duration: 3000,
+          duration: 2000,
           closable: true,
         });
       } finally {
