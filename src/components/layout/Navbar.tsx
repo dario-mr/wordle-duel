@@ -1,4 +1,4 @@
-import { Box, Flex, Heading } from '@chakra-ui/react';
+import { Box, Flex, Heading, Link } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ProfilePopover } from '../navbar/profile/ProfilePopover.tsx';
@@ -10,14 +10,16 @@ export function Navbar() {
   return (
     <Box as="header" borderBottomWidth="1px">
       <Flex maxW="container.md" mx="auto" py={2} px={4} align="center" justify="space-between">
-        <Heading
-          size="md"
-          cursor="pointer"
+        <Link
+          href="/"
           _hover={{ textDecoration: 'underline' }}
-          onClick={() => void navigate('/')}
+          onClick={(e) => {
+            e.preventDefault();
+            void navigate('/');
+          }}
         >
-          {t('app.name')}
-        </Heading>
+          <Heading size="md">{t('app.name')}</Heading>
+        </Link>
 
         <ProfilePopover />
       </Flex>

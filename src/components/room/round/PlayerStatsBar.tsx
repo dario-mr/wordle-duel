@@ -1,6 +1,7 @@
 import { Badge, HStack, Text, VStack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import type { PlayerDto, RoomDto, RoundPlayerStatus } from '../../../api/types';
+import { roundPlayerStatusTextKey } from '../../../utils/roomStatusText';
 
 export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto; room: RoomDto }) {
   const { t } = useTranslation();
@@ -48,10 +49,3 @@ export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto;
     </HStack>
   );
 }
-
-const roundPlayerStatusTextKey = {
-  PLAYING: 'room.playerStats.statusPlaying',
-  WON: 'room.playerStats.statusWon',
-  LOST: 'room.playerStats.statusLost',
-  READY: 'room.playerStats.statusReady',
-} satisfies Record<RoundPlayerStatus, string>;

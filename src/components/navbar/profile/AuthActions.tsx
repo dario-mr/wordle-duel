@@ -1,4 +1,4 @@
-import { Box, Stack } from '@chakra-ui/react';
+import { Box, Separator, Stack, VStack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { AccentButton, GoogleLoginButton } from '../../common/BrandButton';
 import type { JwtUser } from '../../../auth/jwtUser.ts';
@@ -20,9 +20,12 @@ export function AuthActions({ me, logoutPending, onLogin, onLogout }: Props) {
         {!isAuthenticated && <GoogleLoginButton onClick={onLogin} />}
 
         {isAuthenticated && (
-          <AccentButton loading={logoutPending} disabled={logoutPending} onClick={onLogout}>
-            {t('profile.logout')}
-          </AccentButton>
+          <VStack w="full">
+            <Separator w="full" mb={3} />
+            <AccentButton loading={logoutPending} disabled={logoutPending} onClick={onLogout}>
+              {t('profile.logout')}
+            </AccentButton>
+          </VStack>
         )}
       </Stack>
     </Box>

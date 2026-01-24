@@ -10,11 +10,22 @@ import {
   type SubmitGuessResponse,
   WdsApiError,
 } from '../api/types';
-import { createRoom, getRoom, joinRoom, readyForNextRound, submitGuess } from '../api/rooms';
+import {
+  createRoom,
+  getRoom,
+  joinRoom,
+  listMyRooms,
+  readyForNextRound,
+  submitGuess,
+} from '../api/rooms';
 import { i18n } from '../i18n';
 
 export function roomQueryKey(roomId: string) {
   return ['room', roomId] as const;
+}
+
+export function myRoomsQueryKey() {
+  return ['myRooms'] as const;
 }
 
 export function useRoomQuery(roomId: string | undefined) {
@@ -27,6 +38,14 @@ export function useRoomQuery(roomId: string | undefined) {
       }
       return getRoom(roomId, { signal });
     },
+  });
+}
+
+export function useMyRoomsQuery(args: { enabled: boolean }) {
+  return useQuery({
+    queryKey: myRoomsQueryKey(),
+    queryFn: ({ signal }) => listMyRooms({ signal }),
+    enabled: args.enabled,
   });
 }
 

@@ -41,6 +41,11 @@ export default {
     invalidLinkTitle: 'Link stanza non valido',
     invalidLinkMessage: "ID stanza mancante nell'URL.",
     errorTitle: 'Errore stanza',
+    status: {
+      waitingForPlayers: 'IN ATTESA',
+      inProgress: 'LIVE',
+      closed: 'CHIUSA',
+    },
     share: {
       waitingTitle: "In attesa dell'avversario...",
       shareHint: 'Condividi questo link con un amico per farlo entrare.',
@@ -95,8 +100,13 @@ export default {
     loadingPlayerId: '...',
     uiLanguage: 'Lingua',
     uiLanguageAria: 'Lingua',
+    myRooms: 'Le mie stanze',
     loginWithGoogle: 'Accedi con Google',
     logout: 'Esci',
+  },
+  myRooms: {
+    title: 'Le mie stanze',
+    empty: 'Nessuna stanza',
   },
   login: {
     title: 'Accesso richiesto',

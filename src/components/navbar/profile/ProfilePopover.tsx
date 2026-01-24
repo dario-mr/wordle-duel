@@ -1,4 +1,4 @@
-import { Popover, Stack } from '@chakra-ui/react';
+import { Grid, Popover, Separator, Stack, Text } from '@chakra-ui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ChangeEvent } from 'react';
 import { useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import { AuthActions } from './AuthActions';
 import { LanguageSelect } from './LanguageSelect';
 import { ProfileTriggerButton } from './ProfileTriggerButton';
 import { ThemeSelect } from './ThemeSelect';
+import { PrimaryButton } from '../../common/BrandButton.tsx';
 
 export function ProfilePopover() {
   const { t } = useTranslation();
@@ -119,13 +120,39 @@ export function ProfilePopover() {
           <Popover.Header>
             <Popover.Title fontSize="lg" fontWeight="semibold">
               {profileTitle}
+              <Separator mt={3} w="full" />
             </Popover.Title>
           </Popover.Header>
 
           <Popover.Body>
             <Stack gap={4} align="start">
-              <LanguageSelect locale={locale} onChange={handleLocaleChange} />
-              <ThemeSelect themeMode={themeMode} onChange={handleThemeChange} />
+              <Grid
+                w="full"
+                templateColumns="auto 1fr"
+                alignItems="center"
+                columnGap={4}
+                rowGap={3}
+              >
+                <Text>{t('profile.uiLanguage')}</Text>
+                <LanguageSelect locale={locale} onChange={handleLocaleChange} />
+
+                <Text>{t('common.theme')}</Text>
+                <ThemeSelect themeMode={themeMode} onChange={handleThemeChange} />
+              </Grid>
+
+              {isLoggedIn && (
+                <PrimaryButton
+                  w="full"
+                  justifyContent="flex-start"
+                  onClick={() => {
+                    setOpen(false);
+                    void navigate('/my-rooms');
+                  }}
+                >
+                  {t('profile.myRooms')}
+                </PrimaryButton>
+              )}
+
               <AuthActions
                 me={me}
                 logoutPending={logoutPending}

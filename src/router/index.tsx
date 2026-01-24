@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AppLayout } from '../components/layout/AppLayout';
 import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
+import { MyRoomsPage } from '../pages/MyRoomsPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { RoomPage } from '../pages/RoomPage';
 
@@ -16,6 +17,7 @@ const router = createBrowserRouter(
       children: [
         { index: true, element: <HomePage /> },
         { path: 'login', element: <LoginPage /> },
+        { path: 'my-rooms', element: <MyRoomsPage /> },
         { path: 'rooms/:roomId', element: <RoomPage /> },
         { path: '*', element: <NotFoundPage /> },
       ],

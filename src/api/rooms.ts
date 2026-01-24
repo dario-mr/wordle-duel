@@ -26,6 +26,10 @@ export function getRoom(roomId: string, init?: RequestInit): Promise<RoomDto> {
   return fetchJson(roomUrl(roomId), init);
 }
 
+export function listMyRooms(init?: RequestInit): Promise<RoomDto[]> {
+  return fetchJson(apiUrl('/rooms'), init);
+}
+
 export function submitGuess(args: {
   roomId: string;
   body: SubmitGuessRequest;

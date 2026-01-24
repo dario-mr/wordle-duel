@@ -1,6 +1,7 @@
 import { Stack, Text } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import type { PlayerDto, RoomDto, RoundStatus } from '../../../api/types';
+import type { PlayerDto, RoomDto } from '../../../api/types';
+import { roundStatusTextKey } from '../../../utils/roomStatusText';
 import { PlayerStatsBar } from './PlayerStatsBar';
 
 export function RoundPanel(props: { player: PlayerDto; opponent?: PlayerDto; room: RoomDto }) {
@@ -9,15 +10,9 @@ export function RoundPanel(props: { player: PlayerDto; opponent?: PlayerDto; roo
   const roundNumberText =
     typeof round?.roundNumber === 'number' ? String(round.roundNumber) : t('room.playerStats.dash');
 
-  const roundStatusLabel = (roundStatus: RoundStatus): string => {
-    switch (roundStatus) {
-      case 'PLAYING':
-        return t('room.round.statusPlaying');
-      case 'ENDED':
-        return t('room.round.statusEnded');
-    }
-  };
-  const roundStatusSuffix = round?.roundStatus ? `(${roundStatusLabel(round.roundStatus)})` : '';
+  const roundStatusSuffix = round?.roundStatus
+    ? `(${t(roundStatusTextKey[round.roundStatus])})`
+    : '';
 
   return (
     <Stack>

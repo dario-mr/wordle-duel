@@ -14,7 +14,7 @@ export function Card(props: CardProps) {
     <Box
       p={4}
       borderWidth="1px"
-      borderLeftWidth="4px"
+      borderLeftWidth="3px"
       borderRadius="xl"
       bg="bg.card"
       borderLeftColor={borderLeftColor}

@@ -41,6 +41,11 @@ export default {
     invalidLinkTitle: 'Invalid room link',
     invalidLinkMessage: 'Missing room id in URL.',
     errorTitle: 'Room error',
+    status: {
+      waitingForPlayers: 'WAITING',
+      inProgress: 'LIVE',
+      closed: 'CLOSED',
+    },
     share: {
       waitingTitle: 'Waiting for opponent...',
       shareHint: 'Share this room link with a friend to join.',
@@ -95,8 +100,13 @@ export default {
     loadingPlayerId: '...',
     uiLanguage: 'Language',
     uiLanguageAria: 'Language',
+    myRooms: 'My rooms',
     loginWithGoogle: 'Sign in with Google',
     logout: 'Logout',
+  },
+  myRooms: {
+    title: 'My rooms',
+    empty: 'No rooms yet',
   },
   login: {
     title: 'Login required',
