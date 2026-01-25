@@ -2,11 +2,13 @@ import { Box, Stack, Text } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PlayerDto, RoomDto, RoundPlayerStatus } from '../../api/types';
-import { roomStatusTextKey, roundPlayerStatusTextKey } from '../../utils/roomStatusText';
+import {
+  roomStatusTextKey,
+  roundPlayerStatusTextKey,
+  roundStatusTextKey,
+} from '../../utils/roomStatusText';
 import { Card } from '../common/Card';
-import { getRoomStatusStyle, getRoundPlayerIcon } from './roomVisuals';
-
-const roomStatusTextKeyByStatus: Partial<Record<string, string>> = roomStatusTextKey;
+import { getRoundPlayerIcon, roomStatusStyleByStatus } from './roomVisuals';
 
 interface MyRoomCardProps {
   room: RoomDto;
@@ -44,23 +46,26 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
   const meScore = mePlayer?.score ?? 0;
   const opponentScore = opponent?.score ?? 0;
 
+  const roomStatusLabel = t(roomStatusTextKey[room.status]);
+  const roomStatusStyle = roomStatusStyleByStatus[room.status];
+
   const roundNumber = room.currentRound?.roundNumber;
+  const roundStatusLabel = room.currentRound
+    ? t(roundStatusTextKey[room.currentRound.roundStatus])
+    : '';
 
   const myRoundStatusRaw = room.currentRound?.statusByPlayerId[myPlayerId];
   const opponentRoundStatusRaw = opponent?.id
     ? room.currentRound?.statusByPlayerId[opponent.id]
     : undefined;
 
-  const statusLabel = t(roomStatusTextKeyByStatus[room.status] ?? 'room.playerStats.statusUnknown');
-
-  const subtitleParts: string[] = [statusLabel];
-  if (typeof roundNumber === 'number') {
+  const subtitleParts: string[] = [];
+  if (roundNumber) {
     subtitleParts.push(t('room.round.title', { roundNumber: String(roundNumber) }));
     subtitleParts.push(formatRoomLanguage(room.language));
+    subtitleParts.push(roundStatusLabel);
   }
   const subtitle = subtitleParts.join(' • ');
-
-  const statusStyle = getRoomStatusStyle(room.status);
 
   const meIcon = getRoundPlayerIcon(myRoundStatusRaw);
   const opponentIcon = getRoundPlayerIcon(opponentRoundStatusRaw);
@@ -73,7 +78,7 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
   return (
     <Card
       as="button"
-      borderLeftColor={statusStyle.borderLeftColor}
+      borderLeftColor={roomStatusStyle.borderLeftColor}
       textAlign="left"
       cursor="pointer"
       _hover={{ boxShadow: 'md' }}
@@ -94,14 +99,14 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
             px={3}
             py={1}
             borderRadius="full"
-            bg={statusStyle.pillBg}
-            color={statusStyle.pillColor}
+            bg={roomStatusStyle.pillBg}
+            color={roomStatusStyle.pillColor}
             fontWeight="bold"
             letterSpacing="wider"
             fontSize="xs"
             flexShrink={0}
           >
-            {statusLabel}
+            {roomStatusLabel}
           </Box>
         </Box>
 

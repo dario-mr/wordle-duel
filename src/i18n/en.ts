@@ -121,6 +121,6 @@ export default {
     logoutFailed: 'Logout failed',
   },
   roomLanguage: {
-    it: 'Italiano (IT)',
+    it: 'Italian',
   },
 } as const;
