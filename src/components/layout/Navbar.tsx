@@ -11,7 +11,7 @@ export function Navbar() {
     <Box as="header" borderBottomWidth="1px">
       <Flex maxW="container.md" mx="auto" py={2} px={4} align="center" justify="space-between">
         <Link
-          href="/"
+          href={import.meta.env.BASE_URL}
           _hover={{ textDecoration: 'underline' }}
           onClick={(e) => {
             e.preventDefault();

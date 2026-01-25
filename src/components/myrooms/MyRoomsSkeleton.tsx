@@ -11,8 +11,8 @@ export function MyRoomsSkeleton() {
 
       <VStack gap={3} align="stretch">
         {Array.from({ length: cards }).map((_, idx) => (
-          <Box key={idx} borderRadius="xl" borderWidth="1px" px={4} py={3}>
-            <Stack gap={2}>
+          <Box key={idx} borderRadius="xl" borderWidth="1px" px={4} py={5}>
+            <Stack gap={3}>
               <Box display="flex" justifyContent="space-between" alignItems="center" gap={3}>
                 <Skeleton height="20px" width="160px" borderRadius="md" />
                 <Skeleton height="20px" width="64px" borderRadius="full" />
