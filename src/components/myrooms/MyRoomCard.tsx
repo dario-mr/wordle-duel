@@ -72,8 +72,9 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
 
   return (
     <Card
+      borderLeftWidth="default"
+      borderLeftColor="default"
       as="button"
-      borderLeftColor={roomStatusStyle.borderLeftColor}
       textAlign="left"
       cursor="pointer"
       _hover={{ boxShadow: 'md' }}

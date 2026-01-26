@@ -35,7 +35,7 @@ const ROUND_STATUS_STYLE_BY_STATUS = {
 const ROUND_PLAYER_ICON_BY_STATUS = {
   PLAYING: { bg: 'blue.600', fg: 'white', label: '▶' },
   READY: { bg: 'green.600', fg: 'white', label: '✓' },
-  WON: { bg: 'green.600', fg: 'white', label: '✓' },
+  WON: { bg: 'yellow.500', fg: 'white', label: '★' },
   LOST: { bg: 'red.600', fg: 'white', label: '✕' },
 } satisfies Record<RoundPlayerStatus, RoundPlayerIcon>;
 
