@@ -1,14 +1,12 @@
 import { Box, Stack, Text } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { PlayerDto, RoomDto, RoundPlayerStatus } from '../../api/types';
-import {
-  roomStatusTextKey,
-  roundPlayerStatusTextKey,
-  roundStatusTextKey,
-} from '../../utils/roomStatusText';
+import type { PlayerDto, RoomDto } from '../../api/types';
+import { roomStatusTextKey, roundStatusTextKey } from '../../utils/roomStatusText';
 import { Card } from '../common/Card';
-import { getRoundPlayerIcon, roomStatusStyleByStatus } from './roomVisuals';
+import { Pill } from '../common/Pill';
+import { RoundPlayerStatusIcon } from '../common/RoundPlayerStatusIcon';
+import { getRoundPlayerIcon, roomStatusStyleByStatus } from '../../utils/roomStatusVisuals';
 
 interface MyRoomCardProps {
   room: RoomDto;
@@ -19,9 +17,6 @@ interface MyRoomCardProps {
 export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
   const { t } = useTranslation();
   const DASH = t('room.playerStats.dash');
-
-  const formatPlayerStatus = (status: RoundPlayerStatus | undefined) =>
-    status ? t(roundPlayerStatusTextKey[status]) : DASH;
 
   const getPlayerLabel = (player: PlayerDto | undefined, fallback: string) => {
     return player?.displayName ?? fallback;
@@ -95,19 +90,9 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
             {meName} vs {opponentName}
           </Text>
 
-          <Box
-            px={3}
-            py={1}
-            borderRadius="full"
-            bg={roomStatusStyle.pillBg}
-            color={roomStatusStyle.pillColor}
-            fontWeight="bold"
-            letterSpacing="wider"
-            fontSize="xs"
-            flexShrink={0}
-          >
+          <Pill bg={roomStatusStyle.pillBg} color={roomStatusStyle.pillColor}>
             {roomStatusLabel}
-          </Box>
+          </Pill>
         </Box>
 
         <Text fontSize="sm" opacity="0.8" letterSpacing="widest">
@@ -120,21 +105,11 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
           {playerRows.map((row, index) => (
             <Box key={`${room.id}-${String(index)}`} w="full">
               <Box display="grid" gridTemplateColumns="auto 1fr auto" alignItems="center" gap={4}>
-                <Box
-                  boxSize={6}
-                  borderRadius="full"
+                <RoundPlayerStatusIcon
                   bg={row.icon.bg}
                   color={row.icon.fg}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  fontWeight="bold"
-                  title={formatPlayerStatus(
-                    index === 0 ? myRoundStatusRaw : opponentRoundStatusRaw,
-                  )}
-                >
-                  {row.icon.label}
-                </Box>
+                  label={row.icon.label}
+                />
 
                 <Text fontWeight="semibold" truncate>
                   {row.name}

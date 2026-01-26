@@ -1,4 +1,4 @@
-import { Separator, Stack } from '@chakra-ui/react';
+import { Stack } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -159,10 +159,8 @@ export function RoomPage() {
   }
 
   return (
-    <Stack gap={3}>
+    <Stack gap={4}>
       <RoundPanel player={me} opponent={opponent} room={room} />
-
-      <Separator />
 
       <PlayerBoard
         player={me}

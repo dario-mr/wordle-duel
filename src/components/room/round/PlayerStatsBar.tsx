@@ -1,7 +1,10 @@
-import { Badge, HStack, Text, VStack } from '@chakra-ui/react';
+import { Grid, HStack, Text, VStack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import type { PlayerDto, RoomDto, RoundPlayerStatus } from '../../../api/types';
 import { roundPlayerStatusTextKey } from '../../../utils/roomStatusText';
+import { Card } from '../../common/Card';
+import { RoundPlayerStatusIcon } from '../../common/RoundPlayerStatusIcon';
+import { getRoundPlayerIcon } from '../../../utils/roomStatusVisuals';
 
 export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto; room: RoomDto }) {
   const { t } = useTranslation();
@@ -11,8 +14,6 @@ export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto;
   const opponentStatus = props.opponent ? round?.statusByPlayerId[props.opponent.id] : undefined;
 
   const DASH = t('room.playerStats.dash');
-  const scoreLabel = t('room.playerStats.score');
-  const statusLabel = t('room.playerStats.status');
 
   const formatStatus = (status: RoundPlayerStatus | undefined) =>
     status ? t(roundPlayerStatusTextKey[status]) : DASH;
@@ -21,31 +22,46 @@ export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto;
   const opponentName = props.opponent?.displayName ?? t('room.playerStats.opponent');
   const opponentScore = props.opponent?.score ?? DASH;
 
-  return (
-    <HStack w="100%" justify="space-between" wrap="nowrap" gap={10}>
-      <VStack align="flex-start" gap={1}>
-        <Text fontWeight="semibold">{meName}</Text>
-        <HStack gap={2}>
-          <Text fontSize="sm">{scoreLabel}</Text>
-          <Badge>{props.player.score}</Badge>
-        </HStack>
-        <HStack gap={2}>
-          <Text fontSize="sm">{statusLabel}</Text>
-          <Badge>{formatStatus(myStatus)}</Badge>
-        </HStack>
-      </VStack>
+  const meIcon = getRoundPlayerIcon(myStatus);
+  const opponentIcon = getRoundPlayerIcon(opponentStatus);
 
-      <VStack align="flex-end" textAlign="right" gap={1}>
-        <Text fontWeight="semibold">{opponentName}</Text>
-        <HStack gap={2}>
-          <Text fontSize="sm">{scoreLabel}</Text>
-          <Badge>{opponentScore}</Badge>
+  return (
+    <Card borderLeftWidth="default" borderLeftColor="default" p={3}>
+      <Grid w="100%" templateColumns="1fr auto 1fr" columnGap={10} alignItems="center">
+        <VStack align="flex-start" gap={2} minW={0}>
+          <Text fontWeight="semibold">{meName}</Text>
+          <HStack gap={2} minW={0}>
+            <RoundPlayerStatusIcon bg={meIcon.bg} color={meIcon.fg} label={meIcon.label} />
+            <Text fontSize="sm" opacity="0.7" truncate>
+              {formatStatus(myStatus)}
+            </Text>
+          </HStack>
+        </VStack>
+
+        <HStack justify="center" wrap="nowrap" gap={2}>
+          <Text fontWeight="semibold" flexShrink={0}>
+            {props.player.score}
+          </Text>
+          <Text opacity="0.5">{DASH}</Text>
+          <Text fontWeight="semibold" flexShrink={0}>
+            {opponentScore}
+          </Text>
         </HStack>
-        <HStack gap={2}>
-          <Text fontSize="sm">{statusLabel}</Text>
-          <Badge>{formatStatus(opponentStatus)}</Badge>
-        </HStack>
-      </VStack>
-    </HStack>
+
+        <VStack align="flex-end" textAlign="right" gap={2} minW={0}>
+          <Text fontWeight="semibold">{opponentName}</Text>
+          <HStack gap={2} minW={0} justify="flex-end">
+            <RoundPlayerStatusIcon
+              bg={opponentIcon.bg}
+              color={opponentIcon.fg}
+              label={opponentIcon.label}
+            />
+            <Text fontSize="sm" opacity="0.7" truncate>
+              {formatStatus(opponentStatus)}
+            </Text>
+          </HStack>
+        </VStack>
+      </Grid>
+    </Card>
   );
 }
