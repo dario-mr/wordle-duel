@@ -1,4 +1,5 @@
-import { Box, HStack, Skeleton, VStack } from '@chakra-ui/react';
+import { Box, Grid, HStack, Skeleton, VStack } from '@chakra-ui/react';
+import { Card } from '../common/Card';
 
 export const RoomSkeleton = () => {
   const rows = 6;
@@ -6,27 +7,39 @@ export const RoomSkeleton = () => {
   const keySize = '3.25rem';
 
   return (
-    <VStack w="full" gap="5" align="stretch">
+    <VStack w="full" gap="4" align="stretch">
       {/* Title */}
       <Box>
-        <Skeleton height="20px" width="220px" mx="auto" borderRadius="md" />
+        <Skeleton height="20px" width="180px" mx="auto" borderRadius="md" />
       </Box>
       {/* Score / status row */}
-      <HStack justify="space-between" align="start">
-        {/* Left side (Me) */}
-        <VStack align="start" gap="2">
-          <Skeleton height="18px" width="50px" borderRadius="md" />
-          <Skeleton height="18px" width="70px" borderRadius="md" />
-          <Skeleton height="18px" width="100px" borderRadius="md" />
-        </VStack>
+      <Card
+        borderColor="border.muted"
+        bg="bg.mutedCard"
+        borderLeftWidth="default"
+        borderLeftColor="default"
+        p={3}
+      >
+        <Grid w="100%" templateColumns="1fr auto 1fr" columnGap={10} alignItems="center">
+          <VStack align="flex-start" gap={3} minW={0}>
+            <Skeleton height="20px" width="100px" borderRadius="md" />
+            <HStack gap={2} minW={0}>
+              <Skeleton boxSize="6" borderRadius="full" />
+              <Skeleton height="16px" width="50px" borderRadius="md" />
+            </HStack>
+          </VStack>
 
-        {/* Right side (Opponent) */}
-        <VStack align="end" gap="2">
-          <Skeleton height="18px" width="50px" borderRadius="md" />
-          <Skeleton height="18px" width="70px" borderRadius="md" />
-          <Skeleton height="18px" width="100px" borderRadius="md" />
-        </VStack>
-      </HStack>
+          <HStack justify="center" />
+
+          <VStack align="flex-end" textAlign="right" gap={3} minW={0}>
+            <Skeleton height="20px" width="100px" borderRadius="md" />
+            <HStack gap={2} minW={0} justify="flex-end">
+              <Skeleton boxSize="6" borderRadius="full" />
+              <Skeleton height="16px" width="50px" borderRadius="md" />
+            </HStack>
+          </VStack>
+        </Grid>
+      </Card>
 
       {/* Board */}
       <VStack align="center">

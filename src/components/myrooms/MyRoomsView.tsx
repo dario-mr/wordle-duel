@@ -21,7 +21,7 @@ export function MyRoomsView({ rooms, myPlayerId, onOpenRoom }: MyRoomsViewProps)
       {rooms.length === 0 ? (
         <Text textAlign="center">{t('myRooms.empty')}</Text>
       ) : (
-        <Stack gap={3}>
+        <Stack gap={4}>
           {rooms.map((room) => (
             <MyRoomCard
               key={room.id}

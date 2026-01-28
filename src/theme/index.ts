@@ -17,8 +17,10 @@ const config = defineConfig({
           red: { value: '#ff5555' },
           yellow: { value: '#f1fa8c' },
           card: { value: '#1A1D24' },
+          mutedCard: { value: '#2E3448' },
           primary: { value: '#1f8df8' },
           accent: { value: '#078f84' },
+          mutedWhite: { value: 'rgba(255,255,255,0.1)' },
         },
       },
     },
@@ -58,6 +60,9 @@ const config = defineConfig({
           card: {
             value: { _light: '{colors.green.50}', _dark: '{colors.dracula.card}' },
           },
+          mutedCard: {
+            value: { _light: '{colors.green.50}', _dark: '{colors.dracula.mutedCard}' },
+          },
         },
         fg: {
           DEFAULT: {
@@ -96,7 +101,7 @@ const config = defineConfig({
             value: { _light: '{colors.gray.200}', _dark: '{colors.dracula.currentLine}' },
           },
           muted: {
-            value: { _light: '{colors.gray.100}', _dark: '{colors.dracula.currentLine}' },
+            value: { _light: '{colors.gray.100}', _dark: '{colors.dracula.mutedWhite}' },
           },
           subtle: {
             value: { _light: '{colors.gray.50}', _dark: '{colors.dracula.background}' },

@@ -26,7 +26,13 @@ export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto;
   const opponentIcon = getRoundPlayerIcon(opponentStatus);
 
   return (
-    <Card borderLeftWidth="default" borderLeftColor="default" p={3}>
+    <Card
+      borderColor="border.muted"
+      bg="bg.mutedCard"
+      borderLeftWidth="default"
+      borderLeftColor="default"
+      p={3}
+    >
       <Grid w="100%" templateColumns="1fr auto 1fr" columnGap={10} alignItems="center">
         <VStack align="flex-start" gap={2} minW={0}>
           <Text fontWeight="semibold">{meName}</Text>
