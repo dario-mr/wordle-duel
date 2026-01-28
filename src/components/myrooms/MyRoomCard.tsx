@@ -1,4 +1,4 @@
-import { Box, Stack, Text } from '@chakra-ui/react';
+import { Box, HStack, Stack, Text } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PlayerDto, RoomDto } from '../../api/types';
@@ -6,12 +6,23 @@ import { roomStatusTextKey, roundStatusTextKey } from '../../utils/roomStatusTex
 import { Card } from '../common/Card';
 import { Pill } from '../common/Pill';
 import { RoundPlayerStatusIcon } from '../common/RoundPlayerStatusIcon';
-import { getRoundPlayerIcon, roomStatusStyleByStatus } from '../../utils/roomStatusVisuals';
+import {
+  getRoundPlayerIcon,
+  getRoundStatusStyle,
+  roomStatusStyleByStatus,
+} from '../../utils/roomStatusVisuals';
+import { RoomLanguageFlag } from './RoomLanguageFlag';
 
 interface MyRoomCardProps {
   room: RoomDto;
   myPlayerId: string;
   onOpen: () => void;
+}
+
+interface StatusPillModel {
+  label: string;
+  bg: string;
+  color: string;
 }
 
 export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
@@ -20,13 +31,6 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
 
   const getPlayerLabel = (player: PlayerDto | undefined, fallback: string) => {
     return player?.displayName ?? fallback;
-  };
-
-  const formatRoomLanguage = (language: string) => {
-    const normalized = language.trim().toLowerCase();
-    return t(`roomLanguage.${normalized}`, {
-      defaultValue: t(`locales.${normalized}`, { defaultValue: language }),
-    });
   };
 
   const { mePlayer, opponent } = useMemo(() => {
@@ -46,21 +50,27 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
 
   const roundNumber = room.currentRound?.roundNumber;
   const roundStatusLabel = room.currentRound
-    ? t(roundStatusTextKey[room.currentRound.roundStatus])
-    : '';
+    ? t(roundStatusTextKey[room.currentRound.roundStatus]).toUpperCase()
+    : DASH;
+  const roundStatusStyle = getRoundStatusStyle(room.currentRound?.roundStatus);
+
+  const statusPill: StatusPillModel =
+    room.status === 'IN_PROGRESS'
+      ? {
+          label: roundStatusLabel,
+          bg: roundStatusStyle.pillBg,
+          color: roundStatusStyle.pillColor,
+        }
+      : {
+          label: roomStatusLabel,
+          bg: roomStatusStyle.pillBg,
+          color: roomStatusStyle.pillColor,
+        };
 
   const myRoundStatusRaw = room.currentRound?.statusByPlayerId[myPlayerId];
   const opponentRoundStatusRaw = opponent?.id
     ? room.currentRound?.statusByPlayerId[opponent.id]
     : undefined;
-
-  const subtitleParts: string[] = [];
-  if (roundNumber) {
-    subtitleParts.push(t('room.round.title', { roundNumber: String(roundNumber) }));
-    subtitleParts.push(formatRoomLanguage(room.language));
-    subtitleParts.push(roundStatusLabel);
-  }
-  const subtitle = subtitleParts.join(' • ');
 
   const meIcon = getRoundPlayerIcon(myRoundStatusRaw);
   const opponentIcon = getRoundPlayerIcon(opponentRoundStatusRaw);
@@ -90,18 +100,21 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
           <Text fontSize="lg" fontWeight="bold" truncate>
             {meName} vs {opponentName}
           </Text>
-
-          <Pill bg={roomStatusStyle.pillBg} color={roomStatusStyle.pillColor}>
-            {roomStatusLabel}
+          <Pill bg={statusPill.bg} color={statusPill.color}>
+            {statusPill.label}
           </Pill>
         </Box>
 
-        <Text fontSize="sm" opacity="0.8" letterSpacing="widest">
-          {subtitle}
-        </Text>
+        {roundNumber && (
+          <HStack gap={3} alignItems="center" flexWrap="wrap">
+            <Text fontSize="sm" opacity="0.7">
+              {t('room.round.title', { roundNumber: String(roundNumber) })}
+            </Text>
+            <RoomLanguageFlag language={room.language} />
+          </HStack>
+        )}
 
         <Box my={2} borderTopWidth="1px" borderColor="border.emphasized" opacity={0.35} />
-
         <Stack gap={3}>
           {playerRows.map((row, index) => (
             <Box key={`${room.id}-${String(index)}`} w="full">
