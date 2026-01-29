@@ -15,7 +15,7 @@ export function AuthActions({ me, logoutPending, onLogin, onLogout }: Props) {
   const isAuthenticated = Boolean(me);
 
   return (
-    <Box w="full" mt={2}>
+    <Box w="full">
       <Stack direction={{ base: 'column', sm: 'row' }} w="full" align="center" justify="center">
         {!isAuthenticated && <GoogleLoginButton onClick={onLogin} />}
 

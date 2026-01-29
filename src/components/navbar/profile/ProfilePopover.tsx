@@ -153,6 +153,17 @@ export function ProfilePopover() {
                 </PrimaryButton>
               )}
 
+              <PrimaryButton
+                w="full"
+                justifyContent="flex-start"
+                onClick={() => {
+                  setOpen(false);
+                  void navigate('/legal');
+                }}
+              >
+                {t('profile.legal')}
+              </PrimaryButton>
+
               <AuthActions
                 me={me}
                 logoutPending={logoutPending}

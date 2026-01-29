@@ -65,30 +65,12 @@ export function LoginPage() {
           i18nKey="login.disclaimer"
           components={[
             <Link
-              key="terms"
-              href={appHref('/terms')}
+              key="legal"
+              href={appHref('/legal')}
               textDecoration="underline"
               onClick={(e) => {
                 e.preventDefault();
-                void navigate('/terms');
-              }}
-            />,
-            <Link
-              key="privacy"
-              href={appHref('/privacy')}
-              textDecoration="underline"
-              onClick={(e) => {
-                e.preventDefault();
-                void navigate('/privacy');
-              }}
-            />,
-            <Link
-              key="cookies"
-              href={appHref('/cookies')}
-              textDecoration="underline"
-              onClick={(e) => {
-                e.preventDefault();
-                void navigate('/cookies');
+                void navigate('/legal');
               }}
             />,
           ]}

@@ -2,12 +2,6 @@ export default {
   app: {
     name: 'Wordle Duel',
   },
-  footer: {
-    privacy: 'Privacy',
-    cookies: 'Cookies',
-    terms: 'Terms',
-    acceptableUse: 'Acceptable Use',
-  },
   common: {
     language: 'Language',
     theme: 'Theme',
@@ -107,6 +101,7 @@ export default {
     uiLanguage: 'Language',
     uiLanguageAria: 'Language',
     myRooms: 'My rooms',
+    legal: 'Legal & Policies',
     loginWithGoogle: 'Sign in with Google',
     logout: 'Logout',
   },
@@ -117,8 +112,7 @@ export default {
   login: {
     title: 'Login required',
     loginWithGoogle: 'Sign in with Google',
-    disclaimer:
-      'By continuing, you agree to our <0>Terms</0>, and you acknowledge our <1>Privacy Policy</1> and <2>Cookies Policy</2>.',
+    disclaimer: 'By continuing, you agree to our <0>legal terms and policies</0>.',
   },
   notFound: {
     message: 'Page not found',
