@@ -2,6 +2,12 @@ export default {
   app: {
     name: 'Wordle Duel',
   },
+  footer: {
+    privacy: 'Privacy',
+    cookies: 'Cookie',
+    terms: 'Termini',
+    acceptableUse: 'Uso consentito',
+  },
   common: {
     language: 'Lingua',
     theme: 'Tema',
@@ -111,7 +117,8 @@ export default {
   login: {
     title: 'Accesso richiesto',
     loginWithGoogle: 'Accedi con Google',
-    backHome: 'Torna alla home',
+    disclaimer:
+      'Continuando, accetti i nostri <0>Termini</0> e dichiari di aver preso visione della <1>Privacy Policy</1> e della <2>Cookie Policy</2>.',
   },
   notFound: {
     message: 'Pagina non trovata',

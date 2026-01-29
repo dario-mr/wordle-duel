@@ -1,9 +1,9 @@
-import { Heading, Stack } from '@chakra-ui/react';
+import { Heading, Link, Stack, Text } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { beginGoogleLogin, getCurrentUser, subscribeCurrentUser } from '../api/auth';
-import { AccentButton, GoogleLoginButton } from '../components/common/BrandButton';
+import { GoogleLoginButton } from '../components/common/BrandButton';
 import { STORAGE_KEYS } from '../state/storageKeys';
 import { sanitizeReturnTo } from '../utils/sanitizeReturnTo';
 
@@ -58,15 +58,48 @@ export function LoginPage() {
             beginGoogleLogin();
           }}
         />
-
-        <AccentButton
-          onClick={() => {
-            void navigate('/');
-          }}
-        >
-          {t('login.backHome')}
-        </AccentButton>
       </Stack>
+
+      <Text fontSize="sm" opacity={0.75} pt={5}>
+        <Trans
+          i18nKey="login.disclaimer"
+          components={[
+            <Link
+              key="terms"
+              href={appHref('/terms')}
+              textDecoration="underline"
+              onClick={(e) => {
+                e.preventDefault();
+                void navigate('/terms');
+              }}
+            />,
+            <Link
+              key="privacy"
+              href={appHref('/privacy')}
+              textDecoration="underline"
+              onClick={(e) => {
+                e.preventDefault();
+                void navigate('/privacy');
+              }}
+            />,
+            <Link
+              key="cookies"
+              href={appHref('/cookies')}
+              textDecoration="underline"
+              onClick={(e) => {
+                e.preventDefault();
+                void navigate('/cookies');
+              }}
+            />,
+          ]}
+        />
+      </Text>
     </Stack>
   );
+}
+
+function appHref(path: string): string {
+  const base = import.meta.env.BASE_URL;
+  const basePath = base === '/' ? '' : base.replace(/\/$/, '');
+  return `${basePath}${path}`;
 }
