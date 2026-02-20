@@ -151,6 +151,9 @@ export function RoomPage() {
   }
 
   if (!me) {
+    if (!myPlayerId) {
+      return <RoomSkeleton />;
+    }
     return <RoomJoinGate room={room} roomId={roomId} />;
   }
 
