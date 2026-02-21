@@ -153,6 +153,19 @@ export function ProfilePopover() {
                 </PrimaryButton>
               )}
 
+              {isLoggedIn && me?.roles.includes('ADMIN') && (
+                <PrimaryButton
+                  w="full"
+                  justifyContent="flex-start"
+                  onClick={() => {
+                    setOpen(false);
+                    void navigate('/users');
+                  }}
+                >
+                  {t('admin.users.navLink')}
+                </PrimaryButton>
+              )}
+
               <PrimaryButton
                 w="full"
                 justifyContent="flex-start"

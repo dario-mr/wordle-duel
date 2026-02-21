@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AppLayout } from '../components/layout/AppLayout';
+import { UsersPage } from '../pages/UsersPage.tsx';
 import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
 import { MyRoomsPage } from '../pages/MyRoomsPage';
@@ -19,6 +20,7 @@ const router = createBrowserRouter(
         { index: true, element: <HomePage /> },
         { path: 'login', element: <LoginPage /> },
         { path: 'my-rooms', element: <MyRoomsPage /> },
+        { path: 'users', element: <UsersPage /> },
         { path: 'legal', element: <LegalPage /> },
         { path: 'rooms/:roomId', element: <RoomPage /> },
         { path: '*', element: <NotFoundPage /> },

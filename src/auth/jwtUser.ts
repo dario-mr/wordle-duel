@@ -1,9 +1,11 @@
 import { jwtDecode } from 'jwt-decode';
 
+export type UserRole = 'USER' | 'ADMIN';
+
 export interface JwtUser {
   id: string;
   email: string;
-  roles: string[];
+  roles: UserRole[];
 }
 
 interface AccessTokenClaims {
@@ -28,7 +30,7 @@ export function getUserFromAccessToken(token: string): JwtUser | null {
     return {
       id: claims.uid,
       email: claims.sub,
-      roles: Array.isArray(claims.roles) ? claims.roles : [],
+      roles: Array.isArray(claims.roles) ? (claims.roles as UserRole[]) : [],
     };
   } catch {
     return null;

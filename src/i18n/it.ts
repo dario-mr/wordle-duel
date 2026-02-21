@@ -124,4 +124,24 @@ export default {
   roomLanguage: {
     it: 'Italiano',
   },
+  admin: {
+    users: {
+      title: 'Utenti',
+      navLink: 'Utenti',
+      empty: 'Nessun utente trovato',
+      errorTitle: 'Errore nel caricamento degli utenti',
+      columns: {
+        fullName: 'Nome completo',
+        displayName: 'Nome visualizzato',
+        email: 'Email',
+        joined: 'Iscritto',
+      },
+      pagination: {
+        previous: 'Precedente',
+        next: 'Successivo',
+        pageSize: 'Per pagina',
+        pageOf: 'Pagina {{page}} di {{total}}',
+      },
+    },
+  },
 } as const;

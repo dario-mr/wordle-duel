@@ -29,6 +29,10 @@ export default defineConfig(({ mode }) => {
             target: DEV_BACKEND_ORIGIN,
             changeOrigin: true,
           },
+          '/admin': {
+            target: DEV_BACKEND_ORIGIN,
+            changeOrigin: true,
+          },
         }
       : undefined;
 
