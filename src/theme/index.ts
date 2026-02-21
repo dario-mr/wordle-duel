@@ -21,6 +21,7 @@ const config = defineConfig({
           primary: { value: '#1f8df8' },
           accent: { value: '#078f84' },
           mutedWhite: { value: 'rgba(255,255,255,0.1)' },
+          panel: { value: '#303341' },
         },
       },
     },
@@ -40,7 +41,7 @@ const config = defineConfig({
             value: { _light: '{colors.gray.200}', _dark: '{colors.dracula.currentLine}' },
           },
           panel: {
-            value: { _light: '{colors.white}', _dark: '{colors.dracula.background}' },
+            value: { _light: '{colors.white}', _dark: '{colors.dracula.panel}' },
           },
           inverted: {
             value: { _light: '{colors.black}', _dark: '{colors.dracula.foreground}' },

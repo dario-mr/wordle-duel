@@ -6,6 +6,7 @@ import {
   EMPTY_USERS_FILTERS,
   getActiveUsersFilters,
   trimUsersFilters,
+  usersFiltersEqual,
   type UsersFilterField,
 } from '../admin/usersFilters';
 import {
@@ -94,7 +95,8 @@ export function UsersPage() {
   };
 
   const handleFilterApply = () => {
-    setFilters(trimUsersFilters(filterDraft));
+    const trimmed = trimUsersFilters(filterDraft);
+    setFilters((current) => (usersFiltersEqual(current, trimmed) ? current : trimmed));
   };
 
   if (!data && (isLoading || isFetching)) {

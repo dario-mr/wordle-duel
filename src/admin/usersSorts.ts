@@ -1,4 +1,4 @@
-export const USERS_SORT_FIELDS = ['fullName', 'email', 'createdOn'] as const;
+export const USERS_SORT_FIELDS = ['fullName', 'email', 'createdOn', 'displayName'] as const;
 
 export type UsersSortField = (typeof USERS_SORT_FIELDS)[number];
 export type UsersSortDirection = 'asc' | 'desc';

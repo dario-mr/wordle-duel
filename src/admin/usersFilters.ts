@@ -1,4 +1,4 @@
-export const USERS_FILTER_FIELDS = ['fullName', 'email'] as const;
+export const USERS_FILTER_FIELDS = ['fullName', 'email', 'displayName'] as const;
 
 export type UsersFilterField = (typeof USERS_FILTER_FIELDS)[number];
 export type UsersFilters = Record<UsersFilterField, string>;
@@ -13,6 +13,10 @@ export function trimUsersFilters(filters: UsersFilters): UsersFilters {
     trimmed[field] = filters[field].trim();
   }
   return trimmed;
+}
+
+export function usersFiltersEqual(a: UsersFilters, b: UsersFilters): boolean {
+  return USERS_FILTER_FIELDS.every((field) => a[field] === b[field]);
 }
 
 export function getActiveUsersFilters(filters: UsersFilters): Partial<UsersFilters> {

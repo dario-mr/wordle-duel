@@ -71,17 +71,15 @@ export function UsersTable({
               />
             </Table.ColumnHeader>
             <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.displayName} p={0}>
-              <VStack align="stretch" gap={USERS_HEADER_GAP}>
-                <Box
-                  height={USERS_HEADER_LABEL_SLOT_HEIGHT}
-                  display="flex"
-                  alignItems="center"
-                  px={2}
-                >
-                  {t('admin.users.columns.displayName')}
-                </Box>
-                <HeaderSpacer />
-              </VStack>
+              <FilterHeader
+                label={t('admin.users.columns.displayName')}
+                field="displayName"
+                value={filters.displayName}
+                sort={sort}
+                onSortChange={onSortChange}
+                onFilterValueChange={onFilterValueChange}
+                onFilterApply={onFilterApply}
+              />
             </Table.ColumnHeader>
             <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.email} p={0}>
               <FilterHeader

@@ -49,7 +49,7 @@ export function UsersSkeleton() {
                 </VStack>
               </Table.ColumnHeader>
               <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.fullName} p={0}>
-                <VStack align="stretch" gap={USERS_HEADER_GAP} py={2}>
+                <VStack align="stretch" gap={USERS_HEADER_GAP} py={2} px={1}>
                   <SortHeaderButton
                     label={t('admin.users.columns.fullName')}
                     field="fullName"
@@ -60,20 +60,18 @@ export function UsersSkeleton() {
                 </VStack>
               </Table.ColumnHeader>
               <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.displayName} p={0}>
-                <VStack align="stretch" gap={USERS_HEADER_GAP}>
-                  <Box
-                    height={USERS_HEADER_LABEL_SLOT_HEIGHT}
-                    display="flex"
-                    alignItems="center"
-                    px={2}
-                  >
-                    {t('admin.users.columns.displayName')}
-                  </Box>
-                  <Box height={USERS_HEADER_FILTER_SLOT_HEIGHT} />
+                <VStack align="stretch" gap={USERS_HEADER_GAP} py={2} px={1}>
+                  <SortHeaderButton
+                    label={t('admin.users.columns.displayName')}
+                    field="displayName"
+                    sort={null}
+                    onSortChange={NOOP_SORT_CHANGE}
+                  />
+                  <FilterInputPlaceholder />
                 </VStack>
               </Table.ColumnHeader>
               <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.email} p={0}>
-                <VStack align="stretch" gap={USERS_HEADER_GAP} py={2}>
+                <VStack align="stretch" gap={USERS_HEADER_GAP} py={2} px={1}>
                   <SortHeaderButton
                     label={t('admin.users.columns.email')}
                     field="email"

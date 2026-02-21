@@ -33,7 +33,7 @@ export function FilterHeader({
   };
 
   return (
-    <VStack align="stretch" gap={1} py={2}>
+    <VStack align="stretch" gap={1} py={2} px={1}>
       <SortHeaderButton label={label} field={field} sort={sort} onSortChange={onSortChange} />
       <Input
         value={value}
@@ -48,7 +48,7 @@ export function FilterHeader({
         bg="bg.panel"
         transition="border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease"
         _hover={{
-          borderColor: 'border.inverted',
+          borderColor: 'border.info',
           bg: 'bg',
         }}
         _focusVisible={{
