@@ -1,6 +1,33 @@
-import { Box, Heading, Skeleton, Stack, Table } from '@chakra-ui/react';
+import { Box, Heading, Input, Skeleton, Stack, Table, VStack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import { USERS_COL_WIDTHS } from './UsersTable';
+import type { UsersSortField } from '../../admin/usersSorts';
+import { SortHeaderButton } from './SortHeaderButton';
+import {
+  USERS_COL_WIDTHS,
+  USERS_HEADER_FILTER_SLOT_HEIGHT,
+  USERS_HEADER_GAP,
+  USERS_HEADER_LABEL_SLOT_HEIGHT,
+} from './usersTable.constants';
+
+const NOOP_SORT_CHANGE = (field: UsersSortField) => {
+  void field;
+};
+
+function FilterInputPlaceholder() {
+  return (
+    <Input
+      height={USERS_HEADER_FILTER_SLOT_HEIGHT}
+      size="sm"
+      borderWidth="1px"
+      borderColor="border.emphasized"
+      bg="bg.panel"
+      pointerEvents="none"
+      readOnly
+      value=""
+      aria-hidden="true"
+    />
+  );
+}
 
 export function UsersSkeleton() {
   const { t } = useTranslation();
@@ -15,18 +42,57 @@ export function UsersSkeleton() {
         <Table.Root tableLayout="fixed">
           <Table.Header>
             <Table.Row bg="bg.subtle">
-              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.avatar} />
-              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.fullName}>
-                {t('admin.users.columns.fullName')}
+              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.avatar} p={0}>
+                <VStack align="stretch" gap={USERS_HEADER_GAP}>
+                  <Box height={USERS_HEADER_LABEL_SLOT_HEIGHT} />
+                  <Box height={USERS_HEADER_FILTER_SLOT_HEIGHT} />
+                </VStack>
               </Table.ColumnHeader>
-              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.displayName}>
-                {t('admin.users.columns.displayName')}
+              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.fullName} p={0}>
+                <VStack align="stretch" gap={USERS_HEADER_GAP} py={2}>
+                  <SortHeaderButton
+                    label={t('admin.users.columns.fullName')}
+                    field="fullName"
+                    sort={null}
+                    onSortChange={NOOP_SORT_CHANGE}
+                  />
+                  <FilterInputPlaceholder />
+                </VStack>
               </Table.ColumnHeader>
-              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.email}>
-                {t('admin.users.columns.email')}
+              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.displayName} p={0}>
+                <VStack align="stretch" gap={USERS_HEADER_GAP}>
+                  <Box
+                    height={USERS_HEADER_LABEL_SLOT_HEIGHT}
+                    display="flex"
+                    alignItems="center"
+                    px={2}
+                  >
+                    {t('admin.users.columns.displayName')}
+                  </Box>
+                  <Box height={USERS_HEADER_FILTER_SLOT_HEIGHT} />
+                </VStack>
               </Table.ColumnHeader>
-              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.joined}>
-                {t('admin.users.columns.joined')}
+              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.email} p={0}>
+                <VStack align="stretch" gap={USERS_HEADER_GAP} py={2}>
+                  <SortHeaderButton
+                    label={t('admin.users.columns.email')}
+                    field="email"
+                    sort={null}
+                    onSortChange={NOOP_SORT_CHANGE}
+                  />
+                  <FilterInputPlaceholder />
+                </VStack>
+              </Table.ColumnHeader>
+              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.joined} p={0}>
+                <VStack align="stretch" gap={USERS_HEADER_GAP}>
+                  <SortHeaderButton
+                    label={t('admin.users.columns.joined')}
+                    field="createdOn"
+                    sort={null}
+                    onSortChange={NOOP_SORT_CHANGE}
+                  />
+                  <Box height={USERS_HEADER_FILTER_SLOT_HEIGHT} />
+                </VStack>
               </Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
@@ -40,13 +106,13 @@ export function UsersSkeleton() {
                   <Skeleton height="18px" width="80%" borderRadius="md" />
                 </Table.Cell>
                 <Table.Cell>
-                  <Skeleton height="16px" width="70%" borderRadius="md" />
+                  <Skeleton height="18px" width="70%" borderRadius="md" />
                 </Table.Cell>
                 <Table.Cell>
-                  <Skeleton height="16px" width="85%" borderRadius="md" />
+                  <Skeleton height="18px" width="85%" borderRadius="md" />
                 </Table.Cell>
                 <Table.Cell>
-                  <Skeleton height="16px" width="70%" borderRadius="md" />
+                  <Skeleton height="18px" width="70%" borderRadius="md" />
                 </Table.Cell>
               </Table.Row>
             ))}

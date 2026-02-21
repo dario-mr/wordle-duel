@@ -2,12 +2,23 @@ import { Heading, Spinner, Stack, Text } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import {
+  EMPTY_USERS_FILTERS,
+  getActiveUsersFilters,
+  trimUsersFilters,
+  type UsersFilterField,
+} from '../admin/usersFilters';
+import {
+  toggleUsersSort,
+  toUsersSortParam,
+  type UsersSort,
+  type UsersSortField,
+} from '../admin/usersSorts';
 import { getCurrentUser, subscribeCurrentUser } from '../api/auth';
 import { getErrorMessage } from '../api/errors';
 import { UNAUTHENTICATED_CODE } from '../constants';
 import { WdsApiError } from '../api/types';
 import { UsersSkeleton } from '../components/admin/UsersSkeleton.tsx';
-import type { UsersSort, UsersSortField } from '../components/admin/UsersTable.tsx';
 import { UsersTable } from '../components/admin/UsersTable.tsx';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import { useAdminUsersQuery } from '../query/adminQueries';
@@ -18,6 +29,8 @@ export function UsersPage() {
 
   const [me, setMe] = useState(() => getCurrentUser());
   const [sort, setSort] = useState<UsersSort>(null);
+  const [filterDraft, setFilterDraft] = useState(EMPTY_USERS_FILTERS);
+  const [filters, setFilters] = useState(EMPTY_USERS_FILTERS);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -35,10 +48,12 @@ export function UsersPage() {
   }, [me, isAdmin, navigate]);
 
   const shouldFetchUsers = me === null || isAdmin;
-  const sortParam = sort ? `${sort.field},${sort.direction}` : undefined;
+  const sortParam = toUsersSortParam(sort);
+  const activeFilters = getActiveUsersFilters(filters);
   const { data, isLoading, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage, error } =
     useAdminUsersQuery({
       sort: sortParam,
+      filters: activeFilters,
       enabled: shouldFetchUsers,
     });
 
@@ -71,15 +86,15 @@ export function UsersPage() {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const handleSortChange = (field: UsersSortField) => {
-    setSort((current) => {
-      if (current?.field !== field) {
-        return { field, direction: 'asc' };
-      }
-      if (current.direction === 'asc') {
-        return { field, direction: 'desc' };
-      }
-      return null;
-    });
+    setSort((current) => toggleUsersSort(current, field));
+  };
+
+  const handleFilterValueChange = (field: UsersFilterField, value: string) => {
+    setFilterDraft((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleFilterApply = () => {
+    setFilters(trimUsersFilters(filterDraft));
   };
 
   if (!data && (isLoading || isFetching)) {
@@ -117,19 +132,23 @@ export function UsersPage() {
         {t('admin.users.title')}
       </Heading>
 
-      {users.length === 0 ? (
-        <Text textAlign="center">{t('admin.users.empty')}</Text>
-      ) : (
-        <>
-          <UsersTable users={users} sort={sort} onSortChange={handleSortChange} />
-          {isFetchingNextPage && (
-            <Stack align="center">
-              <Spinner size="sm" />
-            </Stack>
-          )}
-          {hasNextPage && <div ref={loadMoreRef} aria-hidden="true" />}
-        </>
-      )}
+      <>
+        <UsersTable
+          users={users}
+          sort={sort}
+          onSortChange={handleSortChange}
+          filters={filterDraft}
+          onFilterValueChange={handleFilterValueChange}
+          onFilterApply={handleFilterApply}
+        />
+        {users.length === 0 && <Text textAlign="center">{t('admin.users.empty')}</Text>}
+        {isFetchingNextPage && (
+          <Stack align="center">
+            <Spinner size="sm" />
+          </Stack>
+        )}
+        {hasNextPage && <div ref={loadMoreRef} aria-hidden="true" />}
+      </>
     </Stack>
   );
 }

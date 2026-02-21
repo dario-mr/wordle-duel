@@ -1,9 +1,10 @@
+import { USERS_FILTER_FIELDS, type UsersFilters } from '../admin/usersFilters';
 import { getBackendBasePath, getRestApiV1BaseUrl } from '../config/wds';
 import type { AdminUsersResponse, UserMeDto } from './types';
 import { joinUrl } from './url';
 import { fetchJson } from './wdsClient';
 
-interface AdminUsersParams {
+interface AdminUsersParams extends Partial<UsersFilters> {
   page?: number;
   size?: number;
   sort?: string;
@@ -26,6 +27,12 @@ export function getAdminUsers(
   }
   if (params?.sort !== undefined) {
     query.set('sort', params.sort);
+  }
+  for (const field of USERS_FILTER_FIELDS) {
+    const value = params?.[field];
+    if (value !== undefined) {
+      query.set(field, value);
+    }
   }
   const qs = query.toString();
   return fetchJson(joinUrl(getBackendBasePath(), `/admin/users${qs ? `?${qs}` : ''}`), init);

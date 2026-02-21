@@ -1,49 +1,32 @@
-import { Avatar, Box, Button, Table } from '@chakra-ui/react';
+import { Avatar, Box, Table, VStack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
+import type { UsersFilterField, UsersFilters } from '../../admin/usersFilters';
+import type { UsersSort, UsersSortField } from '../../admin/usersSorts';
 import type { AdminUserDto } from '../../api/types';
-
-export type UsersSortField = 'fullName' | 'createdOn' | `email`;
-export type UsersSortDirection = 'asc' | 'desc';
-export type UsersSort = { field: UsersSortField; direction: UsersSortDirection } | null;
-
-export const USERS_COL_WIDTHS = {
-  avatar: '60px',
-  fullName: '20%',
-  displayName: '20%',
-  email: '30%',
-  joined: '120px',
-} as const;
+import { FilterHeader } from './FilterHeader';
+import { SortHeaderButton } from './SortHeaderButton';
+import {
+  USERS_COL_WIDTHS,
+  USERS_HEADER_FILTER_SLOT_HEIGHT,
+  USERS_HEADER_GAP,
+  USERS_HEADER_LABEL_SLOT_HEIGHT,
+} from './usersTable.constants';
 
 interface AdminUsersTableProps {
   users: AdminUserDto[];
   sort: UsersSort;
   onSortChange: (field: UsersSortField) => void;
+  filters: UsersFilters;
+  onFilterValueChange: (field: UsersFilterField, value: string) => void;
+  onFilterApply: () => void;
 }
 
-interface SortHeaderButtonProps {
-  label: string;
-  field: UsersSortField;
-  sort: UsersSort;
-  onSortChange: (field: UsersSortField) => void;
+function HeaderSpacer() {
+  return <Box height={USERS_HEADER_FILTER_SLOT_HEIGHT} />;
 }
 
-function SortHeaderButton({ label, field, sort, onSortChange }: SortHeaderButtonProps) {
-  const indicator = sort?.field !== field ? '' : sort.direction === 'asc' ? ' ↑' : ' ↓';
-
-  return (
-    <Button
-      variant="ghost"
-      w="full"
-      justifyContent="flex-start"
-      px={3}
-      onClick={() => {
-        onSortChange(field);
-      }}
-    >
-      {label}
-      {indicator}
-    </Button>
-  );
+function HeaderLabelSpacer() {
+  return <Box height={USERS_HEADER_LABEL_SLOT_HEIGHT} />;
 }
 
 function getInitials(fullName: string): string {
@@ -55,7 +38,14 @@ function getInitials(fullName: string): string {
     .toUpperCase();
 }
 
-export function UsersTable({ users, sort, onSortChange }: AdminUsersTableProps) {
+export function UsersTable({
+  users,
+  sort,
+  onSortChange,
+  filters,
+  onFilterValueChange,
+  onFilterApply,
+}: AdminUsersTableProps) {
   const { t } = useTranslation();
 
   return (
@@ -63,33 +53,57 @@ export function UsersTable({ users, sort, onSortChange }: AdminUsersTableProps) 
       <Table.Root tableLayout="fixed">
         <Table.Header>
           <Table.Row bg="bg.subtle">
-            <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.avatar} />
+            <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.avatar} p={0}>
+              <VStack align="stretch" gap={USERS_HEADER_GAP}>
+                <HeaderLabelSpacer />
+                <HeaderSpacer />
+              </VStack>
+            </Table.ColumnHeader>
             <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.fullName} p={0}>
-              <SortHeaderButton
+              <FilterHeader
                 label={t('admin.users.columns.fullName')}
                 field="fullName"
+                value={filters.fullName}
                 sort={sort}
                 onSortChange={onSortChange}
+                onFilterValueChange={onFilterValueChange}
+                onFilterApply={onFilterApply}
               />
             </Table.ColumnHeader>
-            <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.displayName}>
-              {t('admin.users.columns.displayName')}
+            <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.displayName} p={0}>
+              <VStack align="stretch" gap={USERS_HEADER_GAP}>
+                <Box
+                  height={USERS_HEADER_LABEL_SLOT_HEIGHT}
+                  display="flex"
+                  alignItems="center"
+                  px={2}
+                >
+                  {t('admin.users.columns.displayName')}
+                </Box>
+                <HeaderSpacer />
+              </VStack>
             </Table.ColumnHeader>
             <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.email} p={0}>
-              <SortHeaderButton
+              <FilterHeader
                 label={t('admin.users.columns.email')}
                 field="email"
+                value={filters.email}
                 sort={sort}
                 onSortChange={onSortChange}
+                onFilterValueChange={onFilterValueChange}
+                onFilterApply={onFilterApply}
               />
             </Table.ColumnHeader>
             <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.joined} p={0}>
-              <SortHeaderButton
-                label={t('admin.users.columns.joined')}
-                field="createdOn"
-                sort={sort}
-                onSortChange={onSortChange}
-              />
+              <VStack align="stretch" gap={USERS_HEADER_GAP}>
+                <SortHeaderButton
+                  label={t('admin.users.columns.joined')}
+                  field="createdOn"
+                  sort={sort}
+                  onSortChange={onSortChange}
+                />
+                <HeaderSpacer />
+              </VStack>
             </Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
