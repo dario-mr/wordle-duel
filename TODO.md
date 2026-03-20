@@ -1,2 +1,2 @@
-- unit tests wherever possible
 - map BE error messages in FE so that they can be localized
+- use the react skill to review the whole repo
