@@ -1,3 +1,2 @@
-- improve `useRoomTopic` to use ws payload, instead of just invalidating room query
 - unit tests wherever possible
 - map BE error messages in FE so that they can be localized

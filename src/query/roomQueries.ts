@@ -24,10 +24,6 @@ export function roomQueryKey(roomId: string) {
   return ['room', roomId] as const;
 }
 
-export function myRoomsQueryKey() {
-  return ['myRooms'] as const;
-}
-
 export function useRoomQuery(roomId: string | undefined) {
   return useQuery({
     queryKey: roomId ? roomQueryKey(roomId) : ['room', 'missing'],
@@ -43,7 +39,7 @@ export function useRoomQuery(roomId: string | undefined) {
 
 export function useMyRoomsQuery(args: { enabled: boolean }) {
   return useQuery({
-    queryKey: myRoomsQueryKey(),
+    queryKey: ['myRooms'],
     queryFn: ({ signal }) => listMyRooms({ signal }),
     enabled: args.enabled,
   });

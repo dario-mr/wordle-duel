@@ -1,6 +1,6 @@
 import { apiFetch } from '../api/apiFetch';
 import { getXsrfTokenFromCookie } from '../api/csrf';
-import { getBackendBasePath } from '../config/wds';
+import { backendUrl } from '../api/url';
 
 const EXPIRY_SAFETY_WINDOW_MS = 30_000;
 const listeners = new Set<() => void>();
@@ -129,10 +129,4 @@ async function doRefresh(): Promise<string | null> {
   notifyAccessTokenChanged();
 
   return accessToken;
-}
-
-function backendUrl(path: string): string {
-  const basePath = getBackendBasePath();
-  const base = new URL(basePath, window.location.origin).toString();
-  return new URL(path.replace(/^\//, ''), base).toString();
 }

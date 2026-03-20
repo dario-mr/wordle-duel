@@ -1,8 +1,7 @@
 import { USERS_FILTER_FIELDS, type UsersFilters } from '../admin/usersFilters';
-import { getBackendBasePath, getRestApiV1BaseUrl } from '../config/wds';
 import type { AdminUsersResponse, UserMeDto } from './types';
-import { joinUrl } from './url';
-import { fetchJson } from './wdsClient';
+import { apiV1Url, backendUrl, withQuery } from './url';
+import { getJson } from './wdsClient';
 
 interface AdminUsersParams extends Partial<UsersFilters> {
   page?: number;
@@ -11,33 +10,31 @@ interface AdminUsersParams extends Partial<UsersFilters> {
 }
 
 export function getMe(init?: RequestInit): Promise<UserMeDto> {
-  return fetchJson(apiUrl('/users/me'), init);
+  return getJson<UserMeDto>(apiV1Url('/users/me'), init);
 }
 
 export function getAdminUsers(
   params?: AdminUsersParams,
   init?: RequestInit,
 ): Promise<AdminUsersResponse> {
-  const query = new URLSearchParams();
+  const queryEntries: [string, string | number][] = [];
+
   if (params?.page !== undefined) {
-    query.set('page', String(params.page));
+    queryEntries.push(['page', params.page]);
   }
   if (params?.size !== undefined) {
-    query.set('size', String(params.size));
+    queryEntries.push(['size', params.size]);
   }
   if (params?.sort !== undefined) {
-    query.set('sort', params.sort);
+    queryEntries.push(['sort', params.sort]);
   }
+
   for (const field of USERS_FILTER_FIELDS) {
     const value = params?.[field];
     if (value !== undefined) {
-      query.set(field, value);
+      queryEntries.push([field, value]);
     }
   }
-  const qs = query.toString();
-  return fetchJson(joinUrl(getBackendBasePath(), `/admin/users${qs ? `?${qs}` : ''}`), init);
-}
 
-function apiUrl(path: string): string {
-  return joinUrl(getRestApiV1BaseUrl(), path);
+  return getJson<AdminUsersResponse>(withQuery(backendUrl('/admin/users'), queryEntries), init);
 }

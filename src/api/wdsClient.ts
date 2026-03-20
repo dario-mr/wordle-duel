@@ -5,22 +5,28 @@ import { UNAUTHENTICATED_CODE, UNEXPECTED_RESPONSE_CODE } from '../constants.ts'
 import { apiFetch } from './apiFetch';
 import { type ErrorResponseDto, WdsApiError } from './types';
 
-export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+export function getJson<T>(url: string, init?: RequestInit): Promise<T> {
+  return fetchJson<T>(url, init);
+}
+
+export function postJson<TResponse>(
+  url: string,
+  body?: unknown,
+  init?: Omit<RequestInit, 'body' | 'method'>,
+): Promise<TResponse> {
+  return fetchJson<TResponse>(url, withJsonBody(init, body));
+}
+
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  return parseJsonResponse<T>(await fetchAuthorized(url, init));
+}
+
+async function fetchAuthorized(url: string, init?: RequestInit): Promise<Response> {
   const baseInit = withJsonHeaders(init);
-  const doFetch = (token: string | null) => apiFetch(url, withAuthorization(baseInit, token));
-
-  let token = await getValidAccessToken();
-  token ??= await refreshAccessToken();
-
-  let res = await doFetch(token);
+  let res = await doAuthorizedFetch(url, baseInit, await getAccessTokenOrRedirect());
 
   if (res.status === 401) {
-    token = await refreshAccessToken();
-    if (!token) {
-      return redirectToLoginAndHalt();
-    }
-
-    res = await doFetch(token);
+    res = await doAuthorizedFetch(url, baseInit, await getAccessTokenOrRedirect({ refresh: true }));
 
     if (res.status === 401) {
       return redirectToLoginAndHalt();
@@ -31,8 +37,29 @@ export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> 
     throw await parseApiError(res);
   }
 
+  return res;
+}
+
+async function getAccessTokenOrRedirect(args?: { refresh?: boolean }): Promise<string> {
+  let token = args?.refresh ? await refreshAccessToken() : await getValidAccessToken();
+  if (!token && !args?.refresh) {
+    token = await refreshAccessToken();
+  }
+
+  if (!token) {
+    return redirectToLoginAndHalt();
+  }
+
+  return token;
+}
+
+function doAuthorizedFetch(url: string, init: RequestInit, token: string): Promise<Response> {
+  return apiFetch(url, withAuthorization(init, token));
+}
+
+async function parseJsonResponse<T>(res: Response): Promise<T> {
   if (res.status === 204) {
-    return null as T;
+    throw makeUnexpectedResponseError(res.status);
   }
 
   const contentType = getContentType(res);
@@ -83,6 +110,17 @@ function withJsonHeaders(init: RequestInit | undefined): RequestInit {
   return {
     ...init,
     headers,
+  };
+}
+
+function withJsonBody(
+  init: Omit<RequestInit, 'body' | 'method'> | undefined,
+  body: unknown,
+): RequestInit {
+  return {
+    ...init,
+    method: 'POST',
+    body: body === undefined ? undefined : JSON.stringify(body),
   };
 }
 

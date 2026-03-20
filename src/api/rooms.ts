@@ -1,4 +1,3 @@
-import { getRestApiV1BaseUrl } from '../config/wds';
 import type {
   CreateRoomRequest,
   ReadyForNextRoundRequest,
@@ -6,54 +5,39 @@ import type {
   SubmitGuessRequest,
   SubmitGuessResponse,
 } from './types';
-import { fetchJson } from './wdsClient';
-import { joinUrl } from './url';
+import { getJson, postJson } from './wdsClient';
+import { apiV1Url } from './url';
 
 export function createRoom(body: CreateRoomRequest): Promise<RoomDto> {
-  return fetchJson(apiUrl('/rooms'), {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
+  return postJson<RoomDto>(apiV1Url('/rooms'), body);
 }
 
 export function joinRoom(roomId: string): Promise<RoomDto> {
-  return fetchJson(roomUrl(roomId, '/join'), {
-    method: 'POST',
-  });
+  return postJson<RoomDto>(roomUrl(roomId, '/join'));
 }
 
 export function getRoom(roomId: string, init?: RequestInit): Promise<RoomDto> {
-  return fetchJson(roomUrl(roomId), init);
+  return getJson<RoomDto>(roomUrl(roomId), init);
 }
 
 export function listMyRooms(init?: RequestInit): Promise<RoomDto[]> {
-  return fetchJson(apiUrl('/rooms'), init);
+  return getJson<RoomDto[]>(apiV1Url('/rooms'), init);
 }
 
 export function submitGuess(args: {
   roomId: string;
   body: SubmitGuessRequest;
 }): Promise<SubmitGuessResponse> {
-  return fetchJson(roomUrl(args.roomId, '/guess'), {
-    method: 'POST',
-    body: JSON.stringify(args.body),
-  });
+  return postJson<SubmitGuessResponse>(roomUrl(args.roomId, '/guess'), args.body);
 }
 
 export function readyForNextRound(args: {
   roomId: string;
   body: ReadyForNextRoundRequest;
 }): Promise<RoomDto> {
-  return fetchJson(roomUrl(args.roomId, '/ready'), {
-    method: 'POST',
-    body: JSON.stringify(args.body),
-  });
-}
-
-function apiUrl(path: string): string {
-  return joinUrl(getRestApiV1BaseUrl(), path);
+  return postJson<RoomDto>(roomUrl(args.roomId, '/ready'), args.body);
 }
 
 function roomUrl(roomId: string, suffix = ''): string {
-  return apiUrl(`/rooms/${encodeURIComponent(roomId)}${suffix}`);
+  return apiV1Url(`/rooms/${encodeURIComponent(roomId)}${suffix}`);
 }
