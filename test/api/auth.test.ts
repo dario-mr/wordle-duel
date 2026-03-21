@@ -31,6 +31,11 @@ vi.mock('../../src/api/url', () => ({
   backendUrl: mocks.backendUrl,
 }));
 
+async function loadAuthApi() {
+  vi.resetModules();
+  return await import('../../src/api/auth');
+}
+
 describe('api/auth', () => {
   beforeEach(() => {
     mocks.clearAccessToken.mockReset();
@@ -42,7 +47,7 @@ describe('api/auth', () => {
   });
 
   it('beginGoogleLogin redirects to the google oauth entrypoint', async () => {
-    const api = await import('../../src/api/auth');
+    const api = await loadAuthApi();
     const assign = vi.fn();
     vi.stubGlobal('location', { origin: window.location.origin, assign });
 
@@ -52,7 +57,7 @@ describe('api/auth', () => {
   });
 
   it('logout clears the token on ok, 401, and 403', async () => {
-    const api = await import('../../src/api/auth');
+    const api = await loadAuthApi();
     mocks.apiFetch
       .mockResolvedValueOnce(new Response(null, { status: 200 }))
       .mockResolvedValueOnce(new Response(null, { status: 401 }))
@@ -66,14 +71,14 @@ describe('api/auth', () => {
   });
 
   it('logout throws on unexpected statuses', async () => {
-    const api = await import('../../src/api/auth');
+    const api = await loadAuthApi();
     mocks.apiFetch.mockResolvedValueOnce(new Response(null, { status: 500 }));
 
     await expect(api.logout()).rejects.toThrow('Logout failed with status 500');
   });
 
   it('getCurrentUser decodes the current token', async () => {
-    const api = await import('../../src/api/auth');
+    const api = await loadAuthApi();
     mocks.getAccessToken.mockReturnValue('token-1');
     mocks.getUserFromAccessToken.mockReturnValue({ id: 'user-1' });
 
@@ -81,8 +86,21 @@ describe('api/auth', () => {
     expect(mocks.getUserFromAccessToken).toHaveBeenCalledWith('token-1');
   });
 
+  it('getCurrentUser returns a stable snapshot for the same token', async () => {
+    const api = await loadAuthApi();
+    const user = { id: 'user-1' };
+    mocks.getAccessToken.mockReturnValue('token-1');
+    mocks.getUserFromAccessToken.mockReturnValue(user);
+
+    const first = api.getCurrentUser();
+    const second = api.getCurrentUser();
+
+    expect(first).toBe(second);
+    expect(mocks.getUserFromAccessToken).toHaveBeenCalledTimes(1);
+  });
+
   it('subscribeCurrentUser proxies the token subscription', async () => {
-    const api = await import('../../src/api/auth');
+    const api = await loadAuthApi();
     const listener = vi.fn();
 
     api.subscribeCurrentUser(listener);

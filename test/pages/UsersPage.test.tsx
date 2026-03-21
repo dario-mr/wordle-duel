@@ -67,6 +67,10 @@ vi.mock('../../src/api/auth', () => ({
   subscribeCurrentUser: mocks.subscribeCurrentUser,
 }));
 
+vi.mock('../../src/auth/useCurrentUser', () => ({
+  useCurrentUser: () => mocks.getCurrentUser() as { id: string; roles: string[] } | null,
+}));
+
 vi.mock('../../src/api/errors', () => ({
   getErrorMessage: () => 'Users failed',
 }));

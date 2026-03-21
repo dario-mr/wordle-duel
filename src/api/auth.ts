@@ -4,6 +4,9 @@ import { getUserFromAccessToken } from '../auth/jwtUser';
 import { apiFetch } from './apiFetch';
 import { backendUrl } from './url';
 
+let currentUserSnapshotToken: string | null | undefined;
+let currentUserSnapshot: JwtUser | null = null;
+
 export function beginGoogleLogin(): void {
   window.location.assign(backendUrl('/oauth2/authorization/google'));
 }
@@ -21,7 +24,14 @@ export async function logout(): Promise<void> {
 
 export function getCurrentUser(): JwtUser | null {
   const token = getAccessToken();
-  return token ? getUserFromAccessToken(token) : null;
+
+  if (token === currentUserSnapshotToken) {
+    return currentUserSnapshot;
+  }
+
+  currentUserSnapshotToken = token;
+  currentUserSnapshot = token ? getUserFromAccessToken(token) : null;
+  return currentUserSnapshot;
 }
 
 export function subscribeCurrentUser(listener: () => void): () => void {

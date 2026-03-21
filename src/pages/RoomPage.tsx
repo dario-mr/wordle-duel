@@ -1,10 +1,10 @@
 import { Stack } from '@chakra-ui/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { getCurrentUser, subscribeCurrentUser } from '../api/auth';
 import { getErrorMessage } from '../api/errors';
 import { type GuessLetterStatus, WdsApiError } from '../api/types';
+import { useCurrentUser } from '../auth/useCurrentUser';
 import { UNAUTHENTICATED_CODE, WORD_LENGTH } from '../constants';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import { GuessKeyboard } from '../components/room/keyboard/GuessKeyboard';
@@ -25,14 +25,7 @@ import { RoomSkeleton } from '../components/room/RoomSkeleton.tsx';
 export function RoomPage() {
   const { t } = useTranslation();
   const { roomId } = useParams();
-
-  const [meUser, setMeUser] = useState(() => getCurrentUser());
-
-  useEffect(() => {
-    return subscribeCurrentUser(() => {
-      setMeUser(getCurrentUser());
-    });
-  }, []);
+  const meUser = useCurrentUser();
 
   const myPlayerId = meUser?.id ?? '';
 

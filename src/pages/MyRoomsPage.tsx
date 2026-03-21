@@ -1,10 +1,9 @@
 import { Stack } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, subscribeCurrentUser } from '../api/auth';
 import { getErrorMessage } from '../api/errors';
 import { WdsApiError } from '../api/types';
+import { useCurrentUser } from '../auth/useCurrentUser';
 import { UNAUTHENTICATED_CODE } from '../constants';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import { MyRoomsSkeleton } from '../components/myrooms/MyRoomsSkeleton';
@@ -14,14 +13,7 @@ import { useMyRoomsQuery } from '../query/roomQueries';
 export function MyRoomsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
-  const [me, setMe] = useState(() => getCurrentUser());
-
-  useEffect(() => {
-    return subscribeCurrentUser(() => {
-      setMe(getCurrentUser());
-    });
-  }, []);
+  const me = useCurrentUser();
 
   const { data, isLoading, isFetching, error } = useMyRoomsQuery({ enabled: true });
 

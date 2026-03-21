@@ -1,8 +1,9 @@
 import { Heading, Link, Stack, Text } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { beginGoogleLogin, getCurrentUser, subscribeCurrentUser } from '../api/auth';
+import { beginGoogleLogin } from '../api/auth';
+import { useCurrentUser } from '../auth/useCurrentUser';
 import { GoogleLoginButton } from '../components/common/BrandButton';
 import { STORAGE_KEYS } from '../state/storageKeys';
 import { sanitizeReturnTo } from '../utils/sanitizeReturnTo';
@@ -11,14 +12,7 @@ export function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-
-  const [me, setMe] = useState(() => getCurrentUser());
-
-  useEffect(() => {
-    return subscribeCurrentUser(() => {
-      setMe(getCurrentUser());
-    });
-  }, []);
+  const me = useCurrentUser();
 
   const returnToParam = params.get('returnTo');
 

@@ -1,10 +1,10 @@
 import { Grid, Popover, Separator, Stack, Text } from '@chakra-ui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ChangeEvent } from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { beginGoogleLogin, getCurrentUser, logout, subscribeCurrentUser } from '../../../api/auth';
+import { beginGoogleLogin, logout } from '../../../api/auth';
 import { getErrorMessage } from '../../../api/errors';
 import { meQueryKey, useMeQuery } from '../../../query/meQueries';
 import { useSingleToast } from '../../../hooks/useSingleToast';
@@ -12,6 +12,7 @@ import type { UiLocale } from '../../../i18n/resources';
 import { useLocaleStore } from '../../../state/localeStore';
 import { STORAGE_KEYS } from '../../../state/storageKeys';
 import { type ThemeMode, useThemeStore } from '../../../state/themeStore';
+import { useCurrentUser } from '../../../auth/useCurrentUser';
 import { AuthActions } from './AuthActions';
 import { LanguageSelect } from './LanguageSelect';
 import { ProfileTriggerButton } from './ProfileTriggerButton';
@@ -26,14 +27,7 @@ export function ProfilePopover() {
 
   const [open, setOpen] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
-
-  const [me, setMe] = useState(() => getCurrentUser());
-
-  useEffect(() => {
-    return subscribeCurrentUser(() => {
-      setMe(getCurrentUser());
-    });
-  }, []);
+  const me = useCurrentUser();
 
   const locale = useLocaleStore((s) => s.locale);
   const setLocale = useLocaleStore((s) => s.setLocale);
@@ -41,7 +35,8 @@ export function ProfilePopover() {
   const themeMode = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
 
-  const isLoggedIn = Boolean(me) && !logoutPending;
+  const displayedMe = logoutPending ? null : me;
+  const isLoggedIn = Boolean(displayedMe);
   const { data: meProfile } = useMeQuery({ enabled: isLoggedIn });
 
   const profileTitle = isLoggedIn
@@ -70,7 +65,6 @@ export function ProfilePopover() {
     }
 
     setLogoutPending(true);
-    setMe(null);
 
     const runLogout = async () => {
       try {
@@ -88,7 +82,6 @@ export function ProfilePopover() {
 
         await logout(); // clears access token + notifies listeners
       } catch (err: unknown) {
-        setMe(getCurrentUser());
         showToast({
           type: 'warning',
           title: t('toasts.logoutFailed'),
@@ -153,7 +146,7 @@ export function ProfilePopover() {
                 </PrimaryButton>
               )}
 
-              {isLoggedIn && me?.roles.includes('ADMIN') && (
+              {isLoggedIn && displayedMe?.roles.includes('ADMIN') && (
                 <PrimaryButton
                   w="full"
                   justifyContent="flex-start"
@@ -178,7 +171,7 @@ export function ProfilePopover() {
               </PrimaryButton>
 
               <AuthActions
-                me={me}
+                me={displayedMe}
                 logoutPending={logoutPending}
                 onLogin={beginGoogleLogin}
                 onLogout={handleLogoutClick}

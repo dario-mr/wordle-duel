@@ -29,6 +29,9 @@ const mocks = vi.hoisted(() => ({
     isSuccess: false,
     error: null,
   } as MockRoomQueryResult,
+  lastRoomQueryArgs: undefined as
+    | { roomId: string | undefined; enabled: boolean | undefined }
+    | undefined,
   useRoomTopic: vi.fn(),
   submitMutate: vi.fn(),
   readyMutate: vi.fn(),
@@ -53,13 +56,20 @@ vi.mock('../../src/api/auth', () => ({
   subscribeCurrentUser: mocks.subscribeCurrentUser,
 }));
 
+vi.mock('../../src/auth/useCurrentUser', () => ({
+  useCurrentUser: () => mocks.getCurrentUser() as { id: string; roles: string[] } | null,
+}));
+
 vi.mock('../../src/api/errors', () => ({
   getErrorMessage: (error: unknown) =>
     error instanceof Error ? error.message : 'Unknown room error',
 }));
 
 vi.mock('../../src/query/roomQueries', () => ({
-  useRoomQuery: () => mocks.roomQueryResult,
+  useRoomQuery: (roomId: string | undefined, args?: { enabled?: boolean }) => {
+    mocks.lastRoomQueryArgs = { roomId, enabled: args?.enabled };
+    return mocks.roomQueryResult;
+  },
   useSubmitGuessMutation: () => mocks.submitMutation,
   useReadyForNextRoundMutation: () => mocks.readyMutation,
 }));
@@ -216,6 +226,7 @@ describe('RoomPage', () => {
       isSuccess: true,
       error: null,
     };
+    mocks.lastRoomQueryArgs = undefined;
     mocks.useRoomTopic.mockReset();
     mocks.submitMutate.mockReset();
     mocks.readyMutate.mockReset();

@@ -15,10 +15,10 @@ import {
   type UsersSort,
   type UsersSortField,
 } from '../admin/usersSorts';
-import { getCurrentUser, subscribeCurrentUser } from '../api/auth';
 import { getErrorMessage } from '../api/errors';
 import { UNAUTHENTICATED_CODE } from '../constants';
 import { WdsApiError } from '../api/types';
+import { useCurrentUser } from '../auth/useCurrentUser';
 import { UsersSkeleton } from '../components/admin/UsersSkeleton.tsx';
 import { UsersTable } from '../components/admin/UsersTable.tsx';
 import { ErrorAlert } from '../components/common/ErrorAlert';
@@ -27,18 +27,11 @@ import { useAdminUsersQuery } from '../query/adminQueries';
 export function UsersPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
-  const [me, setMe] = useState(() => getCurrentUser());
+  const me = useCurrentUser();
   const [sort, setSort] = useState<UsersSort>(null);
   const [filterDraft, setFilterDraft] = useState(EMPTY_USERS_FILTERS);
   const [filters, setFilters] = useState(EMPTY_USERS_FILTERS);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    return subscribeCurrentUser(() => {
-      setMe(getCurrentUser());
-    });
-  }, []);
 
   const isAdmin = me?.roles.includes('ADMIN') ?? false;
 

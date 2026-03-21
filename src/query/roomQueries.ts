@@ -24,10 +24,10 @@ export function roomQueryKey(roomId: string) {
   return ['room', roomId] as const;
 }
 
-export function useRoomQuery(roomId: string | undefined) {
+export function useRoomQuery(roomId: string | undefined, args?: { enabled?: boolean }) {
   return useQuery({
     queryKey: roomId ? roomQueryKey(roomId) : ['room', 'missing'],
-    enabled: !!roomId,
+    enabled: (args?.enabled ?? true) && !!roomId,
     queryFn: ({ signal }) => {
       if (!roomId) {
         throw new Error(i18n.t('errors.missingRoomId'));
