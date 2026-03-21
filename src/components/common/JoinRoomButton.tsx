@@ -1,50 +1,27 @@
 import { type ButtonProps, Stack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import { getErrorMessage } from '../../api/errors.ts';
-import { useJoinRoomMutation } from '../../query/roomQueries';
+import { useJoinRoomAction } from '../../hooks/useJoinRoomAction';
 import { AccentButton } from './BrandButton';
-import { useSingleToast } from '../../hooks/useSingleToast';
 
 export function JoinRoomButton(props: {
   roomId: string | undefined;
   onJoined?: (roomId: string) => void;
+  onJoin?: (roomId: string | undefined) => void;
+  isJoining?: boolean;
   buttonProps?: Omit<ButtonProps, 'onClick' | 'loading' | 'disabled'>;
 }) {
   const { t } = useTranslation();
-  const joinMutation = useJoinRoomMutation();
-  const { show: showToast, dismiss: dismissErrorToast } = useSingleToast();
-
-  const showErrorToast = (message: string) => {
-    showToast({
-      type: 'error',
-      title: t('toasts.joinRoomFailed'),
-      description: message,
-      duration: 2000,
-      closable: true,
-    });
-  };
+  const joinAction = useJoinRoomAction({ onJoined: props.onJoined });
+  const isPending = props.isJoining ?? joinAction.isPending;
+  const handleJoin = props.onJoin ?? joinAction.joinRoom;
 
   return (
     <Stack gap={2} align="center">
       <AccentButton
-        loading={joinMutation.isPending}
-        disabled={!props.roomId || joinMutation.isPending}
+        loading={isPending}
+        disabled={!props.roomId || isPending}
         onClick={() => {
-          if (!props.roomId) {
-            return;
-          }
-          joinMutation.mutate(
-            { roomId: props.roomId },
-            {
-              onSuccess: (joined) => {
-                dismissErrorToast();
-                props.onJoined?.(joined.id);
-              },
-              onError: (err) => {
-                showErrorToast(getErrorMessage(err));
-              },
-            },
-          );
+          handleJoin(props.roomId);
         }}
         {...props.buttonProps}
       >

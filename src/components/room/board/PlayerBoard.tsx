@@ -1,5 +1,4 @@
 import { Stack } from '@chakra-ui/react';
-import { useMemo } from 'react';
 import type { PlayerDto, RoomDto } from '../../../api/types';
 import { MAX_GUESS_ATTEMPTS } from '../../../constants.ts';
 import { useGuessRevealAnimation } from '../../../hooks/useGuessRevealAnimation';
@@ -15,9 +14,7 @@ export function PlayerBoard(props: {
   const roundNumber = round?.roundNumber;
   const maxAttempts = round?.maxAttempts ?? MAX_GUESS_ATTEMPTS;
 
-  const guesses = useMemo(() => {
-    return round?.guessesByPlayerId[props.player.id] ?? [];
-  }, [round, props.player.id]);
+  const guesses = round?.guessesByPlayerId[props.player.id] ?? [];
 
   const { shouldAnimateGuess } = useGuessRevealAnimation({
     guesses,

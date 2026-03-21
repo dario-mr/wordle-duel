@@ -1,5 +1,4 @@
 import { Box, HStack, Stack, Text } from '@chakra-ui/react';
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PlayerDto, RoomDto } from '../../api/types';
 import { roomStatusTextKey, roundStatusTextKey } from '../../utils/roomStatusText';
@@ -33,11 +32,8 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
     return player?.displayName ?? fallback;
   };
 
-  const { mePlayer, opponent } = useMemo(() => {
-    const mePlayer = room.players.find((p) => p.id === myPlayerId);
-    const opponent = room.players.find((p) => p.id !== myPlayerId);
-    return { mePlayer, opponent };
-  }, [myPlayerId, room.players]);
+  const mePlayer = room.players.find((p) => p.id === myPlayerId);
+  const opponent = room.players.find((p) => p.id !== myPlayerId);
 
   const meName = getPlayerLabel(mePlayer, 'Me');
   const opponentName = getPlayerLabel(opponent, '?');

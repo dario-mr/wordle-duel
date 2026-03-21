@@ -1,13 +1,14 @@
 import { Heading, HStack, Input, Stack, Text } from '@chakra-ui/react';
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useJoinRoomAction } from '../../hooks/useJoinRoomAction';
 import { Card } from '../common/Card';
 import { JoinRoomButton } from '../common/JoinRoomButton';
 
 export function JoinRoomCard(props: { onJoined: (roomId: string) => void }) {
   const { t } = useTranslation();
   const [roomIdInput, setRoomIdInput] = useState('');
-  const joinButtonId = useId();
+  const { joinRoom, isPending } = useJoinRoomAction({ onJoined: props.onJoined });
 
   const roomIdToJoin = roomIdInput.trim();
 
@@ -18,7 +19,7 @@ export function JoinRoomCard(props: { onJoined: (roomId: string) => void }) {
         gap={3}
         onSubmit={(e) => {
           e.preventDefault();
-          document.getElementById(joinButtonId)?.click();
+          joinRoom(roomIdToJoin);
         }}
       >
         <Heading size="md">{t('home.joinRoom.title')}</Heading>
@@ -39,10 +40,9 @@ export function JoinRoomCard(props: { onJoined: (roomId: string) => void }) {
             />
             <JoinRoomButton
               roomId={roomIdToJoin}
-              onJoined={(joinedRoomId) => {
-                props.onJoined(joinedRoomId);
-              }}
-              buttonProps={{ type: 'button', id: joinButtonId }}
+              onJoin={joinRoom}
+              isJoining={isPending}
+              buttonProps={{ type: 'button' }}
             />
           </HStack>
         </Stack>
