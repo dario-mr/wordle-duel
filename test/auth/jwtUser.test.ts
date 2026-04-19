@@ -13,8 +13,8 @@ function encodeBase64Url(value: Record<string, unknown>): string {
 describe('getUserFromAccessToken', () => {
   it('parses a valid token into a JwtUser', () => {
     const token = makeJwt({
-      sub: 'alice@example.com',
-      uid: 'user-1',
+      sub: 'user-1',
+      email: 'alice@example.com',
       roles: ['USER', 'ADMIN'],
     });
 
@@ -27,8 +27,8 @@ describe('getUserFromAccessToken', () => {
 
   it('returns an empty role list when roles are missing', () => {
     const token = makeJwt({
-      sub: 'alice@example.com',
-      uid: 'user-1',
+      sub: 'user-1',
+      email: 'alice@example.com',
     });
 
     expect(getUserFromAccessToken(token)).toEqual({
@@ -39,9 +39,15 @@ describe('getUserFromAccessToken', () => {
   });
 
   it('returns null when required claims are missing', () => {
-    expect(getUserFromAccessToken(makeJwt({ uid: 'user-1' }))).toBeNull();
-    expect(getUserFromAccessToken(makeJwt({ sub: 'alice@example.com' }))).toBeNull();
-    expect(getUserFromAccessToken(makeJwt({ sub: 'alice@example.com', uid: '   ' }))).toBeNull();
+    expect(getUserFromAccessToken(makeJwt({ email: 'alice@example.com' }))).toBeNull();
+  });
+
+  it('returns an empty email when the email claim is missing', () => {
+    expect(getUserFromAccessToken(makeJwt({ sub: 'user-1', roles: ['USER'] }))).toEqual({
+      id: 'user-1',
+      email: '',
+      roles: ['USER'],
+    });
   });
 
   it('returns null for malformed tokens', () => {

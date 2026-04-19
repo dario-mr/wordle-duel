@@ -27,21 +27,21 @@ export async function mockUnauthenticatedSession(page: Page) {
 export async function mockAuthenticatedSession(
   page: Page,
   args?: {
-    uid?: string;
+    userId?: string;
     email?: string;
     roles?: string[];
     fullName?: string;
     displayName?: string;
   },
 ) {
-  const uid = args?.uid ?? 'user-1';
+  const userId = args?.userId ?? 'user-1';
   const email = args?.email ?? 'alice@example.com';
   const roles = args?.roles ?? ['USER'];
   const fullName = args?.fullName ?? 'Alice Example';
   const displayName = args?.displayName ?? 'alice';
   const token = makeJwt({
-    sub: email,
-    uid,
+    sub: userId,
+    email,
     roles,
     exp: Math.floor(Date.now() / 1000) + 3600,
   });
@@ -52,7 +52,7 @@ export async function mockAuthenticatedSession(
 
   await page.route('**/api/v1/users/me', async (route) => {
     await fulfillJson(route, {
-      id: uid,
+      id: userId,
       fullName,
       displayName,
       pictureUrl: null,

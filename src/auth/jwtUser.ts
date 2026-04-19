@@ -10,7 +10,7 @@ export interface JwtUser {
 
 interface AccessTokenClaims {
   sub: string;
-  uid?: string;
+  email?: string;
   roles?: string[];
   exp?: number;
 }
@@ -23,13 +23,9 @@ export function getUserFromAccessToken(token: string): JwtUser | null {
       return null;
     }
 
-    if (typeof claims.uid !== 'string' || claims.uid.trim().length === 0) {
-      return null;
-    }
-
     return {
-      id: claims.uid,
-      email: claims.sub,
+      id: claims.sub,
+      email: typeof claims.email === 'string' ? claims.email : '',
       roles: Array.isArray(claims.roles) ? (claims.roles as UserRole[]) : [],
     };
   } catch {
