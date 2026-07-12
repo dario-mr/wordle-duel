@@ -76,11 +76,7 @@ export interface SubmitGuessResponse {
 }
 
 export type RoomEventType =
-  | 'ROOM_CREATED'
-  | 'PLAYER_JOINED'
-  | 'ROUND_STARTED'
-  | 'ROUND_FINISHED'
-  | 'SCORES_UPDATED';
+  'ROOM_CREATED' | 'PLAYER_JOINED' | 'ROUND_STARTED' | 'ROUND_FINISHED' | 'SCORES_UPDATED';
 
 export interface RoomEventDto {
   type: RoomEventType;

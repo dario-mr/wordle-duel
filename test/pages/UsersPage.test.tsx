@@ -54,8 +54,7 @@ const mocks = vi.hoisted(() => ({
   observe: vi.fn(),
   disconnect: vi.fn(),
   intersectionCallback: undefined as
-    | ((entries: MockIntersectionObserverEntry[]) => void)
-    | undefined,
+    ((entries: MockIntersectionObserverEntry[]) => void) | undefined,
 }));
 
 vi.mock('react-router-dom', () => ({

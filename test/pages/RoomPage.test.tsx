@@ -30,8 +30,7 @@ const mocks = vi.hoisted(() => ({
     error: null,
   } as MockRoomQueryResult,
   lastRoomQueryArgs: undefined as
-    | { roomId: string | undefined; enabled: boolean | undefined }
-    | undefined,
+    { roomId: string | undefined; enabled: boolean | undefined } | undefined,
   useRoomTopic: vi.fn(),
   submitMutate: vi.fn(),
   readyMutate: vi.fn(),
