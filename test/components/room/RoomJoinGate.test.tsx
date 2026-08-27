@@ -19,6 +19,7 @@ vi.mock('../../../src/components/common/JoinRoomButton', () => ({
 const baseRoom = {
   id: 'room-1',
   language: 'IT' as const,
+  rounds: 5 as const,
   status: 'WAITING_FOR_PLAYERS' as const,
   players: [{ id: 'p1', score: 0, displayName: 'Alice' }],
   currentRound: null,

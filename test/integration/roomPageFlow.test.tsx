@@ -120,6 +120,7 @@ function createRoom(roomId: string): RoomDto {
   return {
     id: roomId,
     language: 'IT',
+    rounds: 5,
     status: 'IN_PROGRESS',
     players: [
       { id: 'me-1', score: 10, displayName: 'Me' },

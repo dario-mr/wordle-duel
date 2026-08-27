@@ -12,6 +12,8 @@ export class WdsApiError extends Error {
 
 export type Language = 'IT';
 
+export type RoomRounds = 5 | 10 | 'ENDLESS';
+
 export type RoomStatus = 'WAITING_FOR_PLAYERS' | 'IN_PROGRESS' | 'CLOSED';
 
 export interface PlayerDto {
@@ -49,6 +51,7 @@ export interface RoundDto {
 export interface RoomDto {
   id: string;
   language: Language;
+  rounds: RoomRounds;
   status: RoomStatus;
   players: PlayerDto[];
   currentRound: RoundDto | null;
@@ -61,6 +64,7 @@ export interface ErrorResponseDto {
 
 export interface CreateRoomRequest {
   language: Language;
+  rounds: RoomRounds;
 }
 
 export interface SubmitGuessRequest {
@@ -76,7 +80,12 @@ export interface SubmitGuessResponse {
 }
 
 export type RoomEventType =
-  'ROOM_CREATED' | 'PLAYER_JOINED' | 'ROUND_STARTED' | 'ROUND_FINISHED' | 'SCORES_UPDATED';
+  | 'ROOM_CREATED'
+  | 'PLAYER_JOINED'
+  | 'ROUND_STARTED'
+  | 'ROUND_FINISHED'
+  | 'SCORES_UPDATED'
+  | 'ROOM_CLOSED';
 
 export interface RoomEventDto {
   type: RoomEventType;

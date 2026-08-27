@@ -168,6 +168,8 @@ export function RoomPage() {
       {showRoundStatusPanel && (
         <RoundStatusPanel
           room={room}
+          player={me}
+          opponent={opponent}
           endedRound={endedRound}
           myRoundStatus={myRoundStatus}
           isReadyPending={readyForNextRoundMutation.isPending}

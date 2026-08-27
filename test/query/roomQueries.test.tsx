@@ -39,6 +39,7 @@ function createRoomDto(id: string): RoomDto {
   return {
     id,
     language: 'IT',
+    rounds: 5,
     status: 'WAITING_FOR_PLAYERS',
     players: [],
     currentRound: null,
@@ -83,7 +84,7 @@ describe('roomQueries', () => {
       const { result } = renderHook(() => useCreateRoomMutation(), { wrapper });
 
       await act(async () => {
-        await result.current.mutateAsync({ language: 'IT' });
+        await result.current.mutateAsync({ language: 'IT', rounds: 5 });
       });
 
       expect(queryClient.getQueryData(roomQueryKey('created-room'))).toEqual(room);

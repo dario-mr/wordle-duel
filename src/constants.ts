@@ -4,6 +4,11 @@ export const PROD_BACKEND_BASE_PATH = '/wordle-duel-service/';
 export const PROD_API_V1_BASE_PATH = '/wordle-duel-service/api/v1/';
 export const PROD_WS_PATH = '/wordle-duel-service/ws';
 export const LANGUAGE_OPTIONS = [{ value: 'IT', labelKey: 'roomLanguage.it' }] as const;
+export const ROUND_OPTIONS = [
+  { value: 5, labelKey: 'home.createRoom.rounds5' },
+  { value: 10, labelKey: 'home.createRoom.rounds10' },
+  { value: 'ENDLESS', labelKey: 'home.createRoom.roundsEndless' },
+] as const;
 
 export const UNAUTHENTICATED_CODE = 'UNAUTHENTICATED';
 export const UNEXPECTED_RESPONSE_CODE = 'UNEXPECTED_RESPONSE';

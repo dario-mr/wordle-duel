@@ -24,11 +24,14 @@ describe('api/rooms', () => {
 
   it('creates and lists rooms via the base rooms endpoint', async () => {
     const api = await import('../../src/api/rooms');
-    void api.createRoom({ language: 'IT' });
+    void api.createRoom({ language: 'IT', rounds: 5 });
     const init: RequestInit = { signal: new AbortController().signal };
     void api.listMyRooms(init);
 
-    expect(mocks.postJson).toHaveBeenCalledWith('https://api.test/rooms', { language: 'IT' });
+    expect(mocks.postJson).toHaveBeenCalledWith('https://api.test/rooms', {
+      language: 'IT',
+      rounds: 5,
+    });
     expect(mocks.getJson).toHaveBeenCalledWith('https://api.test/rooms', init);
   });
 

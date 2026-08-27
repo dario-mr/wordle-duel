@@ -34,6 +34,7 @@ vi.mock('../../../src/components/common/BrandButton.tsx', () => ({
 const baseRoom = {
   id: 'room-1',
   language: 'IT' as const,
+  rounds: 5 as const,
   status: 'IN_PROGRESS' as const,
   players: [],
   currentRound: {
@@ -51,6 +52,8 @@ describe('RoundStatusPanel', () => {
     render(
       <RoundStatusPanel
         room={{ ...baseRoom, status: 'WAITING_FOR_PLAYERS' }}
+        player={{ id: 'me', score: 3, displayName: 'Me' }}
+        opponent={{ id: 'opponent', score: 2, displayName: 'Opponent' }}
         endedRound={null}
         myRoundStatus={undefined}
         onReadyNextRound={vi.fn()}
@@ -67,6 +70,8 @@ describe('RoundStatusPanel', () => {
     render(
       <RoundStatusPanel
         room={baseRoom}
+        player={{ id: 'me', score: 3, displayName: 'Me' }}
+        opponent={{ id: 'opponent', score: 2, displayName: 'Opponent' }}
         endedRound={baseRoom.currentRound}
         myRoundStatus="LOST"
         onReadyNextRound={onReadyNextRound}
@@ -85,6 +90,8 @@ describe('RoundStatusPanel', () => {
     render(
       <RoundStatusPanel
         room={baseRoom}
+        player={{ id: 'me', score: 3, displayName: 'Me' }}
+        opponent={{ id: 'opponent', score: 2, displayName: 'Opponent' }}
         endedRound={baseRoom.currentRound}
         myRoundStatus="READY"
         onReadyNextRound={vi.fn()}
@@ -95,5 +102,26 @@ describe('RoundStatusPanel', () => {
 
     expect(screen.queryByRole('button', { name: 'room.round.readyForNextRound' })).toBeNull();
     expect(screen.getByText('room.round.readyRejected:Ready failed')).toBeTruthy();
+  });
+
+  it('shows the final result and does not offer another round when the room is closed', () => {
+    render(
+      <RoundStatusPanel
+        room={{ ...baseRoom, status: 'CLOSED' }}
+        player={{ id: 'me', score: 3, displayName: 'Me' }}
+        opponent={{ id: 'opponent', score: 2, displayName: 'Opponent' }}
+        endedRound={baseRoom.currentRound}
+        myRoundStatus="WON"
+        onReadyNextRound={vi.fn()}
+        isReadyPending={false}
+        readyError={null}
+      />,
+    );
+
+    expect(screen.getByText('room.round.gameOver')).toBeTruthy();
+    expect(screen.getByText('room.round.youWonMatch')).toBeTruthy();
+    expect(screen.queryByText('room.round.youWonThisRound')).toBeNull();
+    expect(screen.queryByText('room.round.finalScore')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'room.round.readyForNextRound' })).toBeNull();
   });
 });

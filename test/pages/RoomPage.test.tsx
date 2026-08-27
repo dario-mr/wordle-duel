@@ -180,6 +180,7 @@ function createRoom(args?: {
   return {
     id: 'room-1',
     language: 'IT',
+    rounds: 5,
     status: args?.status ?? 'IN_PROGRESS',
     players,
     currentRound:

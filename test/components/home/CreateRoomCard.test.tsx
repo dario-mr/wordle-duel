@@ -101,8 +101,11 @@ describe('CreateRoomCard', () => {
   it('submits the create room mutation and forwards success', () => {
     const onCreated = vi.fn();
     mocks.mutate.mockImplementation(
-      (vars: { language: 'IT' }, options?: { onSuccess?: (room: { id: string }) => void }) => {
-        expect(vars).toEqual({ language: 'IT' });
+      (
+        vars: { language: 'IT'; rounds: 5 | 10 | 'ENDLESS' },
+        options?: { onSuccess?: (room: { id: string }) => void },
+      ) => {
+        expect(vars).toEqual({ language: 'IT', rounds: 5 });
         options?.onSuccess?.({ id: 'room-1' });
       },
     );
@@ -114,6 +117,30 @@ describe('CreateRoomCard', () => {
       throw new Error('Expected create room form');
     }
 
+    fireEvent.submit(form);
+
+    expect(onCreated).toHaveBeenCalledWith('room-1');
+  });
+
+  it('submits a numeric finite round count selected from the native select', () => {
+    const onCreated = vi.fn();
+    mocks.mutate.mockImplementation(
+      (
+        vars: { language: 'IT'; rounds: 5 | 10 | 'ENDLESS' },
+        options?: { onSuccess?: (room: { id: string }) => void },
+      ) => {
+        expect(vars.rounds).toBe(10);
+        options?.onSuccess?.({ id: 'room-1' });
+      },
+    );
+
+    render(<CreateRoomCard onCreated={onCreated} />);
+    const roundsSelect = screen.getAllByRole('combobox')[1];
+    fireEvent.change(roundsSelect, { target: { value: '10' } });
+    const form = screen.getByRole('button').closest('form');
+    if (!form) {
+      throw new Error('Expected create room form');
+    }
     fireEvent.submit(form);
 
     expect(onCreated).toHaveBeenCalledWith('room-1');

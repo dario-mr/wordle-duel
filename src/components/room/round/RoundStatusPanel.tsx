@@ -1,12 +1,14 @@
 import { Code, Stack, Text } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import type { RoomDto, RoundDto, RoundPlayerStatus } from '../../../api/types';
+import type { PlayerDto, RoomDto, RoundDto, RoundPlayerStatus } from '../../../api/types';
 import { getErrorMessage } from '../../../api/errors';
 import { ErrorAlert } from '../../common/ErrorAlert';
 import { AccentButton } from '../../common/BrandButton.tsx';
 
 export function RoundStatusPanel(props: {
   room: RoomDto;
+  player: PlayerDto;
+  opponent?: PlayerDto;
   endedRound: RoundDto | null;
   myRoundStatus: RoundPlayerStatus | undefined;
   onReadyNextRound: (roundNumber: number) => void;
@@ -15,13 +17,27 @@ export function RoundStatusPanel(props: {
 }) {
   const { t } = useTranslation();
 
-  if (props.room.status !== 'IN_PROGRESS') {
+  if (props.room.status === 'WAITING_FOR_PLAYERS') {
     return <Text fontSize="sm">{t('room.round.notInProgressYet')}</Text>;
   }
 
   const endedRound = props.endedRound;
   const currentRound = props.room.currentRound;
   const solution = currentRound?.solution;
+  const isClosed = props.room.status === 'CLOSED';
+
+  if (isClosed) {
+    return (
+      <Stack gap={2} align="center">
+        <Text fontSize="lg" fontWeight="semibold">
+          {t('room.round.gameOver')}
+        </Text>
+        <Text textAlign="center">
+          {t(getMatchResultTextKey(props.player.score, props.opponent?.score))}
+        </Text>
+      </Stack>
+    );
+  }
 
   return (
     <Stack gap={2} align="center">
@@ -62,6 +78,19 @@ export function RoundStatusPanel(props: {
       )}
     </Stack>
   );
+}
+
+function getMatchResultTextKey(playerScore: number, opponentScore: number | undefined): string {
+  if (opponentScore == null) {
+    return 'room.round.matchComplete';
+  }
+  if (playerScore > opponentScore) {
+    return 'room.round.youWonMatch';
+  }
+  if (playerScore < opponentScore) {
+    return 'room.round.youLostMatch';
+  }
+  return 'room.round.matchDraw';
 }
 
 function getEndedRoundTextKey(status: RoundPlayerStatus): string {

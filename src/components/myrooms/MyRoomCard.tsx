@@ -48,6 +48,13 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
   const roundStatusLabel = room.currentRound
     ? t(roundStatusTextKey[room.currentRound.roundStatus]).toUpperCase()
     : DASH;
+  const roundTitle =
+    room.rounds === 'ENDLESS'
+      ? t('room.round.title', { roundNumber: String(roundNumber) })
+      : t('room.round.titleWithRounds', {
+          roundNumber: String(roundNumber),
+          rounds: String(room.rounds),
+        });
   const roundStatusStyle = getRoundStatusStyle(room.currentRound?.roundStatus);
 
   const statusPill: StatusPillModel =
@@ -104,7 +111,7 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
         {roundNumber && (
           <HStack gap={3} alignItems="center" flexWrap="wrap">
             <Text fontSize="sm" opacity="0.7">
-              {t('room.round.title', { roundNumber: String(roundNumber) })}
+              {roundTitle}
             </Text>
             <RoomLanguageFlag language={room.language} />
           </HStack>

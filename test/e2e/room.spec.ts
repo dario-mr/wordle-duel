@@ -10,6 +10,7 @@ function liveRoom(roomId: string) {
   return {
     id: roomId,
     language: 'IT',
+    rounds: 5,
     status: 'IN_PROGRESS',
     players: [
       { id: 'user-1', score: 0, displayName: 'Alice Example' },

@@ -2,17 +2,19 @@ import { Heading, NativeSelect, Stack, Text } from '@chakra-ui/react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getErrorMessage } from '../../api/errors';
-import { LANGUAGE_OPTIONS } from '../../constants';
+import { LANGUAGE_OPTIONS, ROUND_OPTIONS } from '../../constants';
 import { useCreateRoomMutation } from '../../query/roomQueries';
 import { PrimaryButton } from '../common/BrandButton';
 import { Card } from '../common/Card';
 import { ErrorAlert } from '../common/ErrorAlert';
 
 type LanguageCode = (typeof LANGUAGE_OPTIONS)[number]['value'];
+type RoomRounds = (typeof ROUND_OPTIONS)[number]['value'];
 
 export function CreateRoomCard(props: { onCreated: (roomId: string) => void }) {
   const { t } = useTranslation();
   const [language, setLanguage] = useState<LanguageCode>(LANGUAGE_OPTIONS[0].value);
+  const [rounds, setRounds] = useState<RoomRounds>(ROUND_OPTIONS[0].value);
   const createMutation = useCreateRoomMutation();
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const languageSelectorEnabled = LANGUAGE_OPTIONS.length > 1;
@@ -27,6 +29,7 @@ export function CreateRoomCard(props: { onCreated: (roomId: string) => void }) {
           createMutation.mutate(
             {
               language,
+              rounds,
             },
             {
               onSuccess: (room) => {
@@ -60,6 +63,33 @@ export function CreateRoomCard(props: { onCreated: (roomId: string) => void }) {
             >
               {LANGUAGE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
+                  {t(opt.labelKey)}
+                </option>
+              ))}
+            </NativeSelect.Field>
+          </NativeSelect.Root>
+        </Stack>
+
+        <Stack gap={1} maxW="240px">
+          <Text fontSize="sm" fontWeight="medium">
+            {t('home.createRoom.roundsLabel')}
+          </Text>
+          <NativeSelect.Root>
+            <NativeSelect.Field
+              id="create-room-rounds"
+              value={rounds}
+              onChange={(e) => {
+                const selectedRounds = ROUND_OPTIONS.find(
+                  (option) => String(option.value) === e.target.value,
+                )?.value;
+                if (selectedRounds !== undefined) {
+                  setRounds(selectedRounds);
+                }
+              }}
+              aria-label={t('home.createRoom.roundsAriaLabel')}
+            >
+              {ROUND_OPTIONS.map((opt) => (
+                <option key={String(opt.value)} value={opt.value}>
                   {t(opt.labelKey)}
                 </option>
               ))}
