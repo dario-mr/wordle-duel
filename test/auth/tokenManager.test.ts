@@ -43,6 +43,7 @@ describe('tokenManager', () => {
     const tokenManager = await loadTokenManager();
     tokenManager.clearAccessToken();
     vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   describe('getValidAccessToken', () => {
@@ -98,6 +99,22 @@ describe('tokenManager', () => {
 
       await expect(first).resolves.toBe('token-1');
       await expect(second).resolves.toBe('token-1');
+      expect(mocks.apiFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses a browser lock to coordinate refreshes across tabs', async () => {
+      const request = vi.fn(
+        async (_name: string, callback: () => Promise<string | null>) => await callback(),
+      );
+      vi.stubGlobal('navigator', { locks: { request } });
+      const tokenManager = await loadTokenManager();
+      mocks.apiFetch.mockResolvedValueOnce(
+        jsonResponse({ accessToken: 'token-1', expiresInSeconds: 300 }),
+      );
+
+      await expect(tokenManager.refreshAccessToken()).resolves.toBe('token-1');
+
+      expect(request).toHaveBeenCalledWith('wordle-duel-refresh', expect.any(Function));
       expect(mocks.apiFetch).toHaveBeenCalledTimes(1);
     });
 

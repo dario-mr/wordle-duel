@@ -55,11 +55,20 @@ export async function refreshAccessToken(): Promise<string | null> {
     return await refreshInFlight;
   }
 
-  refreshInFlight = doRefresh().finally(() => {
+  refreshInFlight = doRefreshWithLock().finally(() => {
     refreshInFlight = null;
   });
 
   return await refreshInFlight;
+}
+
+async function doRefreshWithLock(): Promise<string | null> {
+  const locks = Reflect.get(navigator, 'locks') as LockManager | undefined;
+  if (!locks) {
+    return await doRefresh();
+  }
+
+  return await locks.request('wordle-duel-refresh', doRefresh);
 }
 
 function notifyAccessTokenChanged(): void {
