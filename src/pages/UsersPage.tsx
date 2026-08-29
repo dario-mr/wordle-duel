@@ -36,7 +36,7 @@ export function UsersPage() {
   const isAdmin = me?.roles.includes('ADMIN') ?? false;
 
   useEffect(() => {
-    if (me !== null && !isAdmin) {
+    if (me && !isAdmin) {
       void navigate('/', { replace: true });
     }
   }, [me, isAdmin, navigate]);

@@ -41,7 +41,6 @@ const mocks = vi.hoisted(() => {
     deactivate,
     activate,
     getWsBrokerUrl: vi.fn(() => 'ws://localhost/ws'),
-    getValidAccessToken: vi.fn(),
     roomQueryKey: vi.fn((roomId: string) => ['room', roomId] as const),
   };
 });
@@ -65,10 +64,6 @@ vi.mock('../../src/config/wds', () => ({
   getWsBrokerUrl: mocks.getWsBrokerUrl,
 }));
 
-vi.mock('../../src/auth/tokenManager', () => ({
-  getValidAccessToken: mocks.getValidAccessToken,
-}));
-
 vi.mock('../../src/query/roomQueries', () => ({
   roomQueryKey: mocks.roomQueryKey,
 }));
@@ -79,7 +74,6 @@ describe('useRoomTopic', () => {
     mocks.deactivate.mockReset();
     mocks.activate.mockReset();
     mocks.getWsBrokerUrl.mockClear();
-    mocks.getValidAccessToken.mockReset();
     mocks.roomQueryKey.mockClear();
   });
 
@@ -107,23 +101,18 @@ describe('useRoomTopic', () => {
     });
   });
 
-  it('beforeConnect sets an authorization header when a token exists', async () => {
+  it('does not configure a STOMP authorization header', async () => {
     const { useRoomTopic } = await import('../../src/ws/useRoomTopic');
-    mocks.getValidAccessToken.mockResolvedValue('token-1');
 
     renderHook(() => {
       useRoomTopic('room-1');
     });
-    const config = mocks.getLastConfig() as { beforeConnect?: () => Promise<void> };
 
-    await (config.beforeConnect?.() ?? Promise.resolve());
-
+    expect(mocks.getLastConfig()).not.toHaveProperty('beforeConnect');
     expect(
       (mocks.getLastConfig() as { __client: { connectHeaders: Record<string, string> } }).__client
         .connectHeaders,
-    ).toEqual({
-      Authorization: 'Bearer token-1',
-    });
+    ).toEqual({});
   });
 
   it('subscribes on connect and invalidates the room query on messages', async () => {

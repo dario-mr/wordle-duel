@@ -27,10 +27,6 @@ test.describe('profile and admin flows', () => {
   }) => {
     await mockAuthenticatedSession(page);
 
-    await page.route('**/auth/logout', async (route) => {
-      await route.fulfill({ status: 204 });
-    });
-
     await page.goto('/');
     await page.evaluate(() => {
       window.sessionStorage.setItem('wd.auth.returnTo', '/rooms/room-1');

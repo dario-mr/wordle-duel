@@ -11,7 +11,6 @@ import { withMemoryRouter, Route } from '../testUtils/router';
 
 const mocks = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
-  subscribeCurrentUser: vi.fn<(listener: () => void) => () => void>(),
   getRoom: vi.fn(),
   submitGuess: vi.fn(),
   readyForNextRound: vi.fn(),
@@ -19,9 +18,9 @@ const mocks = vi.hoisted(() => ({
   showToast: vi.fn(),
 }));
 
-vi.mock('../../src/api/auth', () => ({
-  getCurrentUser: mocks.getCurrentUser,
-  subscribeCurrentUser: mocks.subscribeCurrentUser,
+vi.mock('../../src/auth/useCurrentUser', () => ({
+  useCurrentUser: () =>
+    mocks.getCurrentUser() as { id: string; roles: string[] } | null | undefined,
 }));
 
 vi.mock('../../src/api/rooms', () => ({

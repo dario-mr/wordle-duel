@@ -109,7 +109,7 @@ export function LegalPage() {
             </Text>
             <Text as="li">
               Technical/security data: IP address and server logs (as typically produced by
-              hosting/infra), plus authentication/session tokens.
+              hosting/infra), plus authentication/session data.
             </Text>
             <Text as="li">
               Preferences stored in the browser: UI language and theme (see{' '}
@@ -172,8 +172,8 @@ export function LegalPage() {
           <Heading size="md">Retention</Heading>
           <Text>
             We keep your user record while your account is active and as needed to operate the
-            Service. Tokens/cookies expire automatically. Server logs are retained for 30 days as
-            required for security and operations.
+            Service. Sessions and cookies expire automatically. Server logs are retained for 30 days
+            as required for security and operations.
           </Text>
         </Stack>
 
@@ -210,8 +210,8 @@ export function LegalPage() {
               is readable by the browser.
             </Text>
             <Text as="li">
-              <Code>__Host-wd_refresh</Code>: used to refresh your session securely. This cookie is
-              not accessible via JavaScript (HttpOnly).
+              <Code>session cookie</Code>: used for authentication. This cookie is not accessible
+              via JavaScript (HttpOnly).
             </Text>
           </Stack>
           <Text>Without these cookies, the Service cannot function correctly.</Text>

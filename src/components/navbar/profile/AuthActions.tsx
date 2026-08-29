@@ -1,10 +1,10 @@
 import { Box, Separator, Stack, VStack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
+import type { UserMeDto } from '../../../api/types';
 import { AccentButton, GoogleLoginButton } from '../../common/BrandButton';
-import type { JwtUser } from '../../../auth/jwtUser.ts';
 
 interface Props {
-  me: JwtUser | null | undefined;
+  me: UserMeDto | null | undefined;
   logoutPending: boolean;
   onLogin: () => void;
   onLogout: () => void;

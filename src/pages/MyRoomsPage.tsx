@@ -15,7 +15,7 @@ export function MyRoomsPage() {
   const navigate = useNavigate();
   const me = useCurrentUser();
 
-  const { data, isLoading, isFetching, error } = useMyRoomsQuery({ enabled: true });
+  const { data, isLoading, isFetching, error } = useMyRoomsQuery({ enabled: me !== undefined });
 
   const rooms = data ?? [];
 

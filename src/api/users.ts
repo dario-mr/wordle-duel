@@ -1,5 +1,5 @@
 import { USERS_FILTER_FIELDS, type UsersFilters } from '../admin/usersFilters';
-import type { AdminUsersResponse, UserMeDto } from './types';
+import { WdsApiError, type AdminUsersResponse, type UserMeDto } from './types';
 import { apiV1Url, backendUrl, withQuery } from './url';
 import { getJson } from './wdsClient';
 
@@ -9,8 +9,17 @@ interface AdminUsersParams extends Partial<UsersFilters> {
   sort?: string;
 }
 
-export function getMe(init?: RequestInit): Promise<UserMeDto> {
-  return getJson<UserMeDto>(apiV1Url('/users/me'), init);
+export async function getMe(init?: RequestInit): Promise<UserMeDto | null> {
+  try {
+    return await getJson<UserMeDto>(apiV1Url('/users/me'), init, {
+      redirectOnUnauthorized: false,
+    });
+  } catch (error) {
+    if (error instanceof WdsApiError && error.status === 401) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export function getAdminUsers(

@@ -9,14 +9,15 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   beginGoogleLogin: vi.fn(),
   getCurrentUser: vi.fn(),
-  subscribeCurrentUser: vi.fn<(listener: () => void) => () => void>(),
   searchParams: new URLSearchParams(),
 }));
 
 vi.mock('../../src/api/auth', () => ({
   beginGoogleLogin: mocks.beginGoogleLogin,
-  getCurrentUser: mocks.getCurrentUser,
-  subscribeCurrentUser: mocks.subscribeCurrentUser,
+}));
+
+vi.mock('../../src/auth/useCurrentUser', () => ({
+  useCurrentUser: () => mocks.getCurrentUser() as { id: string } | null | undefined,
 }));
 
 vi.mock('react-router-dom', () => ({

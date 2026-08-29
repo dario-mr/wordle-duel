@@ -97,7 +97,10 @@ export interface UserMeDto {
   fullName: string;
   displayName: string;
   pictureUrl: string | null;
+  roles: UserRole[];
 }
+
+export type UserRole = 'USER' | 'ADMIN';
 
 export interface AdminUserDto {
   id: string;

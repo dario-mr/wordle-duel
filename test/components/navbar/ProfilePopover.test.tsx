@@ -6,13 +6,12 @@ import { ProfilePopover } from '../../../src/components/navbar/profile/ProfilePo
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   cancelQueries: vi.fn().mockResolvedValue(undefined),
+  setQueryData: vi.fn(),
   removeQueries: vi.fn(),
   showToast: vi.fn(),
   beginGoogleLogin: vi.fn(),
   logout: vi.fn().mockResolvedValue(undefined),
   getCurrentUser: vi.fn(),
-  subscribeCurrentUser: vi.fn(() => () => undefined),
-  meQueryResult: { data: { fullName: 'Alice', pictureUrl: null as string | null } },
   setLocale: vi.fn(),
   setTheme: vi.fn(),
   locale: 'en',
@@ -26,6 +25,7 @@ vi.mock('react-router-dom', () => ({
 vi.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({
     cancelQueries: mocks.cancelQueries,
+    setQueryData: mocks.setQueryData,
     removeQueries: mocks.removeQueries,
   }),
 }));
@@ -37,8 +37,11 @@ vi.mock('react-i18next', () => ({
 vi.mock('../../../src/api/auth', () => ({
   beginGoogleLogin: mocks.beginGoogleLogin,
   logout: mocks.logout,
-  getCurrentUser: mocks.getCurrentUser,
-  subscribeCurrentUser: mocks.subscribeCurrentUser,
+}));
+
+vi.mock('../../../src/auth/useCurrentUser', () => ({
+  useCurrentUser: () =>
+    mocks.getCurrentUser() as { id: string; roles: string[] } | null | undefined,
 }));
 
 vi.mock('../../../src/api/errors', () => ({
@@ -47,7 +50,6 @@ vi.mock('../../../src/api/errors', () => ({
 
 vi.mock('../../../src/query/meQueries', () => ({
   meQueryKey: () => ['me'],
-  useMeQuery: () => mocks.meQueryResult,
 }));
 
 vi.mock('../../../src/hooks/useSingleToast', () => ({
@@ -151,15 +153,13 @@ describe('ProfilePopover', () => {
     mocks.navigate.mockReset();
     mocks.cancelQueries.mockReset();
     mocks.cancelQueries.mockResolvedValue(undefined);
+    mocks.setQueryData.mockReset();
     mocks.removeQueries.mockReset();
     mocks.showToast.mockReset();
     mocks.beginGoogleLogin.mockReset();
     mocks.logout.mockReset();
     mocks.logout.mockResolvedValue(undefined);
     mocks.getCurrentUser.mockReset();
-    mocks.subscribeCurrentUser.mockReset();
-    mocks.subscribeCurrentUser.mockReturnValue(() => undefined);
-    mocks.meQueryResult = { data: { fullName: 'Alice', pictureUrl: null } };
     mocks.setLocale.mockReset();
     mocks.setTheme.mockReset();
     sessionStorage.clear();

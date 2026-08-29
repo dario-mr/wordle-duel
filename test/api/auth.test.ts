@@ -1,26 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  clearAccessToken: vi.fn(),
-  getAccessToken: vi.fn(),
-  subscribeAccessToken: vi.fn((listener: () => void) => {
-    return () => {
-      listener();
-    };
-  }),
-  getUserFromAccessToken: vi.fn(),
   apiFetch: vi.fn(),
   backendUrl: vi.fn((path: string) => `http://backend.test${path}`),
-}));
-
-vi.mock('../../src/auth/tokenManager', () => ({
-  clearAccessToken: mocks.clearAccessToken,
-  getAccessToken: mocks.getAccessToken,
-  subscribeAccessToken: mocks.subscribeAccessToken,
-}));
-
-vi.mock('../../src/auth/jwtUser', () => ({
-  getUserFromAccessToken: mocks.getUserFromAccessToken,
 }));
 
 vi.mock('../../src/api/apiFetch', () => ({
@@ -38,10 +20,6 @@ async function loadAuthApi() {
 
 describe('api/auth', () => {
   beforeEach(() => {
-    mocks.clearAccessToken.mockReset();
-    mocks.getAccessToken.mockReset();
-    mocks.subscribeAccessToken.mockClear();
-    mocks.getUserFromAccessToken.mockReset();
     mocks.apiFetch.mockReset();
     mocks.backendUrl.mockClear();
   });
@@ -56,7 +34,7 @@ describe('api/auth', () => {
     expect(assign).toHaveBeenCalledWith('http://backend.test/oauth2/authorization/google');
   });
 
-  it('logout clears the token on ok, 401, and 403', async () => {
+  it('accepts successful and already-logged-out responses', async () => {
     const api = await loadAuthApi();
     mocks.apiFetch
       .mockResolvedValueOnce(new Response(null, { status: 200 }))
@@ -67,44 +45,16 @@ describe('api/auth', () => {
     await expect(api.logout()).resolves.toBeUndefined();
     await expect(api.logout()).resolves.toBeUndefined();
 
-    expect(mocks.clearAccessToken).toHaveBeenCalledTimes(3);
+    expect(mocks.apiFetch).toHaveBeenCalledTimes(3);
+    expect(mocks.apiFetch).toHaveBeenCalledWith('http://backend.test/auth/logout', {
+      method: 'POST',
+    });
   });
 
-  it('logout throws on unexpected statuses', async () => {
+  it('throws on unexpected logout statuses', async () => {
     const api = await loadAuthApi();
     mocks.apiFetch.mockResolvedValueOnce(new Response(null, { status: 500 }));
 
     await expect(api.logout()).rejects.toThrow('Logout failed with status 500');
-  });
-
-  it('getCurrentUser decodes the current token', async () => {
-    const api = await loadAuthApi();
-    mocks.getAccessToken.mockReturnValue('token-1');
-    mocks.getUserFromAccessToken.mockReturnValue({ id: 'user-1' });
-
-    expect(api.getCurrentUser()).toEqual({ id: 'user-1' });
-    expect(mocks.getUserFromAccessToken).toHaveBeenCalledWith('token-1');
-  });
-
-  it('getCurrentUser returns a stable snapshot for the same token', async () => {
-    const api = await loadAuthApi();
-    const user = { id: 'user-1' };
-    mocks.getAccessToken.mockReturnValue('token-1');
-    mocks.getUserFromAccessToken.mockReturnValue(user);
-
-    const first = api.getCurrentUser();
-    const second = api.getCurrentUser();
-
-    expect(first).toBe(second);
-    expect(mocks.getUserFromAccessToken).toHaveBeenCalledTimes(1);
-  });
-
-  it('subscribeCurrentUser proxies the token subscription', async () => {
-    const api = await loadAuthApi();
-    const listener = vi.fn();
-
-    api.subscribeCurrentUser(listener);
-
-    expect(mocks.subscribeAccessToken).toHaveBeenCalledWith(listener);
   });
 });

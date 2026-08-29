@@ -34,7 +34,6 @@ interface MockIntersectionObserverEntry {
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   getCurrentUser: vi.fn(),
-  subscribeCurrentUser: vi.fn<(listener: () => void) => () => void>(),
   queryResult: {
     data: { pages: [] },
     isLoading: false,
@@ -59,11 +58,6 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
-}));
-
-vi.mock('../../src/api/auth', () => ({
-  getCurrentUser: mocks.getCurrentUser,
-  subscribeCurrentUser: mocks.subscribeCurrentUser,
 }));
 
 vi.mock('../../src/auth/useCurrentUser', () => ({
@@ -185,6 +179,15 @@ describe('UsersPage', () => {
     await waitFor(() => {
       expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
     });
+  });
+
+  it('waits for the current-user query before redirecting', () => {
+    mocks.getCurrentUser.mockReturnValue(undefined);
+
+    render(<UsersPage />);
+
+    expect(mocks.navigate).not.toHaveBeenCalled();
+    expect(mocks.lastQueryArgs?.enabled).toBe(false);
   });
 
   it('redirects away when the admin query returns 403', async () => {

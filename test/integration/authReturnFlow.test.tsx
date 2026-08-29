@@ -11,13 +11,14 @@ import { renderWithMemoryRouter, Route } from '../testUtils/router';
 const mocks = vi.hoisted(() => ({
   beginGoogleLogin: vi.fn(),
   getCurrentUser: vi.fn(),
-  subscribeCurrentUser: vi.fn<(listener: () => void) => () => void>(),
 }));
 
 vi.mock('../../src/api/auth', () => ({
   beginGoogleLogin: mocks.beginGoogleLogin,
-  getCurrentUser: mocks.getCurrentUser,
-  subscribeCurrentUser: mocks.subscribeCurrentUser,
+}));
+
+vi.mock('../../src/auth/useCurrentUser', () => ({
+  useCurrentUser: () => mocks.getCurrentUser() as { id: string } | null | undefined,
 }));
 
 vi.mock('react-i18next', async () => await import('../testUtils/reactI18nextMock'));

@@ -48,9 +48,9 @@
 - Routing is defined in `src/router/index.tsx`; top-level pages live in `src/pages/`.
 - REST requests are centralized in `src/api/` (`apiFetch.ts`, resource modules, typed contracts in
   `types.ts`).
-- Authentication uses in-memory access tokens in `src/auth/tokenManager.ts`, refreshed through
-  `/auth/refresh` with cookie session + CSRF.
+- Authentication uses the server-backed session established by Google OAuth; REST and WebSocket
+  requests use the session cookie, while unsafe REST requests retain CSRF protection.
 - Server state is managed with React Query in `src/query/`.
-- Real-time updates use STOMP WebSocket in `src/ws/useRoomTopic.ts` with JWT sent on CONNECT and
-  room-query invalidation on topic events.
+- Real-time updates use STOMP WebSocket in `src/ws/useRoomTopic.ts` with the browser session cookie
+  and room-query invalidation on topic events.
 - UI preferences use Zustand in `src/state/`; translations are in `src/i18n/`.

@@ -5,7 +5,6 @@ import { App } from '../src/App';
 
 const mocks = vi.hoisted(() => ({
   changeLanguage: vi.fn().mockResolvedValue(undefined),
-  refreshAccessToken: vi.fn().mockResolvedValue(null),
   locale: 'en',
   theme: 'light',
 }));
@@ -26,10 +25,6 @@ vi.mock('../src/i18n', () => ({
   i18n: {
     changeLanguage: mocks.changeLanguage,
   },
-}));
-
-vi.mock('../src/auth/tokenManager', () => ({
-  refreshAccessToken: mocks.refreshAccessToken,
 }));
 
 vi.mock('../src/components/common/toaster', () => ({
@@ -62,8 +57,6 @@ describe('App', () => {
   beforeEach(() => {
     mocks.changeLanguage.mockReset();
     mocks.changeLanguage.mockResolvedValue(undefined);
-    mocks.refreshAccessToken.mockReset();
-    mocks.refreshAccessToken.mockResolvedValue(null);
     mocks.locale = 'en';
     mocks.theme = 'light';
     document.documentElement.className = '';
@@ -79,14 +72,13 @@ describe('App', () => {
     expect(document.documentElement.style.colorScheme).toBe('dark');
   });
 
-  it('changes language on locale updates and refreshes auth on mount', async () => {
+  it('changes language on locale updates', async () => {
     mocks.locale = 'it';
 
     const { rerender } = render(<App />);
 
     await waitFor(() => {
       expect(mocks.changeLanguage).toHaveBeenCalledWith('it');
-      expect(mocks.refreshAccessToken).toHaveBeenCalledTimes(1);
     });
 
     mocks.locale = 'en';

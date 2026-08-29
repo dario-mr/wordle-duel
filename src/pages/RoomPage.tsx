@@ -29,8 +29,17 @@ export function RoomPage() {
 
   const myPlayerId = meUser?.id ?? '';
 
-  const { data: room, isLoading, isFetching, isSuccess, error } = useRoomQuery(roomId);
-  useRoomTopic(roomId);
+  const authResolved = meUser !== undefined;
+  const {
+    data: room,
+    isLoading,
+    isFetching,
+    isSuccess,
+    error,
+  } = useRoomQuery(roomId, {
+    enabled: authResolved,
+  });
+  useRoomTopic(meUser ? roomId : undefined);
 
   const [guessState, setGuessState] = useState<{ roundNumber?: number; value: string }>({
     value: '',

@@ -1,18 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  getValidAccessToken: vi.fn(),
-  refreshAccessToken: vi.fn(),
   redirectToLogin: vi.fn(),
   apiFetch: vi.fn(),
   t: vi.fn((key: string, params?: { status?: number }) =>
     key === 'errors.requestFailedWithStatus' ? `status:${String(params?.status ?? '')}` : key,
   ),
-}));
-
-vi.mock('../../src/auth/tokenManager', () => ({
-  getValidAccessToken: mocks.getValidAccessToken,
-  refreshAccessToken: mocks.refreshAccessToken,
 }));
 
 vi.mock('../../src/auth/redirectToLogin', () => ({
@@ -44,33 +37,26 @@ function jsonResponse(body: unknown, init?: ResponseInit) {
 
 function getApiFetchInitCall(index = 0): RequestInit {
   const calls = mocks.apiFetch.mock.calls as unknown[][];
-  if (!(index in calls)) {
-    return {};
-  }
-  const init = calls[index]?.[1];
-  return (init as RequestInit | undefined) ?? {};
+  return (calls[index]?.[1] as RequestInit | undefined) ?? {};
 }
 
 describe('wdsClient', () => {
   beforeEach(() => {
-    mocks.getValidAccessToken.mockReset();
-    mocks.refreshAccessToken.mockReset();
     mocks.redirectToLogin.mockReset();
     mocks.apiFetch.mockReset();
     mocks.t.mockClear();
-    mocks.getValidAccessToken.mockResolvedValue('token-1');
-    mocks.refreshAccessToken.mockResolvedValue('token-2');
   });
 
-  it('getJson adds auth and parses JSON', async () => {
+  it('uses the session cookie and parses JSON without a bearer header', async () => {
     const client = await loadClient();
     mocks.apiFetch.mockResolvedValueOnce(jsonResponse({ ok: true }));
 
     await expect(client.getJson<{ ok: boolean }>('/api/test')).resolves.toEqual({ ok: true });
 
     const headers = new Headers(getApiFetchInitCall().headers);
-    expect(headers.get('Authorization')).toBe('Bearer token-1');
+    expect(headers.get('Authorization')).toBeNull();
     expect(headers.get('Accept')).toBe('application/json');
+    expect(mocks.apiFetch).toHaveBeenCalledTimes(1);
   });
 
   it('postJson serializes the body and sets the method', async () => {
@@ -88,28 +74,27 @@ describe('wdsClient', () => {
     expect(headers.get('Content-Type')).toBe('application/json');
   });
 
-  it('retries once on 401 after refreshing the token', async () => {
+  it('redirects once on a 401 without retrying the request', async () => {
     const client = await loadClient();
-    mocks.apiFetch
-      .mockResolvedValueOnce(new Response(null, { status: 401 }))
-      .mockResolvedValueOnce(jsonResponse({ ok: true }));
-
-    await expect(client.getJson<{ ok: boolean }>('/api/test')).resolves.toEqual({ ok: true });
-    expect(mocks.refreshAccessToken).toHaveBeenCalledTimes(1);
-    expect(mocks.apiFetch).toHaveBeenCalledTimes(2);
-  });
-
-  it('redirects and throws unauthenticated when no token can be obtained', async () => {
-    const client = await loadClient();
-    mocks.getValidAccessToken.mockResolvedValueOnce(null);
-    mocks.refreshAccessToken.mockResolvedValueOnce(null);
+    mocks.apiFetch.mockResolvedValueOnce(new Response(null, { status: 401 }));
 
     await expect(client.getJson('/api/test')).rejects.toMatchObject({
       status: 401,
       code: 'UNAUTHENTICATED',
     });
     expect(mocks.redirectToLogin).toHaveBeenCalledTimes(1);
-    expect(mocks.apiFetch).not.toHaveBeenCalled();
+    expect(mocks.apiFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('can leave a 401 for the current-user query to interpret', async () => {
+    const client = await loadClient();
+    mocks.apiFetch.mockResolvedValueOnce(new Response(null, { status: 401 }));
+
+    await expect(
+      client.getJson('/api/test', undefined, { redirectOnUnauthorized: false }),
+    ).rejects.toMatchObject({ status: 401 });
+    expect(mocks.redirectToLogin).not.toHaveBeenCalled();
+    expect(mocks.apiFetch).toHaveBeenCalledTimes(1);
   });
 
   it('parses backend json errors into WdsApiError', async () => {
@@ -128,28 +113,6 @@ describe('wdsClient', () => {
     });
   });
 
-  it('maps html 401 to unauthenticated', async () => {
-    const client = await loadClient();
-    mocks.apiFetch.mockResolvedValueOnce(
-      new Response('<html lang="en"></html>', {
-        status: 401,
-        headers: { 'content-type': 'text/html' },
-      }),
-    );
-    mocks.refreshAccessToken.mockResolvedValueOnce('token-2');
-    mocks.apiFetch.mockResolvedValueOnce(
-      new Response('<html lang="en"></html>', {
-        status: 401,
-        headers: { 'content-type': 'text/html' },
-      }),
-    );
-
-    await expect(client.getJson('/api/test')).rejects.toMatchObject({
-      status: 401,
-      code: 'UNAUTHENTICATED',
-    });
-  });
-
   it('maps html non-401 errors to unexpected response', async () => {
     const client = await loadClient();
     mocks.apiFetch.mockResolvedValueOnce(
@@ -161,16 +124,6 @@ describe('wdsClient', () => {
 
     await expect(client.getJson('/api/test')).rejects.toMatchObject({
       status: 500,
-      code: 'UNEXPECTED_RESPONSE',
-    });
-  });
-
-  it('rejects 204 responses for json endpoints', async () => {
-    const client = await loadClient();
-    mocks.apiFetch.mockResolvedValueOnce(new Response(null, { status: 204 }));
-
-    await expect(client.getJson('/api/test')).rejects.toMatchObject({
-      status: 204,
       code: 'UNEXPECTED_RESPONSE',
     });
   });

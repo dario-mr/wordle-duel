@@ -1,6 +1,5 @@
-import { useSyncExternalStore } from 'react';
-import { getCurrentUser, subscribeCurrentUser } from '../api/auth';
+import { useMeQuery } from '../query/meQueries';
 
 export function useCurrentUser() {
-  return useSyncExternalStore(subscribeCurrentUser, getCurrentUser, getCurrentUser);
+  return useMeQuery().data;
 }

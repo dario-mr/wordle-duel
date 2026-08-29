@@ -1,15 +1,5 @@
 import type { Page, Route } from '@playwright/test';
 
-function base64UrlEncode(value: string): string {
-  return Buffer.from(value).toString('base64url');
-}
-
-export function makeJwt(payload: Record<string, unknown>): string {
-  const header = base64UrlEncode(JSON.stringify({ alg: 'none', typ: 'JWT' }));
-  const body = base64UrlEncode(JSON.stringify(payload));
-  return `${header}.${body}.signature`;
-}
-
 export async function fulfillJson(route: Route, body: unknown, status = 200) {
   await route.fulfill({
     status,
@@ -19,7 +9,7 @@ export async function fulfillJson(route: Route, body: unknown, status = 200) {
 }
 
 export async function mockUnauthenticatedSession(page: Page) {
-  await page.route('**/auth/refresh', async (route) => {
+  await page.route('**/api/v1/**', async (route) => {
     await route.fulfill({ status: 401 });
   });
 }
@@ -28,34 +18,34 @@ export async function mockAuthenticatedSession(
   page: Page,
   args?: {
     userId?: string;
-    email?: string;
     roles?: string[];
     fullName?: string;
     displayName?: string;
   },
 ) {
+  let sessionActive = true;
   const userId = args?.userId ?? 'user-1';
-  const email = args?.email ?? 'alice@example.com';
   const roles = args?.roles ?? ['USER'];
   const fullName = args?.fullName ?? 'Alice Example';
   const displayName = args?.displayName ?? 'alice';
-  const token = makeJwt({
-    sub: userId,
-    email,
-    roles,
-    exp: Math.floor(Date.now() / 1000) + 3600,
-  });
 
-  await page.route('**/auth/refresh', async (route) => {
-    await fulfillJson(route, { accessToken: token, expiresInSeconds: 3600 });
+  await page.route('**/auth/logout', async (route) => {
+    sessionActive = false;
+    await route.fulfill({ status: 204 });
   });
 
   await page.route('**/api/v1/users/me', async (route) => {
+    if (!sessionActive) {
+      await route.fulfill({ status: 401 });
+      return;
+    }
+
     await fulfillJson(route, {
       id: userId,
       fullName,
       displayName,
       pictureUrl: null,
+      roles,
     });
   });
 }

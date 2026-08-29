@@ -21,7 +21,6 @@ interface SubmitGuessCallbacks {
 const mocks = vi.hoisted(() => ({
   roomId: 'room-1' as string | undefined,
   getCurrentUser: vi.fn(),
-  subscribeCurrentUser: vi.fn<(listener: () => void) => () => void>(),
   roomQueryResult: {
     data: undefined,
     isLoading: false,
@@ -48,11 +47,6 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('react-router-dom', () => ({
   useParams: () => ({ roomId: mocks.roomId }),
-}));
-
-vi.mock('../../src/api/auth', () => ({
-  getCurrentUser: mocks.getCurrentUser,
-  subscribeCurrentUser: mocks.subscribeCurrentUser,
 }));
 
 vi.mock('../../src/auth/useCurrentUser', () => ({
@@ -217,8 +211,6 @@ describe('RoomPage', () => {
     mocks.roomId = 'room-1';
     mocks.getCurrentUser.mockReset();
     mocks.getCurrentUser.mockReturnValue({ id: 'me-1', roles: ['USER'] });
-    mocks.subscribeCurrentUser.mockReset();
-    mocks.subscribeCurrentUser.mockReturnValue(() => undefined);
     mocks.roomQueryResult = {
       data: createRoom(),
       isLoading: false,
@@ -268,6 +260,14 @@ describe('RoomPage', () => {
     const { container } = render(<RoomPage />);
 
     expect(container.firstChild).toBeNull();
+  });
+
+  it('does not open a room websocket for an unauthenticated user', () => {
+    mocks.getCurrentUser.mockReturnValue(null);
+
+    render(<RoomPage />);
+
+    expect(mocks.useRoomTopic).toHaveBeenCalledWith(undefined);
   });
 
   it('shows the join gate when the authenticated user is not part of the room', () => {

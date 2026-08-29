@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { beginGoogleLogin, logout } from '../../../api/auth';
 import { getErrorMessage } from '../../../api/errors';
-import { meQueryKey, useMeQuery } from '../../../query/meQueries';
+import { meQueryKey } from '../../../query/meQueries';
 import { useSingleToast } from '../../../hooks/useSingleToast';
 import type { UiLocale } from '../../../i18n/resources';
 import { useLocaleStore } from '../../../state/localeStore';
@@ -37,11 +37,8 @@ export function ProfilePopover() {
 
   const displayedMe = logoutPending ? null : me;
   const isLoggedIn = Boolean(displayedMe);
-  const { data: meProfile } = useMeQuery({ enabled: isLoggedIn });
 
-  const profileTitle = isLoggedIn
-    ? (meProfile?.fullName ?? t('profile.title'))
-    : t('profile.title');
+  const profileTitle = isLoggedIn ? (me?.fullName ?? t('profile.title')) : t('profile.title');
 
   const handleOpenChange = (details: { open: boolean }) => {
     setOpen(details.open);
@@ -70,17 +67,18 @@ export function ProfilePopover() {
       try {
         setOpen(false);
 
+        await logout();
+
         await queryClient.cancelQueries({ queryKey: ['room'], exact: false });
         queryClient.removeQueries({ queryKey: ['room'], exact: false });
 
         await queryClient.cancelQueries({ queryKey: meQueryKey(), exact: true });
+        queryClient.setQueryData(meQueryKey(), null);
         queryClient.removeQueries({ queryKey: meQueryKey(), exact: true });
 
         sessionStorage.removeItem(STORAGE_KEYS.authReturnTo);
 
         void navigate('/', { replace: true });
-
-        await logout(); // clears access token + notifies listeners
       } catch (err: unknown) {
         showToast({
           type: 'warning',
@@ -104,7 +102,7 @@ export function ProfilePopover() {
       positioning={{ placement: 'bottom-end' }}
     >
       <Popover.Trigger asChild>
-        <ProfileTriggerButton pictureUrl={isLoggedIn ? meProfile?.pictureUrl : undefined} />
+        <ProfileTriggerButton pictureUrl={isLoggedIn ? me?.pictureUrl : undefined} />
       </Popover.Trigger>
 
       <Popover.Positioner>
