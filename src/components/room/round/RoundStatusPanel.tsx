@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { PlayerDto, RoomDto, RoundDto, RoundPlayerStatus } from '../../../api/types';
 import { getErrorMessage } from '../../../api/errors';
 import { ErrorAlert } from '../../common/ErrorAlert';
-import { AccentButton } from '../../common/BrandButton.tsx';
+import { PrimaryButton } from '../../common/BrandButton.tsx';
 
 export function RoundStatusPanel(props: {
   room: RoomDto;
@@ -14,6 +14,10 @@ export function RoundStatusPanel(props: {
   onReadyNextRound: (roundNumber: number) => void;
   isReadyPending: boolean;
   readyError: Error | null;
+  onPlayAgain: () => void;
+  isPlayAgainPending: boolean;
+  playAgainError: unknown;
+  onBackToHome: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -28,13 +32,39 @@ export function RoundStatusPanel(props: {
 
   if (isClosed) {
     return (
-      <Stack gap={2} align="center">
-        <Text fontSize="lg" fontWeight="semibold">
-          {t('room.round.gameOver')}
-        </Text>
-        <Text textAlign="center">
-          {t(getMatchResultTextKey(props.player.score, props.opponent?.score))}
-        </Text>
+      <Stack gap={2} align="center" pt={2}>
+        <Stack gap={2} w="full" maxW="32rem">
+          {/* TODO: "play again" should sync both players to start in the same new room */}
+          <PrimaryButton
+            w="full"
+            h="46px"
+            size="lg"
+            loading={props.isPlayAgainPending}
+            disabled={props.isPlayAgainPending}
+            onClick={props.onPlayAgain}
+          >
+            {t('room.round.playAgain')}
+          </PrimaryButton>
+
+          <PrimaryButton
+            variant="outline"
+            bg="transparent"
+            color="fg.primary"
+            h="46px"
+            _hover={{ bg: 'transparent', textDecoration: 'underline' }}
+            _active={{ bg: 'transparent' }}
+            onClick={props.onBackToHome}
+          >
+            {t('room.round.backToHome')}
+          </PrimaryButton>
+
+          {props.playAgainError != null && (
+            <ErrorAlert
+              title={t('room.round.playAgainFailed')}
+              message={getErrorMessage(props.playAgainError)}
+            />
+          )}
+        </Stack>
       </Stack>
     );
   }
@@ -57,7 +87,7 @@ export function RoundStatusPanel(props: {
       {endedRound && (
         <Stack gap={2} align="center">
           {props.myRoundStatus !== 'READY' && (
-            <AccentButton
+            <PrimaryButton
               loading={props.isReadyPending}
               disabled={props.isReadyPending}
               onClick={() => {
@@ -65,7 +95,7 @@ export function RoundStatusPanel(props: {
               }}
             >
               {t('room.round.readyForNextRound')}
-            </AccentButton>
+            </PrimaryButton>
           )}
 
           {props.readyError && (
@@ -78,19 +108,6 @@ export function RoundStatusPanel(props: {
       )}
     </Stack>
   );
-}
-
-function getMatchResultTextKey(playerScore: number, opponentScore: number | undefined): string {
-  if (opponentScore == null) {
-    return 'room.round.matchComplete';
-  }
-  if (playerScore > opponentScore) {
-    return 'room.round.youWonMatch';
-  }
-  if (playerScore < opponentScore) {
-    return 'room.round.youLostMatch';
-  }
-  return 'room.round.matchDraw';
 }
 
 function getEndedRoundTextKey(status: RoundPlayerStatus): string {

@@ -24,7 +24,7 @@ vi.mock('../../../src/components/common/ErrorAlert', () => ({
 }));
 
 vi.mock('../../../src/components/common/BrandButton.tsx', () => ({
-  AccentButton: ({ children, onClick }: { children?: ReactNode; onClick?: () => void }) => (
+  PrimaryButton: ({ children, onClick }: { children?: ReactNode; onClick?: () => void }) => (
     <button type="button" onClick={onClick}>
       {children}
     </button>
@@ -59,6 +59,10 @@ describe('RoundStatusPanel', () => {
         onReadyNextRound={vi.fn()}
         isReadyPending={false}
         readyError={null}
+        onPlayAgain={vi.fn()}
+        isPlayAgainPending={false}
+        playAgainError={null}
+        onBackToHome={vi.fn()}
       />,
     );
 
@@ -77,6 +81,10 @@ describe('RoundStatusPanel', () => {
         onReadyNextRound={onReadyNextRound}
         isReadyPending={false}
         readyError={null}
+        onPlayAgain={vi.fn()}
+        isPlayAgainPending={false}
+        playAgainError={null}
+        onBackToHome={vi.fn()}
       />,
     );
 
@@ -97,6 +105,10 @@ describe('RoundStatusPanel', () => {
         onReadyNextRound={vi.fn()}
         isReadyPending={false}
         readyError={new Error('boom')}
+        onPlayAgain={vi.fn()}
+        isPlayAgainPending={false}
+        playAgainError={null}
+        onBackToHome={vi.fn()}
       />,
     );
 
@@ -115,13 +127,18 @@ describe('RoundStatusPanel', () => {
         onReadyNextRound={vi.fn()}
         isReadyPending={false}
         readyError={null}
+        onPlayAgain={vi.fn()}
+        isPlayAgainPending={false}
+        playAgainError={null}
+        onBackToHome={vi.fn()}
       />,
     );
 
-    expect(screen.getByText('room.round.gameOver')).toBeTruthy();
-    expect(screen.getByText('room.round.youWonMatch')).toBeTruthy();
-    expect(screen.queryByText('room.round.youWonThisRound')).toBeNull();
+    expect(screen.queryByText('room.round.youWonMatch')).toBeNull();
     expect(screen.queryByText('room.round.finalScore')).toBeNull();
+    expect(screen.getByRole('button', { name: 'room.round.playAgain' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'room.round.backToHome' })).toBeTruthy();
+    expect(screen.queryByText('room.round.youWonThisRound')).toBeNull();
     expect(screen.queryByRole('button', { name: 'room.round.readyForNextRound' })).toBeNull();
   });
 });

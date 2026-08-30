@@ -48,7 +48,7 @@ const tileProps = {
   justifyContent: 'center',
   fontWeight: 'bold',
   fontSize: '2xl',
-  borderRadius: 'sm',
+  borderRadius: 'md',
   overflow: 'hidden',
 } as const;
 

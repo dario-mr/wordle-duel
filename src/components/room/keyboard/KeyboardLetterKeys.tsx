@@ -22,7 +22,7 @@ export function KeyboardLetterKeys(props: {
         }}
         disabled={props.isDisabled}
         buttonProps={{
-          bg: statusBg,
+          bg: statusBg ?? 'bg.keyboard',
           color: status ? 'white' : undefined,
           _hover: statusBg ? { bg: statusBg } : undefined,
           _active: statusBg ? { bg: statusBg } : undefined,

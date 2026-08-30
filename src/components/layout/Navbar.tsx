@@ -8,8 +8,8 @@ export function Navbar() {
   const navigate = useNavigate();
 
   return (
-    <Box as="header" borderBottomWidth="1px">
-      <Flex maxW="container.md" mx="auto" py={2} px={4} align="center" justify="space-between">
+    <Box as="header" borderBottomWidth="1px" borderColor="border.divider">
+      <Flex w="full" mx="auto" py={2} px={4} align="center" justify="space-between">
         <Link
           href={import.meta.env.BASE_URL}
           _hover={{ textDecoration: 'underline' }}
@@ -18,7 +18,7 @@ export function Navbar() {
             void navigate('/');
           }}
         >
-          <Heading size="md">{t('app.name')}</Heading>
+          <Heading fontSize="xl">{t('app.name')}</Heading>
         </Link>
 
         <ProfilePopover />

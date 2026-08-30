@@ -20,6 +20,7 @@ interface SubmitGuessCallbacks {
 
 const mocks = vi.hoisted(() => ({
   roomId: 'room-1' as string | undefined,
+  navigate: vi.fn(),
   getCurrentUser: vi.fn(),
   roomQueryResult: {
     data: undefined,
@@ -42,11 +43,17 @@ const mocks = vi.hoisted(() => ({
     error: null as Error | null,
     mutate: vi.fn(),
   },
+  createMutation: {
+    isPending: false,
+    error: null as Error | null,
+    mutate: vi.fn(),
+  },
   showToast: vi.fn(),
 }));
 
 vi.mock('react-router-dom', () => ({
   useParams: () => ({ roomId: mocks.roomId }),
+  useNavigate: () => mocks.navigate,
 }));
 
 vi.mock('../../src/auth/useCurrentUser', () => ({
@@ -65,6 +72,7 @@ vi.mock('../../src/query/roomQueries', () => ({
   },
   useSubmitGuessMutation: () => mocks.submitMutation,
   useReadyForNextRoundMutation: () => mocks.readyMutation,
+  useCreateRoomMutation: () => mocks.createMutation,
 }));
 
 vi.mock('../../src/ws/useRoomTopic', () => ({
@@ -112,8 +120,30 @@ vi.mock('../../src/components/room/board/PlayerBoard', () => ({
 }));
 
 vi.mock('../../src/components/room/round/RoundStatusPanel', () => ({
-  RoundStatusPanel: ({ myRoundStatus }: { myRoundStatus?: string }) => (
-    <div>{`round-status:${myRoundStatus ?? 'none'}`}</div>
+  RoundStatusPanel: ({
+    myRoundStatus,
+    room,
+    onPlayAgain,
+    onBackToHome,
+  }: {
+    myRoundStatus?: string;
+    room: RoomDto;
+    onPlayAgain: () => void;
+    onBackToHome: () => void;
+  }) => (
+    <div>
+      <div>{`round-status:${myRoundStatus ?? 'none'}`}</div>
+      {room.status === 'CLOSED' && (
+        <button type="button" onClick={onPlayAgain}>
+          room.round.playAgain
+        </button>
+      )}
+      {room.status === 'CLOSED' && (
+        <button type="button" onClick={onBackToHome}>
+          room.round.backToHome
+        </button>
+      )}
+    </div>
   ),
 }));
 
@@ -209,6 +239,7 @@ function createRoom(args?: {
 describe('RoomPage', () => {
   beforeEach(() => {
     mocks.roomId = 'room-1';
+    mocks.navigate.mockReset();
     mocks.getCurrentUser.mockReset();
     mocks.getCurrentUser.mockReturnValue({ id: 'me-1', roles: ['USER'] });
     mocks.roomQueryResult = {
@@ -229,6 +260,11 @@ describe('RoomPage', () => {
       }),
     };
     mocks.readyMutation = {
+      isPending: false,
+      error: null,
+      mutate: vi.fn(),
+    };
+    mocks.createMutation = {
       isPending: false,
       error: null,
       mutate: vi.fn(),
@@ -302,5 +338,34 @@ describe('RoomPage', () => {
     await waitFor(() => {
       expect(screen.getByText('keyboard-value:')).toBeTruthy();
     });
+  });
+
+  it('creates a new room with the current match settings when playing again', () => {
+    mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', roundStatus: 'ENDED' });
+
+    render(<RoomPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'room.round.playAgain' }));
+
+    expect(mocks.createMutation.mutate).toHaveBeenCalledWith(
+      { language: 'IT', rounds: 5 },
+      expect.any(Object),
+    );
+
+    const calls = mocks.createMutation.mutate.mock.calls as unknown[][];
+    const options = calls[0]?.[1] as { onSuccess?: (room: { id: string }) => void } | undefined;
+    options?.onSuccess?.({ id: 'room-2' });
+
+    expect(mocks.navigate).toHaveBeenCalledWith('/rooms/room-2');
+  });
+
+  it('returns to home from a completed match', () => {
+    mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', roundStatus: 'ENDED' });
+
+    render(<RoomPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'room.round.backToHome' }));
+
+    expect(mocks.navigate).toHaveBeenCalledWith('/');
   });
 });

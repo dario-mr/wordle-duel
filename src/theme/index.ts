@@ -5,23 +5,25 @@ const config = defineConfig({
     tokens: {
       colors: {
         dracula: {
-          background: { value: '#282a36' },
-          currentLine: { value: '#44475a' },
+          background: { value: '#0d1320' },
+          currentLine: { value: '#30384c' },
           foreground: { value: '#f8f8f2' },
           comment: { value: '#6272a4' },
           cyan: { value: '#8be9fd' },
-          green: { value: '#50fa7b' },
+          green: { value: '#3bd16f' },
           orange: { value: '#ffb86c' },
           pink: { value: '#ff79c6' },
           purple: { value: '#bd93f9' },
           red: { value: '#ff5555' },
           yellow: { value: '#f1fa8c' },
-          card: { value: '#1A1D24' },
-          mutedCard: { value: '#2E3448' },
-          primary: { value: '#1f8df8' },
+          card: { value: '#182235' },
+          keyboard: { value: '#1e2a3f' },
+          mutedCard: { value: '#171e2d' },
+          primary: { value: '#2f80ed' },
           accent: { value: '#078f84' },
           mutedWhite: { value: 'rgba(255,255,255,0.1)' },
-          panel: { value: '#303341' },
+          divider: { value: 'rgba(255,255,255,0.06)' },
+          panel: { value: '#111827' },
         },
       },
     },
@@ -60,6 +62,9 @@ const config = defineConfig({
           },
           card: {
             value: { _light: '{colors.green.50}', _dark: '{colors.dracula.card}' },
+          },
+          keyboard: {
+            value: { _light: '{colors.gray.200}', _dark: '{colors.dracula.keyboard}' },
           },
           mutedCard: {
             value: { _light: '{colors.green.50}', _dark: '{colors.dracula.mutedCard}' },
@@ -103,6 +108,9 @@ const config = defineConfig({
           },
           muted: {
             value: { _light: '{colors.gray.100}', _dark: '{colors.dracula.mutedWhite}' },
+          },
+          divider: {
+            value: { _light: '{colors.gray.50}', _dark: '{colors.dracula.divider}' },
           },
           subtle: {
             value: { _light: '{colors.gray.50}', _dark: '{colors.dracula.background}' },

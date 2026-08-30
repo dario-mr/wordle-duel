@@ -1,7 +1,7 @@
 import { Stack } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getErrorMessage } from '../api/errors';
 import { type GuessLetterStatus, WdsApiError } from '../api/types';
 import { useCurrentUser } from '../auth/useCurrentUser';
@@ -13,6 +13,7 @@ import { RoomJoinGate } from '../components/room/RoomJoinGate';
 import { RoomSharePanel } from '../components/room/RoomSharePanel';
 import { RoundStatusPanel } from '../components/room/round/RoundStatusPanel';
 import {
+  useCreateRoomMutation,
   useReadyForNextRoundMutation,
   useRoomQuery,
   useSubmitGuessMutation,
@@ -24,6 +25,7 @@ import { RoomSkeleton } from '../components/room/RoomSkeleton.tsx';
 
 export function RoomPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { roomId } = useParams();
   const meUser = useCurrentUser();
 
@@ -60,6 +62,7 @@ export function RoomPage() {
   const readyForNextRoundMutation = useReadyForNextRoundMutation({
     roomId: roomId ?? '',
   });
+  const createRoomMutation = useCreateRoomMutation();
 
   const myRoundStatus = currentRound?.statusByPlayerId[myPlayerId];
   const endedRound = currentRound?.roundStatus === 'ENDED' ? currentRound : null;
@@ -124,6 +127,21 @@ export function RoomPage() {
     });
   };
 
+  const handlePlayAgain = () => {
+    if (!room) {
+      return;
+    }
+
+    createRoomMutation.mutate(
+      { language: room.language, rounds: room.rounds },
+      {
+        onSuccess: (newRoom) => {
+          void navigate(`/rooms/${newRoom.id}`);
+        },
+      },
+    );
+  };
+
   if (!roomId) {
     return (
       <Stack gap={6} align="center" justify="center" minH="50vh" textAlign="center">
@@ -164,7 +182,7 @@ export function RoomPage() {
   }
 
   return (
-    <Stack gap={4}>
+    <Stack gap={5} w="full" maxW="44rem" mx="auto" pb={4}>
       <RoundPanel player={me} opponent={opponent} room={room} />
 
       <PlayerBoard
@@ -183,6 +201,12 @@ export function RoomPage() {
           myRoundStatus={myRoundStatus}
           isReadyPending={readyForNextRoundMutation.isPending}
           readyError={readyForNextRoundMutation.error}
+          onPlayAgain={handlePlayAgain}
+          isPlayAgainPending={createRoomMutation.isPending}
+          playAgainError={createRoomMutation.error}
+          onBackToHome={() => {
+            void navigate('/');
+          }}
           onReadyNextRound={(roundNumber) => {
             if (!roomId) {
               return;

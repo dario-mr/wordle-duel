@@ -4,10 +4,10 @@ import { Navbar } from './Navbar';
 
 export function AppLayout() {
   return (
-    <Flex direction="column" minH="100vh">
+    <Flex direction="column" minH="100vh" bg="bg">
       <Navbar />
       <Box as="main" flex="1">
-        <Container maxW={{ md: '50rem' }} py={3} px={2}>
+        <Container maxW={{ md: '50rem' }} py={4} px={4}>
           <Outlet />
         </Container>
       </Box>

@@ -131,6 +131,6 @@ test.describe('room page flow', () => {
     await page.keyboard.press('Enter');
 
     await expect(enterButton).toHaveCount(0);
-    await expect(page.getByText('You won!')).toBeVisible();
+    await expect(page.getByText('You won this round')).toBeVisible();
   });
 });

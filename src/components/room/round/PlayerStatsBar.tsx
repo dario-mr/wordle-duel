@@ -1,73 +1,82 @@
-import { Grid, HStack, Text, VStack } from '@chakra-ui/react';
+import { Box, Grid, HStack, Text, VStack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import type { PlayerDto, RoomDto, RoundPlayerStatus } from '../../../api/types';
-import { roundPlayerStatusTextKey } from '../../../utils/roomStatusText';
-import { Card } from '../../common/Card';
-import { RoundPlayerStatusIcon } from '../../common/RoundPlayerStatusIcon';
-import { getRoundPlayerIcon } from '../../../utils/roomStatusVisuals';
+import type { PlayerDto, RoomDto } from '../../../api/types';
 
 export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto; room: RoomDto }) {
   const { t } = useTranslation();
 
-  const round = props.room.currentRound;
-  const myStatus = round?.statusByPlayerId[props.player.id];
-  const opponentStatus = props.opponent ? round?.statusByPlayerId[props.opponent.id] : undefined;
-
   const DASH = t('room.playerStats.dash');
-
-  const formatStatus = (status: RoundPlayerStatus | undefined) =>
-    status ? t(roundPlayerStatusTextKey[status]) : DASH;
-
   const meName = `${props.player.displayName} (${t('room.playerStats.me')})`;
   const opponentName = props.opponent?.displayName ?? t('room.playerStats.opponent');
   const opponentScore = props.opponent?.score ?? DASH;
-
-  const meIcon = getRoundPlayerIcon(myStatus);
-  const opponentIcon = getRoundPlayerIcon(opponentStatus);
+  const isMatchComplete = props.room.status === 'CLOSED';
+  const meIsWinner = Boolean(
+    isMatchComplete && props.opponent && props.player.score > props.opponent.score,
+  );
+  const opponentIsWinner = Boolean(
+    isMatchComplete && props.opponent && props.opponent.score > props.player.score,
+  );
+  const meScoreColor = opponentIsWinner ? 'fg.muted' : 'fg';
+  const opponentScoreColor = meIsWinner ? 'fg.muted' : 'fg';
+  const winnerLabel = t('room.playerStats.winner');
 
   return (
-    <Card
-      borderColor="border.muted"
-      bg="bg.mutedCard"
-      borderLeftWidth="default"
-      borderLeftColor="default"
-      p={3}
+    <Grid
+      w="full"
+      templateColumns="minmax(0, 1fr) auto minmax(0, 1fr)"
+      columnGap={2}
+      alignItems="stretch"
+      borderBottomWidth="1px"
+      borderColor="border.divider"
+      pb={4}
     >
-      <Grid w="100%" templateColumns="1fr auto 1fr" columnGap={10} alignItems="center">
-        <VStack align="flex-start" gap={2} minW={0}>
-          <Text fontWeight="semibold">{meName}</Text>
-          <HStack gap={2} minW={0}>
-            <RoundPlayerStatusIcon bg={meIcon.bg} color={meIcon.fg} label={meIcon.label} />
-            <Text fontSize="sm" opacity="0.7" truncate>
-              {formatStatus(myStatus)}
-            </Text>
-          </HStack>
-        </VStack>
-
-        <HStack justify="center" wrap="nowrap" gap={2}>
-          <Text fontWeight="semibold" flexShrink={0}>
-            {props.player.score}
+      <VStack align="center" justify="center" textAlign="center" gap={2} minW={0}>
+        <Text fontSize="md" fontWeight="semibold" truncate w="full">
+          {meName}
+        </Text>
+        {meIsWinner && (
+          <Text color="fg.warning" fontSize="sm" fontWeight="bold" whiteSpace="nowrap">
+            <Box as="span" aria-hidden="true">
+              🏆
+            </Box>{' '}
+            {winnerLabel}
           </Text>
-          <Text opacity="0.5">{DASH}</Text>
-          <Text fontWeight="semibold" flexShrink={0}>
-            {opponentScore}
-          </Text>
-        </HStack>
+        )}
+      </VStack>
 
-        <VStack align="flex-end" textAlign="right" gap={2} minW={0}>
-          <Text fontWeight="semibold">{opponentName}</Text>
-          <HStack gap={2} minW={0} justify="flex-end">
-            <RoundPlayerStatusIcon
-              bg={opponentIcon.bg}
-              color={opponentIcon.fg}
-              label={opponentIcon.label}
-            />
-            <Text fontSize="sm" opacity="0.7" truncate>
-              {formatStatus(opponentStatus)}
-            </Text>
-          </HStack>
-        </VStack>
-      </Grid>
-    </Card>
+      <HStack
+        justify="center"
+        gap={2}
+        px={6}
+        borderLeftWidth="1px"
+        borderRightWidth="1px"
+        borderColor="border.divider"
+        whiteSpace="nowrap"
+      >
+        <Text fontSize="3xl" lineHeight="1" fontWeight="bold" color={meScoreColor}>
+          {props.player.score}
+        </Text>
+        <Text fontSize="2xl" lineHeight="1" color="fg.subtle">
+          {DASH}
+        </Text>
+        <Text fontSize="3xl" lineHeight="1" fontWeight="bold" color={opponentScoreColor}>
+          {opponentScore}
+        </Text>
+      </HStack>
+
+      <VStack align="center" justify="center" textAlign="center" gap={1} minW={0}>
+        <Text fontSize="md" fontWeight="semibold" truncate w="full">
+          {opponentName}
+        </Text>
+        {opponentIsWinner && (
+          <Text color="fg.warning" fontSize="sm" fontWeight="bold" whiteSpace="nowrap">
+            <Box as="span" aria-hidden="true">
+              🏆
+            </Box>{' '}
+            {winnerLabel}
+          </Text>
+        )}
+      </VStack>
+    </Grid>
   );
 }

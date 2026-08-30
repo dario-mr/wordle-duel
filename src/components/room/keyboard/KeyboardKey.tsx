@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 const KEY_BUTTON_PROPS = {
   size: { base: 'xs', sm: 'sm' },
   variant: 'subtle',
+  bg: 'bg.keyboard',
   w: '100%',
   minW: '0',
   h: 14,
