@@ -122,7 +122,7 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
             <Text fontSize="sm" opacity="0.7">
               {roundTitle}
             </Text>
-            <RoomLanguageFlag language={room.language} />
+            <RoomLanguageFlag language={room.language} fontSize="lg" />
           </HStack>
         )}
 

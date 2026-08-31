@@ -13,6 +13,7 @@ export function RoundPanel(props: { player: PlayerDto; opponent?: PlayerDto; roo
         rounds={props.room.rounds}
         roundStatus={round?.roundStatus}
         roomStatus={props.room.status}
+        language={props.room.language}
       />
       <PlayerStatsBar player={props.player} opponent={props.opponent} room={props.room} />
     </Stack>

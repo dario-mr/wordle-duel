@@ -1,16 +1,24 @@
 import { Box, HStack, Text } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import type { RoomRounds, RoomStatus, RoundStatus } from '../../../api/types';
+import type { Language, RoomRounds, RoomStatus, RoundStatus } from '../../../api/types';
 import { Pill } from '../../common/Pill';
+import { RoomLanguageFlag } from '../../myrooms/RoomLanguageFlag';
 
 interface RoundTitleProps {
   roundNumber?: number | null;
   rounds?: RoomRounds | null;
   roundStatus?: RoundStatus | null;
   roomStatus?: RoomStatus | null;
+  language: Language;
 }
 
-export function RoundTitle({ roundNumber, rounds, roundStatus, roomStatus }: RoundTitleProps) {
+export function RoundTitle({
+  roundNumber,
+  rounds,
+  roundStatus,
+  roomStatus,
+  language,
+}: RoundTitleProps) {
   const { t } = useTranslation();
 
   const DASH = t('room.playerStats.dash');
@@ -63,6 +71,8 @@ export function RoundTitle({ roundNumber, rounds, roundStatus, roomStatus }: Rou
             </Text>
           </>
         )}
+        <Box aria-hidden="true" h="1.25rem" borderLeftWidth="1px" borderColor="border.muted" />
+        <RoomLanguageFlag language={language} fontSize="lg" />
       </Pill>
     </HStack>
   );

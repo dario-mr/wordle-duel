@@ -1,8 +1,8 @@
-import { Box } from '@chakra-ui/react';
+import { Box, type BoxProps } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import type { Language } from '../../api/types';
 
-export function RoomLanguageFlag(props: { language: Language }) {
+export function RoomLanguageFlag(props: { language: Language; fontSize?: BoxProps['fontSize'] }) {
   const { t } = useTranslation();
 
   const getRoomLanguageLabel = (language: Language) => {
@@ -32,6 +32,7 @@ export function RoomLanguageFlag(props: { language: Language }) {
     <Box
       as="span"
       display="inline-block"
+      fontSize={props.fontSize}
       lineHeight="1"
       role="img"
       aria-label={label}
