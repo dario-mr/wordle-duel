@@ -26,6 +26,9 @@ export function useRoomTopic(
             const event = JSON.parse(message.body) as RoomEventDto;
             if (event.type === 'REMATCH_STARTED' && isRematchStartedPayload(event.payload)) {
               onRematchStarted?.(event.payload.roomId);
+              if (onRematchStarted) {
+                return;
+              }
             }
           } catch {
             // ignore payload parsing for now

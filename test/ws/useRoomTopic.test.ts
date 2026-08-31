@@ -132,7 +132,7 @@ describe('useRoomTopic', () => {
     });
   });
 
-  it('handles valid rematch events and ignores invalid payloads', async () => {
+  it('handles valid rematch events without refetching the old room', async () => {
     const { useRoomTopic } = await import('../../src/ws/useRoomTopic');
     const onRematchStarted = vi.fn();
     renderHook(() => {
@@ -155,7 +155,7 @@ describe('useRoomTopic', () => {
     await waitFor(() => {
       expect(onRematchStarted).toHaveBeenCalledTimes(1);
       expect(onRematchStarted).toHaveBeenCalledWith('room-2');
-      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(3);
+      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(2);
     });
   });
 });
