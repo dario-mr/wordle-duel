@@ -131,4 +131,31 @@ describe('useRoomTopic', () => {
       expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['room', 'room-1'] });
     });
   });
+
+  it('handles valid rematch events and ignores invalid payloads', async () => {
+    const { useRoomTopic } = await import('../../src/ws/useRoomTopic');
+    const onRematchStarted = vi.fn();
+    renderHook(() => {
+      useRoomTopic('room-1', { onRematchStarted });
+    });
+
+    const config = mocks.getLastConfig() as { onConnect?: () => void };
+    config.onConnect?.();
+    const subscribeHandler = mocks.getSubscribeHandler();
+    subscribeHandler?.({
+      body: JSON.stringify({ type: 'REMATCH_STARTED', payload: { roomId: 'room-2' } }),
+    });
+    subscribeHandler?.({
+      body: JSON.stringify({ type: 'REMATCH_STARTED', payload: { roomId: '' } }),
+    });
+    subscribeHandler?.({
+      body: JSON.stringify({ type: 'REMATCH_STARTED', payload: { roomId: 2 } }),
+    });
+
+    await waitFor(() => {
+      expect(onRematchStarted).toHaveBeenCalledTimes(1);
+      expect(onRematchStarted).toHaveBeenCalledWith('room-2');
+      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(3);
+    });
+  });
 });

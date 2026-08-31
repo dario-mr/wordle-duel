@@ -43,9 +43,11 @@ const mocks = vi.hoisted(() => ({
     error: null as Error | null,
     mutate: vi.fn(),
   },
-  createMutation: {
+  rematchMutation: {
     isPending: false,
     error: null as Error | null,
+    isSuccess: false,
+    data: undefined as { roomId: string | null } | undefined,
     mutate: vi.fn(),
   },
   showToast: vi.fn(),
@@ -72,7 +74,7 @@ vi.mock('../../src/query/roomQueries', () => ({
   },
   useSubmitGuessMutation: () => mocks.submitMutation,
   useReadyForNextRoundMutation: () => mocks.readyMutation,
-  useCreateRoomMutation: () => mocks.createMutation,
+  useRematchMutation: () => mocks.rematchMutation,
 }));
 
 vi.mock('../../src/ws/useRoomTopic', () => ({
@@ -123,18 +125,18 @@ vi.mock('../../src/components/room/round/RoundStatusPanel', () => ({
   RoundStatusPanel: ({
     myRoundStatus,
     room,
-    onPlayAgain,
+    onRematch,
     onBackToHome,
   }: {
     myRoundStatus?: string;
     room: RoomDto;
-    onPlayAgain: () => void;
+    onRematch: () => void;
     onBackToHome: () => void;
   }) => (
     <div>
       <div>{`round-status:${myRoundStatus ?? 'none'}`}</div>
       {room.status === 'CLOSED' && (
-        <button type="button" onClick={onPlayAgain}>
+        <button type="button" onClick={onRematch}>
           room.round.playAgain
         </button>
       )}
@@ -264,9 +266,11 @@ describe('RoomPage', () => {
       error: null,
       mutate: vi.fn(),
     };
-    mocks.createMutation = {
+    mocks.rematchMutation = {
       isPending: false,
       error: null,
+      isSuccess: false,
+      data: undefined,
       mutate: vi.fn(),
     };
     mocks.showToast.mockReset();
@@ -303,7 +307,12 @@ describe('RoomPage', () => {
 
     render(<RoomPage />);
 
-    expect(mocks.useRoomTopic).toHaveBeenCalledWith(undefined);
+    const [topicRoomId, topicOptions] = mocks.useRoomTopic.mock.calls[0] as [
+      string | undefined,
+      { onRematchStarted?: unknown },
+    ];
+    expect(topicRoomId).toBeUndefined();
+    expect(typeof topicOptions.onRematchStarted).toBe('function');
   });
 
   it('shows the join gate when the authenticated user is not part of the room', () => {
@@ -340,21 +349,31 @@ describe('RoomPage', () => {
     });
   });
 
-  it('creates a new room with the current match settings when playing again', () => {
+  it('navigates to the room returned by a rematch request', () => {
     mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', roundStatus: 'ENDED' });
 
     render(<RoomPage />);
 
     fireEvent.click(screen.getByRole('button', { name: 'room.round.playAgain' }));
 
-    expect(mocks.createMutation.mutate).toHaveBeenCalledWith(
-      { language: 'IT', rounds: 5 },
-      expect.any(Object),
-    );
+    expect(mocks.rematchMutation.mutate).toHaveBeenCalledWith(undefined, expect.any(Object));
 
-    const calls = mocks.createMutation.mutate.mock.calls as unknown[][];
-    const options = calls[0]?.[1] as { onSuccess?: (room: { id: string }) => void } | undefined;
-    options?.onSuccess?.({ id: 'room-2' });
+    const calls = mocks.rematchMutation.mutate.mock.calls as unknown[][];
+    const options = calls[0]?.[1] as
+      { onSuccess?: (response: { roomId: string | null }) => void } | undefined;
+    options?.onSuccess?.({ roomId: 'room-2' });
+
+    expect(mocks.navigate).toHaveBeenCalledWith('/rooms/room-2');
+  });
+
+  it('navigates to the room announced by the rematch event', () => {
+    mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', roundStatus: 'ENDED' });
+
+    render(<RoomPage />);
+
+    const options = mocks.useRoomTopic.mock.calls[0]?.[1] as
+      { onRematchStarted?: (roomId: string) => void } | undefined;
+    options?.onRematchStarted?.('room-2');
 
     expect(mocks.navigate).toHaveBeenCalledWith('/rooms/room-2');
   });

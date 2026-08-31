@@ -75,6 +75,10 @@ export interface ReadyForNextRoundRequest {
   roundNumber: number;
 }
 
+export interface RematchResponseDto {
+  roomId: string | null;
+}
+
 export interface SubmitGuessResponse {
   room: RoomDto;
 }
@@ -85,7 +89,12 @@ export type RoomEventType =
   | 'ROUND_STARTED'
   | 'ROUND_FINISHED'
   | 'SCORES_UPDATED'
-  | 'ROOM_CLOSED';
+  | 'ROOM_CLOSED'
+  | 'REMATCH_STARTED';
+
+export interface RematchStartedPayload {
+  roomId: string;
+}
 
 export interface RoomEventDto {
   type: RoomEventType;

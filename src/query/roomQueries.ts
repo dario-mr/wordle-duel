@@ -16,6 +16,7 @@ import {
   joinRoom,
   listMyRooms,
   readyForNextRound,
+  requestRematch,
   submitGuess,
 } from '../api/rooms';
 import { i18n } from '../i18n';
@@ -108,5 +109,11 @@ export function useReadyForNextRoundMutation(args: { roomId: string }) {
     onSuccess: (data: RoomDto) => {
       queryClient.setQueryData<RoomDto>(roomQueryKey(args.roomId), data);
     },
+  });
+}
+
+export function useRematchMutation(args: { roomId: string }) {
+  return useMutation({
+    mutationFn: () => requestRematch(args.roomId),
   });
 }

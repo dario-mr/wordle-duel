@@ -1,5 +1,5 @@
 import { Stack } from '@chakra-ui/react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getErrorMessage } from '../api/errors';
@@ -13,7 +13,7 @@ import { RoomJoinGate } from '../components/room/RoomJoinGate';
 import { RoomSharePanel } from '../components/room/RoomSharePanel';
 import { RoundStatusPanel } from '../components/room/round/RoundStatusPanel';
 import {
-  useCreateRoomMutation,
+  useRematchMutation,
   useReadyForNextRoundMutation,
   useRoomQuery,
   useSubmitGuessMutation,
@@ -30,6 +30,12 @@ export function RoomPage() {
   const meUser = useCurrentUser();
 
   const myPlayerId = meUser?.id ?? '';
+  const handleRematchStarted = useCallback(
+    (newRoomId: string) => {
+      void navigate(`/rooms/${newRoomId}`);
+    },
+    [navigate],
+  );
 
   const authResolved = meUser !== undefined;
   const {
@@ -41,7 +47,7 @@ export function RoomPage() {
   } = useRoomQuery(roomId, {
     enabled: authResolved,
   });
-  useRoomTopic(meUser ? roomId : undefined);
+  useRoomTopic(meUser ? roomId : undefined, { onRematchStarted: handleRematchStarted });
 
   const [guessState, setGuessState] = useState<{ roundNumber?: number; value: string }>({
     value: '',
@@ -62,7 +68,7 @@ export function RoomPage() {
   const readyForNextRoundMutation = useReadyForNextRoundMutation({
     roomId: roomId ?? '',
   });
-  const createRoomMutation = useCreateRoomMutation();
+  const rematchMutation = useRematchMutation({ roomId: roomId ?? '' });
 
   const myRoundStatus = currentRound?.statusByPlayerId[myPlayerId];
   const endedRound = currentRound?.roundStatus === 'ENDED' ? currentRound : null;
@@ -127,19 +133,18 @@ export function RoomPage() {
     });
   };
 
-  const handlePlayAgain = () => {
-    if (!room) {
+  const handleRematch = () => {
+    if (!roomId) {
       return;
     }
 
-    createRoomMutation.mutate(
-      { language: room.language, rounds: room.rounds },
-      {
-        onSuccess: (newRoom) => {
-          void navigate(`/rooms/${newRoom.id}`);
-        },
+    rematchMutation.mutate(undefined, {
+      onSuccess: ({ roomId: newRoomId }) => {
+        if (newRoomId) {
+          handleRematchStarted(newRoomId);
+        }
       },
-    );
+    });
   };
 
   if (!roomId) {
@@ -201,9 +206,10 @@ export function RoomPage() {
           myRoundStatus={myRoundStatus}
           isReadyPending={readyForNextRoundMutation.isPending}
           readyError={readyForNextRoundMutation.error}
-          onPlayAgain={handlePlayAgain}
-          isPlayAgainPending={createRoomMutation.isPending}
-          playAgainError={createRoomMutation.error}
+          onRematch={handleRematch}
+          isRematchPending={rematchMutation.isPending}
+          isRematchWaiting={rematchMutation.isSuccess && rematchMutation.data.roomId === null}
+          rematchError={rematchMutation.error}
           onBackToHome={() => {
             void navigate('/');
           }}

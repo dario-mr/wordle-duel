@@ -2,11 +2,15 @@ import { Client, type IMessage } from '@stomp/stompjs';
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { getWsBrokerUrl } from '../config/wds';
-import type { RoomEventDto } from '../api/types';
+import type { RematchStartedPayload, RoomEventDto } from '../api/types';
 import { roomQueryKey } from '../query/roomQueries';
 
-export function useRoomTopic(roomId: string | undefined) {
+export function useRoomTopic(
+  roomId: string | undefined,
+  options?: { onRematchStarted?: (roomId: string) => void },
+) {
   const queryClient = useQueryClient();
+  const onRematchStarted = options?.onRematchStarted;
 
   useEffect(() => {
     if (!roomId) {
@@ -19,7 +23,10 @@ export function useRoomTopic(roomId: string | undefined) {
       onConnect: () => {
         client.subscribe(`/topic/rooms/${roomId}`, (message: IMessage) => {
           try {
-            JSON.parse(message.body) as RoomEventDto;
+            const event = JSON.parse(message.body) as RoomEventDto;
+            if (event.type === 'REMATCH_STARTED' && isRematchStartedPayload(event.payload)) {
+              onRematchStarted?.(event.payload.roomId);
+            }
           } catch {
             // ignore payload parsing for now
           }
@@ -36,5 +43,15 @@ export function useRoomTopic(roomId: string | undefined) {
     return () => {
       void client.deactivate();
     };
-  }, [queryClient, roomId]);
+  }, [onRematchStarted, queryClient, roomId]);
+}
+
+function isRematchStartedPayload(value: unknown): value is RematchStartedPayload {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'roomId' in value &&
+    typeof value.roomId === 'string' &&
+    value.roomId.length > 0
+  );
 }

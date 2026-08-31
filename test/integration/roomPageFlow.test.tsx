@@ -29,6 +29,7 @@ vi.mock('../../src/api/rooms', () => ({
   joinRoom: vi.fn(),
   listMyRooms: vi.fn(),
   readyForNextRound: mocks.readyForNextRound,
+  requestRematch: vi.fn(),
   submitGuess: mocks.submitGuess,
 }));
 

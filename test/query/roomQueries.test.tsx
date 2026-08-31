@@ -6,6 +6,7 @@ import {
   useCreateRoomMutation,
   useJoinRoomMutation,
   useReadyForNextRoundMutation,
+  useRematchMutation,
   useRoomQuery,
   useSubmitGuessMutation,
 } from '../../src/query/roomQueries';
@@ -17,6 +18,7 @@ const mocks = vi.hoisted(() => ({
   joinRoom: vi.fn(),
   listMyRooms: vi.fn(),
   readyForNextRound: vi.fn(),
+  requestRematch: vi.fn(),
   submitGuess: vi.fn(),
 }));
 
@@ -26,6 +28,7 @@ vi.mock('../../src/api/rooms', () => ({
   joinRoom: mocks.joinRoom,
   listMyRooms: mocks.listMyRooms,
   readyForNextRound: mocks.readyForNextRound,
+  requestRematch: mocks.requestRematch,
   submitGuess: mocks.submitGuess,
 }));
 
@@ -53,6 +56,7 @@ describe('roomQueries', () => {
     mocks.joinRoom.mockReset();
     mocks.listMyRooms.mockReset();
     mocks.readyForNextRound.mockReset();
+    mocks.requestRematch.mockReset();
     mocks.submitGuess.mockReset();
   });
 
@@ -166,6 +170,26 @@ describe('roomQueries', () => {
       });
 
       expect(queryClient.getQueryData(roomQueryKey('room-1'))).toEqual(room);
+    });
+  });
+
+  describe('useRematchMutation', () => {
+    it('requests a rematch without changing the room cache', async () => {
+      const { queryClient, wrapper } = createQueryClientWrapper();
+      const response = { roomId: null };
+      mocks.requestRematch.mockResolvedValue(response);
+
+      const { result } = renderHook(() => useRematchMutation({ roomId: 'room-1' }), { wrapper });
+
+      await act(async () => {
+        await result.current.mutateAsync();
+      });
+
+      expect(mocks.requestRematch).toHaveBeenCalledWith('room-1');
+      expect(queryClient.getQueryData(roomQueryKey('room-1'))).toBeUndefined();
+      await waitFor(() => {
+        expect(result.current.data).toEqual(response);
+      });
     });
   });
 });

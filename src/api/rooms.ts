@@ -1,6 +1,7 @@
 import type {
   CreateRoomRequest,
   ReadyForNextRoundRequest,
+  RematchResponseDto,
   RoomDto,
   SubmitGuessRequest,
   SubmitGuessResponse,
@@ -36,6 +37,10 @@ export function readyForNextRound(args: {
   body: ReadyForNextRoundRequest;
 }): Promise<RoomDto> {
   return postJson<RoomDto>(roomUrl(args.roomId, '/ready'), args.body);
+}
+
+export function requestRematch(roomId: string): Promise<RematchResponseDto> {
+  return postJson<RematchResponseDto>(roomUrl(roomId, '/rematch'));
 }
 
 function roomUrl(roomId: string, suffix = ''): string {

@@ -14,9 +14,10 @@ export function RoundStatusPanel(props: {
   onReadyNextRound: (roundNumber: number) => void;
   isReadyPending: boolean;
   readyError: Error | null;
-  onPlayAgain: () => void;
-  isPlayAgainPending: boolean;
-  playAgainError: unknown;
+  onRematch: () => void;
+  isRematchPending: boolean;
+  isRematchWaiting: boolean;
+  rematchError: unknown;
   onBackToHome: () => void;
 }) {
   const { t } = useTranslation();
@@ -34,16 +35,15 @@ export function RoundStatusPanel(props: {
     return (
       <Stack gap={2} align="center" pt={2}>
         <Stack gap={2} w="full" maxW="32rem">
-          {/* TODO: "play again" should sync both players to start in the same new room */}
           <PrimaryButton
             w="full"
             h="46px"
             size="lg"
-            loading={props.isPlayAgainPending}
-            disabled={props.isPlayAgainPending}
-            onClick={props.onPlayAgain}
+            loading={props.isRematchPending}
+            disabled={props.isRematchPending || props.isRematchWaiting}
+            onClick={props.onRematch}
           >
-            {t('room.round.playAgain')}
+            {t(props.isRematchWaiting ? 'room.round.waitingForOpponent' : 'room.round.playAgain')}
           </PrimaryButton>
 
           <PrimaryButton
@@ -58,10 +58,10 @@ export function RoundStatusPanel(props: {
             {t('room.round.backToHome')}
           </PrimaryButton>
 
-          {props.playAgainError != null && (
+          {props.rematchError != null && (
             <ErrorAlert
               title={t('room.round.playAgainFailed')}
-              message={getErrorMessage(props.playAgainError)}
+              message={getErrorMessage(props.rematchError)}
             />
           )}
         </Stack>

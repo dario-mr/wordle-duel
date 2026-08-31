@@ -41,6 +41,7 @@ describe('api/rooms', () => {
     void api.getRoom('room/1');
     void api.submitGuess({ roomId: 'room/1', body: { word: 'APPLE' } });
     void api.readyForNextRound({ roomId: 'room/1', body: { roundNumber: 2 } });
+    void api.requestRematch('room/1');
 
     expect(mocks.postJson).toHaveBeenNthCalledWith(1, 'https://api.test/rooms/room%2F1/join');
     expect(mocks.getJson).toHaveBeenCalledWith('https://api.test/rooms/room%2F1', undefined);
@@ -50,5 +51,6 @@ describe('api/rooms', () => {
     expect(mocks.postJson).toHaveBeenNthCalledWith(3, 'https://api.test/rooms/room%2F1/ready', {
       roundNumber: 2,
     });
+    expect(mocks.postJson).toHaveBeenNthCalledWith(4, 'https://api.test/rooms/room%2F1/rematch');
   });
 });

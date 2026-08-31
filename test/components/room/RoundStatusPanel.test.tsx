@@ -24,8 +24,16 @@ vi.mock('../../../src/components/common/ErrorAlert', () => ({
 }));
 
 vi.mock('../../../src/components/common/BrandButton.tsx', () => ({
-  PrimaryButton: ({ children, onClick }: { children?: ReactNode; onClick?: () => void }) => (
-    <button type="button" onClick={onClick}>
+  PrimaryButton: ({
+    children,
+    onClick,
+    disabled,
+  }: {
+    children?: ReactNode;
+    onClick?: () => void;
+    disabled?: boolean;
+  }) => (
+    <button type="button" onClick={onClick} disabled={disabled}>
       {children}
     </button>
   ),
@@ -59,9 +67,10 @@ describe('RoundStatusPanel', () => {
         onReadyNextRound={vi.fn()}
         isReadyPending={false}
         readyError={null}
-        onPlayAgain={vi.fn()}
-        isPlayAgainPending={false}
-        playAgainError={null}
+        onRematch={vi.fn()}
+        isRematchPending={false}
+        isRematchWaiting={false}
+        rematchError={null}
         onBackToHome={vi.fn()}
       />,
     );
@@ -81,9 +90,10 @@ describe('RoundStatusPanel', () => {
         onReadyNextRound={onReadyNextRound}
         isReadyPending={false}
         readyError={null}
-        onPlayAgain={vi.fn()}
-        isPlayAgainPending={false}
-        playAgainError={null}
+        onRematch={vi.fn()}
+        isRematchPending={false}
+        isRematchWaiting={false}
+        rematchError={null}
         onBackToHome={vi.fn()}
       />,
     );
@@ -105,9 +115,10 @@ describe('RoundStatusPanel', () => {
         onReadyNextRound={vi.fn()}
         isReadyPending={false}
         readyError={new Error('boom')}
-        onPlayAgain={vi.fn()}
-        isPlayAgainPending={false}
-        playAgainError={null}
+        onRematch={vi.fn()}
+        isRematchPending={false}
+        isRematchWaiting={false}
+        rematchError={null}
         onBackToHome={vi.fn()}
       />,
     );
@@ -127,9 +138,10 @@ describe('RoundStatusPanel', () => {
         onReadyNextRound={vi.fn()}
         isReadyPending={false}
         readyError={null}
-        onPlayAgain={vi.fn()}
-        isPlayAgainPending={false}
-        playAgainError={null}
+        onRematch={vi.fn()}
+        isRematchPending={false}
+        isRematchWaiting={false}
+        rematchError={null}
         onBackToHome={vi.fn()}
       />,
     );
@@ -140,5 +152,52 @@ describe('RoundStatusPanel', () => {
     expect(screen.getByRole('button', { name: 'room.round.backToHome' })).toBeTruthy();
     expect(screen.queryByText('room.round.youWonThisRound')).toBeNull();
     expect(screen.queryByRole('button', { name: 'room.round.readyForNextRound' })).toBeNull();
+  });
+
+  it('disables play again while waiting for the other player', () => {
+    render(
+      <RoundStatusPanel
+        room={{ ...baseRoom, status: 'CLOSED' }}
+        player={{ id: 'me', score: 3, displayName: 'Me' }}
+        opponent={{ id: 'opponent', score: 2, displayName: 'Opponent' }}
+        endedRound={baseRoom.currentRound}
+        myRoundStatus="WON"
+        onReadyNextRound={vi.fn()}
+        isReadyPending={false}
+        readyError={null}
+        onRematch={vi.fn()}
+        isRematchPending={false}
+        isRematchWaiting
+        rematchError={null}
+        onBackToHome={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'room.round.waitingForOpponent' }).disabled).toBe(
+      true,
+    );
+    expect(screen.queryByText('room.round.waitingForOtherPlayer')).toBeNull();
+  });
+
+  it('shows a rematch error', () => {
+    render(
+      <RoundStatusPanel
+        room={{ ...baseRoom, status: 'CLOSED' }}
+        player={{ id: 'me', score: 3, displayName: 'Me' }}
+        opponent={{ id: 'opponent', score: 2, displayName: 'Opponent' }}
+        endedRound={baseRoom.currentRound}
+        myRoundStatus="WON"
+        onReadyNextRound={vi.fn()}
+        isReadyPending={false}
+        readyError={null}
+        onRematch={vi.fn()}
+        isRematchPending={false}
+        isRematchWaiting={false}
+        rematchError={new Error('boom')}
+        onBackToHome={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('room.round.playAgainFailed:Ready failed')).toBeTruthy();
   });
 });
