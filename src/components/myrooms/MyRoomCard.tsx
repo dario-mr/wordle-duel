@@ -6,6 +6,7 @@ import { Card } from '../common/Card';
 import { Pill } from '../common/Pill';
 import { RoundPlayerStatusIcon } from '../common/RoundPlayerStatusIcon';
 import {
+  getRoomPlayerStatus,
   getRoundPlayerIcon,
   getRoundStatusStyle,
   roomStatusStyleByStatus,
@@ -70,13 +71,21 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
           color: roomStatusStyle.pillColor,
         };
 
-  const myRoundStatusRaw = room.currentRound?.statusByPlayerId[myPlayerId];
-  const opponentRoundStatusRaw = opponent?.id
-    ? room.currentRound?.statusByPlayerId[opponent.id]
-    : undefined;
+  const myPlayerStatusRaw = getRoomPlayerStatus(
+    room.status,
+    mePlayer?.score,
+    opponent?.score,
+    room.currentRound?.statusByPlayerId[myPlayerId],
+  );
+  const opponentPlayerStatusRaw = getRoomPlayerStatus(
+    room.status,
+    opponent?.score,
+    mePlayer?.score,
+    opponent?.id ? room.currentRound?.statusByPlayerId[opponent.id] : undefined,
+  );
 
-  const meIcon = getRoundPlayerIcon(myRoundStatusRaw);
-  const opponentIcon = getRoundPlayerIcon(opponentRoundStatusRaw);
+  const meIcon = getRoundPlayerIcon(myPlayerStatusRaw);
+  const opponentIcon = getRoundPlayerIcon(opponentPlayerStatusRaw);
 
   const playerRows = [
     { name: meName, score: meScore, icon: meIcon },
@@ -117,7 +126,7 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
           </HStack>
         )}
 
-        <Box my={2} borderTopWidth="1px" borderColor="border.emphasized" opacity={0.35} />
+        <Box my={2} borderTopWidth="1px" borderColor="border.divider" />
         <Stack gap={3}>
           {playerRows.map((row, index) => (
             <Box key={`${room.id}-${String(index)}`} w="full">

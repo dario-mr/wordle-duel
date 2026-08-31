@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   getRoundPlayerIcon,
   getRoundStatusStyle,
+  getRoomPlayerStatus,
   roomStatusStyleByStatus,
 } from '../../src/utils/roomStatusVisuals';
 
@@ -36,5 +37,11 @@ describe('roomStatusVisuals', () => {
     expect(getRoundPlayerIcon('READY')).toEqual({ bg: 'green.600', fg: 'white', label: '✓' });
     expect(getRoundPlayerIcon('WON')).toEqual({ bg: 'yellow.500', fg: 'white', label: '★' });
     expect(getRoundPlayerIcon('LOST')).toEqual({ bg: 'red.600', fg: 'white', label: '✕' });
+  });
+
+  it('uses final scores for player status in closed rooms', () => {
+    expect(getRoomPlayerStatus('CLOSED', 8, 24, 'WON')).toBe('LOST');
+    expect(getRoomPlayerStatus('CLOSED', 24, 8, 'LOST')).toBe('WON');
+    expect(getRoomPlayerStatus('IN_PROGRESS', 8, 24, 'WON')).toBe('WON');
   });
 });

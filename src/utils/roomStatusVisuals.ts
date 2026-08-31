@@ -22,6 +22,19 @@ export function getRoundPlayerIcon(status: RoundPlayerStatus | undefined): Round
   return ROUND_PLAYER_ICON_BY_STATUS[status];
 }
 
+export function getRoomPlayerStatus(
+  roomStatus: RoomStatus,
+  playerScore: number | undefined,
+  opponentScore: number | undefined,
+  roundStatus: RoundPlayerStatus | undefined,
+): RoundPlayerStatus | undefined {
+  if (roomStatus === 'CLOSED' && playerScore !== undefined && opponentScore !== undefined) {
+    return playerScore >= opponentScore ? 'WON' : 'LOST';
+  }
+
+  return roundStatus;
+}
+
 const DEFAULT_ROUND_STATUS_STYLE: RoundStatusStyle = {
   pillBg: 'gray.600',
   pillColor: 'white',

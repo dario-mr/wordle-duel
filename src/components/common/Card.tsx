@@ -12,10 +12,10 @@ export function Card(props: CardProps) {
 
   return (
     <Box
-      p={4}
+      p={4.5}
       borderWidth="1px"
       borderLeftWidth="3px"
-      borderRadius="xl"
+      borderRadius="3xl"
       bg="bg.card"
       borderLeftColor={borderLeftColor}
       boxShadow="sm"
