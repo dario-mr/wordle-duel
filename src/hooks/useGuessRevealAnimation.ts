@@ -4,13 +4,11 @@ import type { GuessDto } from '../api/types';
 export function useGuessRevealAnimation(args: {
   guesses: GuessDto[];
   roundNumber: number | undefined;
-  playerId: string;
 }) {
   const [animatedAttemptNumber, setAnimatedAttemptNumber] = useState<number | null>(null);
 
   const prevSnapshotRef = useRef({
     roundNumber: args.roundNumber,
-    playerId: args.playerId,
     guessCount: args.guesses.length,
   });
 
@@ -18,11 +16,10 @@ export function useGuessRevealAnimation(args: {
     const prev = prevSnapshotRef.current;
     const next = {
       roundNumber: args.roundNumber,
-      playerId: args.playerId,
       guessCount: args.guesses.length,
     };
 
-    const contextChanged = prev.roundNumber !== next.roundNumber || prev.playerId !== next.playerId;
+    const contextChanged = prev.roundNumber !== next.roundNumber;
     let nextAnimatedAttemptNumber: number | null = null;
 
     if (!contextChanged && next.guessCount > prev.guessCount) {
@@ -35,7 +32,7 @@ export function useGuessRevealAnimation(args: {
     setAnimatedAttemptNumber((current) =>
       current === nextAnimatedAttemptNumber ? current : nextAnimatedAttemptNumber,
     );
-  }, [args.guesses, args.playerId, args.roundNumber]);
+  }, [args.guesses, args.roundNumber]);
 
   const shouldAnimateGuess = useCallback(
     (guess: GuessDto | undefined) => {

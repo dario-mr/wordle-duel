@@ -1,11 +1,11 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { WdsApiError, type RoomDto } from '../../src/api/types';
+import type { RoomDto } from '../../src/api/types';
 import {
   roomQueryKey,
   useCreateRoomMutation,
   useJoinRoomMutation,
-  useReadyForNextRoundMutation,
+  useNextRoundMutation,
   useRematchMutation,
   useRoomQuery,
   useSubmitGuessMutation,
@@ -17,8 +17,8 @@ const mocks = vi.hoisted(() => ({
   getRoom: vi.fn(),
   joinRoom: vi.fn(),
   listMyRooms: vi.fn(),
-  readyForNextRound: vi.fn(),
   requestRematch: vi.fn(),
+  startNextRound: vi.fn(),
   submitGuess: vi.fn(),
 }));
 
@@ -27,8 +27,8 @@ vi.mock('../../src/api/rooms', () => ({
   getRoom: mocks.getRoom,
   joinRoom: mocks.joinRoom,
   listMyRooms: mocks.listMyRooms,
-  readyForNextRound: mocks.readyForNextRound,
   requestRematch: mocks.requestRematch,
+  startNextRound: mocks.startNextRound,
   submitGuess: mocks.submitGuess,
 }));
 
@@ -55,8 +55,8 @@ describe('roomQueries', () => {
     mocks.getRoom.mockReset();
     mocks.joinRoom.mockReset();
     mocks.listMyRooms.mockReset();
-    mocks.readyForNextRound.mockReset();
     mocks.requestRematch.mockReset();
+    mocks.startNextRound.mockReset();
     mocks.submitGuess.mockReset();
   });
 
@@ -127,48 +127,23 @@ describe('roomQueries', () => {
 
       expect(queryClient.getQueryData(roomQueryKey('room-1'))).toEqual(room);
     });
-
-    it('invalidates the room query when the round has already finished', async () => {
-      const { queryClient, wrapper } = createQueryClientWrapper();
-      const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
-      mocks.submitGuess.mockRejectedValue(
-        new WdsApiError({
-          status: 409,
-          code: 'ROUND_FINISHED',
-          message: 'Round already finished',
-        }),
-      );
-
-      const { result } = renderHook(() => useSubmitGuessMutation({ roomId: 'room-1' }), {
-        wrapper,
-      });
-
-      await act(async () => {
-        await expect(result.current.mutateAsync({ word: 'APPLE' })).rejects.toBeInstanceOf(
-          WdsApiError,
-        );
-      });
-
-      await waitFor(() => {
-        expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: roomQueryKey('room-1') });
-      });
-    });
   });
 
-  describe('useReadyForNextRoundMutation', () => {
-    it('writes the latest room into the cache on success', async () => {
+  describe('useNextRoundMutation', () => {
+    it('writes the returned next round into the cache on success', async () => {
       const { queryClient, wrapper } = createQueryClientWrapper();
       const room = createRoomDto('room-1');
-      mocks.readyForNextRound.mockResolvedValue(room);
+      mocks.startNextRound.mockResolvedValue(room);
 
-      const { result } = renderHook(() => useReadyForNextRoundMutation({ roomId: 'room-1' }), {
+      const { result } = renderHook(() => useNextRoundMutation({ roomId: 'room-1' }), {
         wrapper,
       });
 
       await act(async () => {
-        await result.current.mutateAsync({ roundNumber: 2 });
+        await result.current.mutateAsync();
       });
 
+      expect(mocks.startNextRound).toHaveBeenCalledWith('room-1');
       expect(queryClient.getQueryData(roomQueryKey('room-1'))).toEqual(room);
     });
   });

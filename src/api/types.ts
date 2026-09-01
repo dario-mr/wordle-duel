@@ -24,7 +24,7 @@ export interface PlayerDto {
 
 export type RoundStatus = 'PLAYING' | 'ENDED';
 
-export type RoundPlayerStatus = 'PLAYING' | 'WON' | 'LOST' | 'READY';
+export type RoundPlayerStatus = 'PLAYING' | 'WON' | 'LOST';
 
 export type GuessLetterStatus = 'CORRECT' | 'PRESENT' | 'ABSENT';
 
@@ -42,8 +42,8 @@ export interface GuessDto {
 export interface RoundDto {
   roundNumber: number;
   maxAttempts: number;
-  guessesByPlayerId: Record<string, GuessDto[]>;
-  statusByPlayerId: Record<string, RoundPlayerStatus>;
+  guesses: GuessDto[];
+  playerStatus: RoundPlayerStatus;
   roundStatus: RoundStatus;
   solution?: string;
 }
@@ -71,10 +71,6 @@ export interface SubmitGuessRequest {
   word: string;
 }
 
-export interface ReadyForNextRoundRequest {
-  roundNumber: number;
-}
-
 export interface RematchResponseDto {
   roomId: string | null;
 }
@@ -86,8 +82,6 @@ export interface SubmitGuessResponse {
 export type RoomEventType =
   | 'ROOM_CREATED'
   | 'PLAYER_JOINED'
-  | 'ROUND_STARTED'
-  | 'ROUND_FINISHED'
   | 'SCORES_UPDATED'
   | 'ROOM_CLOSED'
   | 'REMATCH_STARTED';

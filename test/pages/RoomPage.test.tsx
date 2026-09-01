@@ -33,12 +33,11 @@ const mocks = vi.hoisted(() => ({
     { roomId: string | undefined; enabled: boolean | undefined } | undefined,
   useRoomTopic: vi.fn(),
   submitMutate: vi.fn(),
-  readyMutate: vi.fn(),
   submitMutation: {
     isPending: false,
     mutate: vi.fn(),
   },
-  readyMutation: {
+  nextRoundMutation: {
     isPending: false,
     error: null as Error | null,
     mutate: vi.fn(),
@@ -73,7 +72,7 @@ vi.mock('../../src/query/roomQueries', () => ({
     return mocks.roomQueryResult;
   },
   useSubmitGuessMutation: () => mocks.submitMutation,
-  useReadyForNextRoundMutation: () => mocks.readyMutation,
+  useNextRoundMutation: () => mocks.nextRoundMutation,
   useRematchMutation: () => mocks.rematchMutation,
 }));
 
@@ -123,18 +122,16 @@ vi.mock('../../src/components/room/board/PlayerBoard', () => ({
 
 vi.mock('../../src/components/room/round/RoundStatusPanel', () => ({
   RoundStatusPanel: ({
-    myRoundStatus,
     room,
     onRematch,
     onBackToHome,
   }: {
-    myRoundStatus?: string;
     room: RoomDto;
     onRematch: () => void;
     onBackToHome: () => void;
   }) => (
     <div>
-      <div>{`round-status:${myRoundStatus ?? 'none'}`}</div>
+      <div>{`round-status:${room.currentRound ? 'active' : 'waiting'}`}</div>
       {room.status === 'CLOSED' && (
         <button type="button" onClick={onRematch}>
           room.round.playAgain
@@ -188,8 +185,7 @@ function createRoom(args?: {
   status?: RoomDto['status'];
   meId?: string;
   includeMe?: boolean;
-  myRoundStatus?: 'PLAYING' | 'READY' | 'LOST' | 'WON';
-  roundStatus?: 'PLAYING' | 'ENDED';
+  currentRound?: RoomDto['currentRound'];
 }): RoomDto {
   const meId = args?.meId ?? 'me-1';
   const includeMe = args?.includeMe ?? true;
@@ -212,12 +208,12 @@ function createRoom(args?: {
     currentRound:
       args?.status === 'WAITING_FOR_PLAYERS'
         ? null
-        : {
-            roundNumber: 2,
-            maxAttempts: 6,
-            guessesByPlayerId: includeMe
-              ? {
-                  [meId]: [
+        : args?.currentRound === undefined
+          ? {
+              roundNumber: 2,
+              maxAttempts: 6,
+              guesses: includeMe
+                ? [
                     {
                       word: 'ALLEY',
                       attemptNumber: 1,
@@ -226,15 +222,12 @@ function createRoom(args?: {
                         { letter: 'L', status: 'ABSENT' },
                       ],
                     },
-                  ],
-                }
-              : {},
-            statusByPlayerId: includeMe
-              ? { [meId]: args?.myRoundStatus ?? 'PLAYING', 'opponent-1': 'PLAYING' }
-              : {},
-            roundStatus: args?.roundStatus ?? 'PLAYING',
-            solution: 'APPLE',
-          },
+                  ]
+                : [],
+              playerStatus: 'PLAYING',
+              roundStatus: 'PLAYING',
+            }
+          : args.currentRound,
   };
 }
 
@@ -254,14 +247,13 @@ describe('RoomPage', () => {
     mocks.lastRoomQueryArgs = undefined;
     mocks.useRoomTopic.mockReset();
     mocks.submitMutate.mockReset();
-    mocks.readyMutate.mockReset();
     mocks.submitMutation = {
       isPending: false,
       mutate: vi.fn((_vars: { word: string }, options?: SubmitGuessCallbacks) => {
         options?.onSuccess?.();
       }),
     };
-    mocks.readyMutation = {
+    mocks.nextRoundMutation = {
       isPending: false,
       error: null,
       mutate: vi.fn(),
@@ -324,13 +316,23 @@ describe('RoomPage', () => {
     expect(screen.getByText('join-gate:room-1')).toBeTruthy();
   });
 
-  it('hides the keyboard and shows the round status once the player is ready', () => {
-    mocks.roomQueryResult.data = createRoom({ myRoundStatus: 'READY' });
+  it('keeps the completed final board visible while the player waits for match closure', () => {
+    mocks.roomQueryResult.data = createRoom({
+      currentRound: {
+        roundNumber: 5,
+        maxAttempts: 6,
+        guesses: [],
+        playerStatus: 'LOST',
+        roundStatus: 'PLAYING',
+        solution: 'APPLE',
+      },
+    });
 
     render(<RoomPage />);
 
     expect(screen.queryByText(/keyboard-value:/)).toBeNull();
-    expect(screen.getByText('round-status:READY')).toBeTruthy();
+    expect(screen.getByText('player-board:room-1:')).toBeTruthy();
+    expect(screen.getByText('round-status:active')).toBeTruthy();
   });
 
   it('clears the current guess after a successful submit', async () => {
@@ -350,7 +352,7 @@ describe('RoomPage', () => {
   });
 
   it('navigates to the room returned by a rematch request', () => {
-    mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', roundStatus: 'ENDED' });
+    mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', currentRound: null });
 
     render(<RoomPage />);
 
@@ -367,7 +369,7 @@ describe('RoomPage', () => {
   });
 
   it('navigates to the room announced by the rematch event', () => {
-    mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', roundStatus: 'ENDED' });
+    mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', currentRound: null });
 
     render(<RoomPage />);
 
@@ -379,7 +381,7 @@ describe('RoomPage', () => {
   });
 
   it('returns to home from a completed match', () => {
-    mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', roundStatus: 'ENDED' });
+    mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', currentRound: null });
 
     render(<RoomPage />);
 

@@ -4,12 +4,7 @@ import type { PlayerDto, RoomDto } from '../../api/types';
 import { roomStatusTextKey } from '../../utils/roomStatusText';
 import { Card } from '../common/Card';
 import { Pill } from '../common/Pill';
-import { RoundPlayerStatusIcon } from '../common/RoundPlayerStatusIcon';
-import {
-  getRoomPlayerStatus,
-  getRoundPlayerIcon,
-  roomStatusStyleByStatus,
-} from '../../utils/roomStatusVisuals';
+import { roomStatusStyleByStatus } from '../../utils/roomStatusVisuals';
 import { RoomLanguageFlag } from './RoomLanguageFlag';
 
 interface MyRoomCardProps {
@@ -59,25 +54,9 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
     color: roomStatusStyle.pillColor,
   };
 
-  const myPlayerStatusRaw = getRoomPlayerStatus(
-    room.status,
-    mePlayer?.score,
-    opponent?.score,
-    room.currentRound?.statusByPlayerId[myPlayerId],
-  );
-  const opponentPlayerStatusRaw = getRoomPlayerStatus(
-    room.status,
-    opponent?.score,
-    mePlayer?.score,
-    opponent?.id ? room.currentRound?.statusByPlayerId[opponent.id] : undefined,
-  );
-
-  const meIcon = getRoundPlayerIcon(myPlayerStatusRaw);
-  const opponentIcon = getRoundPlayerIcon(opponentPlayerStatusRaw);
-
   const playerRows = [
-    { name: meName, score: meScore, icon: meIcon },
-    { name: opponent ? opponentName : DASH, score: opponentScore, icon: opponentIcon },
+    { name: meName, score: meScore },
+    { name: opponent ? opponentName : DASH, score: opponentScore },
   ];
 
   return (
@@ -105,26 +84,20 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
           </Pill>
         </Box>
 
-        {roundNumber && (
+        {roundNumber != null ? (
           <HStack gap={3} alignItems="center" flexWrap="wrap">
             <Text fontSize="sm" opacity="0.7">
               {roundTitle}
             </Text>
             <RoomLanguageFlag language={room.language} fontSize="lg" />
           </HStack>
-        )}
+        ) : null}
 
         <Box my={2} borderTopWidth="1px" borderColor="border.divider" />
         <Stack gap={3}>
           {playerRows.map((row, index) => (
             <Box key={`${room.id}-${String(index)}`} w="full">
-              <Box display="grid" gridTemplateColumns="auto 1fr auto" alignItems="center" gap={4}>
-                <RoundPlayerStatusIcon
-                  bg={row.icon.bg}
-                  color={row.icon.fg}
-                  label={row.icon.label}
-                />
-
+              <Box display="grid" gridTemplateColumns="1fr auto" alignItems="center" gap={4}>
                 <Text fontWeight="semibold" truncate>
                   {row.name}
                 </Text>

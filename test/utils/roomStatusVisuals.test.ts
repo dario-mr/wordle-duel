@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  getRoundPlayerIcon,
-  getRoundStatusStyle,
-  getRoomPlayerStatus,
-  roomStatusStyleByStatus,
-} from '../../src/utils/roomStatusVisuals';
+import { roomStatusStyleByStatus } from '../../src/utils/roomStatusVisuals';
 
 describe('roomStatusVisuals', () => {
   it('maps each room status to the expected card/pill visuals', () => {
@@ -17,31 +12,5 @@ describe('roomStatusVisuals', () => {
       },
       CLOSED: { borderLeftColor: 'gray.500', pillBg: 'gray.600', pillColor: 'white' },
     });
-  });
-
-  it('returns default round status visuals when no status is provided', () => {
-    expect(getRoundStatusStyle(undefined)).toEqual({ pillBg: 'gray.600', pillColor: 'white' });
-  });
-
-  it('returns round status visuals for each known status', () => {
-    expect(getRoundStatusStyle('PLAYING')).toEqual({ pillBg: 'blue.600', pillColor: 'white' });
-    expect(getRoundStatusStyle('ENDED')).toEqual({ pillBg: 'gray.600', pillColor: 'white' });
-  });
-
-  it('returns default round player icon when no status is provided', () => {
-    expect(getRoundPlayerIcon(undefined)).toEqual({ bg: 'gray.600', fg: 'gray.400', label: '?' });
-  });
-
-  it('returns round player icons for each known status', () => {
-    expect(getRoundPlayerIcon('PLAYING')).toEqual({ bg: 'blue.600', fg: 'white', label: '▶' });
-    expect(getRoundPlayerIcon('READY')).toEqual({ bg: 'green.600', fg: 'white', label: '✓' });
-    expect(getRoundPlayerIcon('WON')).toEqual({ bg: 'yellow.500', fg: 'white', label: '★' });
-    expect(getRoundPlayerIcon('LOST')).toEqual({ bg: 'red.600', fg: 'white', label: '✕' });
-  });
-
-  it('uses final scores for player status in closed rooms', () => {
-    expect(getRoomPlayerStatus('CLOSED', 8, 24, 'WON')).toBe('LOST');
-    expect(getRoomPlayerStatus('CLOSED', 24, 8, 'LOST')).toBe('WON');
-    expect(getRoomPlayerStatus('IN_PROGRESS', 8, 24, 'WON')).toBe('WON');
   });
 });

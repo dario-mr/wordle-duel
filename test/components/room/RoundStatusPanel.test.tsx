@@ -8,7 +8,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('../../../src/api/errors', () => ({
-  getErrorMessage: () => 'Ready failed',
+  getErrorMessage: () => 'Next round failed',
 }));
 
 vi.mock('@chakra-ui/react', () => ({
@@ -26,178 +26,93 @@ vi.mock('../../../src/components/common/ErrorAlert', () => ({
 vi.mock('../../../src/components/common/BrandButton.tsx', () => ({
   PrimaryButton: ({
     children,
-    onClick,
     disabled,
+    onClick,
   }: {
     children?: ReactNode;
-    onClick?: () => void;
     disabled?: boolean;
+    onClick?: () => void;
   }) => (
-    <button type="button" onClick={onClick} disabled={disabled}>
+    <button type="button" disabled={disabled} onClick={onClick}>
       {children}
     </button>
   ),
 }));
 
-const baseRoom = {
-  id: 'room-1',
-  language: 'IT' as const,
-  rounds: 5 as const,
-  status: 'IN_PROGRESS' as const,
-  players: [],
-  currentRound: {
-    roundNumber: 2,
-    maxAttempts: 6,
-    guessesByPlayerId: {},
-    statusByPlayerId: {},
-    roundStatus: 'ENDED' as const,
-    solution: 'APPLE',
-  },
-};
+function room(args?: {
+  status?: 'IN_PROGRESS' | 'CLOSED';
+  roundNumber?: number;
+  playerStatus?: 'WON' | 'LOST';
+}) {
+  return {
+    id: 'room-1',
+    language: 'IT' as const,
+    rounds: 5 as const,
+    status: args?.status ?? 'IN_PROGRESS',
+    players: [],
+    currentRound: {
+      roundNumber: args?.roundNumber ?? 2,
+      maxAttempts: 6,
+      guesses: [],
+      playerStatus: args?.playerStatus ?? 'LOST',
+      roundStatus: 'PLAYING' as const,
+      solution: 'APPLE',
+    },
+  };
+}
+
+function panelProps(roomDto = room()) {
+  return {
+    room: roomDto,
+    onNextRound: vi.fn(),
+    isNextRoundPending: false,
+    nextRoundError: null,
+    onRematch: vi.fn(),
+    isRematchPending: false,
+    isRematchWaiting: false,
+    rematchError: null,
+    onBackToHome: vi.fn(),
+  };
+}
 
 describe('RoundStatusPanel', () => {
-  it('shows a message when the room is not in progress', () => {
+  it('shows the completed board result, solution, and next-round action', () => {
+    const props = panelProps();
+    render(<RoundStatusPanel {...props} />);
+
+    expect(screen.getByText('room.round.youLostThisRound')).toBeTruthy();
+    expect(screen.getByText('room.round.solution')).toBeTruthy();
+    expect(screen.getByText('APPLE')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'room.round.nextRound' }));
+    expect(props.onNextRound).toHaveBeenCalledOnce();
+  });
+
+  it('waits after a completed final round instead of offering another round', () => {
+    render(<RoundStatusPanel {...panelProps(room({ roundNumber: 5 }))} />);
+
+    expect(screen.getByText('room.round.waitingForOpponent')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'room.round.nextRound' })).toBeNull();
+  });
+
+  it('hides the round result after room closure', () => {
     render(
       <RoundStatusPanel
-        room={{ ...baseRoom, status: 'WAITING_FOR_PLAYERS' }}
-        player={{ id: 'me', score: 3, displayName: 'Me' }}
-        opponent={{ id: 'opponent', score: 2, displayName: 'Opponent' }}
-        endedRound={null}
-        myRoundStatus={undefined}
-        onReadyNextRound={vi.fn()}
-        isReadyPending={false}
-        readyError={null}
-        onRematch={vi.fn()}
-        isRematchPending={false}
-        isRematchWaiting={false}
-        rematchError={null}
-        onBackToHome={vi.fn()}
+        {...panelProps(room({ status: 'CLOSED', roundNumber: 5, playerStatus: 'WON' }))}
       />,
     );
 
-    expect(screen.getByText('room.round.notInProgressYet')).toBeTruthy();
+    expect(screen.queryByText('room.round.youWonThisRound')).toBeNull();
+    expect(screen.getByRole('button', { name: 'room.round.playAgain' })).toBeTruthy();
   });
 
-  it('shows the solution for a lost round and allows readying up', () => {
-    const onReadyNextRound = vi.fn();
+  it('keeps the lost round solution visible after room closure', () => {
     render(
       <RoundStatusPanel
-        room={baseRoom}
-        player={{ id: 'me', score: 3, displayName: 'Me' }}
-        opponent={{ id: 'opponent', score: 2, displayName: 'Opponent' }}
-        endedRound={baseRoom.currentRound}
-        myRoundStatus="LOST"
-        onReadyNextRound={onReadyNextRound}
-        isReadyPending={false}
-        readyError={null}
-        onRematch={vi.fn()}
-        isRematchPending={false}
-        isRematchWaiting={false}
-        rematchError={null}
-        onBackToHome={vi.fn()}
+        {...panelProps(room({ status: 'CLOSED', roundNumber: 5, playerStatus: 'LOST' }))}
       />,
     );
 
     expect(screen.getByText('room.round.youLostThisRound')).toBeTruthy();
-    expect(screen.getByText('room.round.solution')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'room.round.readyForNextRound' }));
-    expect(onReadyNextRound).toHaveBeenCalledWith(2);
-  });
-
-  it('shows the ready error and hides the button when already ready', () => {
-    render(
-      <RoundStatusPanel
-        room={baseRoom}
-        player={{ id: 'me', score: 3, displayName: 'Me' }}
-        opponent={{ id: 'opponent', score: 2, displayName: 'Opponent' }}
-        endedRound={baseRoom.currentRound}
-        myRoundStatus="READY"
-        onReadyNextRound={vi.fn()}
-        isReadyPending={false}
-        readyError={new Error('boom')}
-        onRematch={vi.fn()}
-        isRematchPending={false}
-        isRematchWaiting={false}
-        rematchError={null}
-        onBackToHome={vi.fn()}
-      />,
-    );
-
-    expect(screen.queryByRole('button', { name: 'room.round.readyForNextRound' })).toBeNull();
-    expect(screen.getByText('room.round.readyRejected:Ready failed')).toBeTruthy();
-  });
-
-  it('shows the final result and does not offer another round when the room is closed', () => {
-    render(
-      <RoundStatusPanel
-        room={{ ...baseRoom, status: 'CLOSED' }}
-        player={{ id: 'me', score: 3, displayName: 'Me' }}
-        opponent={{ id: 'opponent', score: 2, displayName: 'Opponent' }}
-        endedRound={baseRoom.currentRound}
-        myRoundStatus="WON"
-        onReadyNextRound={vi.fn()}
-        isReadyPending={false}
-        readyError={null}
-        onRematch={vi.fn()}
-        isRematchPending={false}
-        isRematchWaiting={false}
-        rematchError={null}
-        onBackToHome={vi.fn()}
-      />,
-    );
-
-    expect(screen.queryByText('room.round.youWonMatch')).toBeNull();
-    expect(screen.queryByText('room.round.finalScore')).toBeNull();
-    expect(screen.getByRole('button', { name: 'room.round.playAgain' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'room.round.backToHome' })).toBeTruthy();
-    expect(screen.queryByText('room.round.youWonThisRound')).toBeNull();
-    expect(screen.queryByRole('button', { name: 'room.round.readyForNextRound' })).toBeNull();
-  });
-
-  it('disables play again while waiting for the other player', () => {
-    render(
-      <RoundStatusPanel
-        room={{ ...baseRoom, status: 'CLOSED' }}
-        player={{ id: 'me', score: 3, displayName: 'Me' }}
-        opponent={{ id: 'opponent', score: 2, displayName: 'Opponent' }}
-        endedRound={baseRoom.currentRound}
-        myRoundStatus="WON"
-        onReadyNextRound={vi.fn()}
-        isReadyPending={false}
-        readyError={null}
-        onRematch={vi.fn()}
-        isRematchPending={false}
-        isRematchWaiting
-        rematchError={null}
-        onBackToHome={vi.fn()}
-      />,
-    );
-
-    expect(screen.getByRole('button', { name: 'room.round.waitingForOpponent' }).disabled).toBe(
-      true,
-    );
-    expect(screen.queryByText('room.round.waitingForOtherPlayer')).toBeNull();
-  });
-
-  it('shows a rematch error', () => {
-    render(
-      <RoundStatusPanel
-        room={{ ...baseRoom, status: 'CLOSED' }}
-        player={{ id: 'me', score: 3, displayName: 'Me' }}
-        opponent={{ id: 'opponent', score: 2, displayName: 'Opponent' }}
-        endedRound={baseRoom.currentRound}
-        myRoundStatus="WON"
-        onReadyNextRound={vi.fn()}
-        isReadyPending={false}
-        readyError={null}
-        onRematch={vi.fn()}
-        isRematchPending={false}
-        isRematchWaiting={false}
-        rematchError={new Error('boom')}
-        onBackToHome={vi.fn()}
-      />,
-    );
-
-    expect(screen.getByText('room.round.playAgainFailed:Ready failed')).toBeTruthy();
+    expect(screen.getByText('APPLE')).toBeTruthy();
   });
 });

@@ -4,19 +4,14 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import {
-  type CreateRoomRequest,
-  type RoomDto,
-  type SubmitGuessResponse,
-  WdsApiError,
-} from '../api/types';
+import { type CreateRoomRequest, type RoomDto, type SubmitGuessResponse } from '../api/types';
 import {
   createRoom,
   getRoom,
   joinRoom,
   listMyRooms,
-  readyForNextRound,
   requestRematch,
+  startNextRound,
   submitGuess,
 } from '../api/rooms';
 import { i18n } from '../i18n';
@@ -89,25 +84,16 @@ export function useSubmitGuessMutation(args: { roomId: string }) {
     onSuccess: (data: SubmitGuessResponse) => {
       queryClient.setQueryData<RoomDto>(roomQueryKey(args.roomId), data.room);
     },
-    onError: (error: unknown) => {
-      if (error instanceof WdsApiError && error.code === 'ROUND_FINISHED') {
-        void queryClient.invalidateQueries({ queryKey: roomQueryKey(args.roomId) });
-      }
-    },
   });
 }
 
-export function useReadyForNextRoundMutation(args: { roomId: string }) {
+export function useNextRoundMutation(args: { roomId: string }) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ roundNumber }: { roundNumber: number }) =>
-      readyForNextRound({
-        roomId: args.roomId,
-        body: { roundNumber },
-      }),
-    onSuccess: (data: RoomDto) => {
-      queryClient.setQueryData<RoomDto>(roomQueryKey(args.roomId), data);
+    mutationFn: () => startNextRound(args.roomId),
+    onSuccess: (room: RoomDto) => {
+      queryClient.setQueryData<RoomDto>(roomQueryKey(args.roomId), room);
     },
   });
 }

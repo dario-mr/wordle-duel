@@ -1,19 +1,15 @@
 import { Code, Stack, Text } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import type { PlayerDto, RoomDto, RoundDto, RoundPlayerStatus } from '../../../api/types';
+import type { RoomDto } from '../../../api/types';
 import { getErrorMessage } from '../../../api/errors';
 import { ErrorAlert } from '../../common/ErrorAlert';
 import { PrimaryButton } from '../../common/BrandButton.tsx';
 
 export function RoundStatusPanel(props: {
   room: RoomDto;
-  player: PlayerDto;
-  opponent?: PlayerDto;
-  endedRound: RoundDto | null;
-  myRoundStatus: RoundPlayerStatus | undefined;
-  onReadyNextRound: (roundNumber: number) => void;
-  isReadyPending: boolean;
-  readyError: Error | null;
+  onNextRound: () => void;
+  isNextRoundPending: boolean;
+  nextRoundError: unknown;
   onRematch: () => void;
   isRematchPending: boolean;
   isRematchWaiting: boolean;
@@ -26,14 +22,33 @@ export function RoundStatusPanel(props: {
     return <Text fontSize="sm">{t('room.round.notInProgressYet')}</Text>;
   }
 
-  const endedRound = props.endedRound;
   const currentRound = props.room.currentRound;
-  const solution = currentRound?.solution;
-  const isClosed = props.room.status === 'CLOSED';
+  const playerStatus = currentRound?.playerStatus;
+  const hasFinishedRound = playerStatus != null && playerStatus !== 'PLAYING';
+  const isFinalRound =
+    currentRound != null &&
+    props.room.rounds !== 'ENDLESS' &&
+    currentRound.roundNumber === props.room.rounds;
+  const result =
+    currentRound?.playerStatus === 'WON' ? (
+      <Stack gap={1} align="center">
+        <Text textAlign="center">{t('room.round.youWonThisRound')}</Text>
+      </Stack>
+    ) : currentRound?.playerStatus === 'LOST' ? (
+      <Stack gap={1} align="center">
+        <Text textAlign="center">{t('room.round.youLostThisRound')}</Text>
+        {currentRound.solution ? (
+          <Text fontSize="sm">
+            {t('room.round.solution')} <Code>{currentRound.solution}</Code>
+          </Text>
+        ) : null}
+      </Stack>
+    ) : null;
 
-  if (isClosed) {
+  if (props.room.status === 'CLOSED') {
     return (
       <Stack gap={2} align="center" pt={2}>
+        {currentRound?.playerStatus === 'LOST' ? result : null}
         <Stack gap={2} w="full" maxW="32rem">
           <PrimaryButton
             w="full"
@@ -69,57 +84,36 @@ export function RoundStatusPanel(props: {
     );
   }
 
+  if (!currentRound) {
+    return <Text textAlign="center">{t('room.round.waitingForOpponent')}</Text>;
+  }
+
+  if (!hasFinishedRound) {
+    return null;
+  }
+
   return (
     <Stack gap={2} align="center">
-      {/* player status (WON/LOST/READY) */}
-      {props.myRoundStatus && props.myRoundStatus !== 'PLAYING' && (
-        <Text textAlign="center">{t(getEndedRoundTextKey(props.myRoundStatus))}</Text>
-      )}
-
-      {/* show solution as soon as player loses */}
-      {solution && props.myRoundStatus === 'LOST' && (
-        <Text fontSize="sm">
-          {t('room.round.solution')} <Code>{solution}</Code>
-        </Text>
-      )}
-
-      {/* ended round panel */}
-      {endedRound && (
-        <Stack gap={2} align="center">
-          {props.myRoundStatus !== 'READY' && (
-            <PrimaryButton
-              loading={props.isReadyPending}
-              disabled={props.isReadyPending}
-              onClick={() => {
-                props.onReadyNextRound(endedRound.roundNumber);
-              }}
-            >
-              {t('room.round.readyForNextRound')}
-            </PrimaryButton>
-          )}
-
-          {props.readyError && (
+      {result}
+      {isFinalRound ? (
+        <Text textAlign="center">{t('room.round.waitingForOpponent')}</Text>
+      ) : (
+        <>
+          <PrimaryButton
+            loading={props.isNextRoundPending}
+            disabled={props.isNextRoundPending}
+            onClick={props.onNextRound}
+          >
+            {t('room.round.nextRound')}
+          </PrimaryButton>
+          {props.nextRoundError != null ? (
             <ErrorAlert
-              title={t('room.round.readyRejected')}
-              message={getErrorMessage(props.readyError)}
+              title={t('room.round.nextRoundRejected')}
+              message={getErrorMessage(props.nextRoundError)}
             />
-          )}
-        </Stack>
+          ) : null}
+        </>
       )}
     </Stack>
   );
-}
-
-function getEndedRoundTextKey(status: RoundPlayerStatus): string {
-  switch (status) {
-    case 'WON':
-      return 'room.round.youWonThisRound';
-    case 'LOST':
-      return 'room.round.youLostThisRound';
-    case 'READY':
-      return 'room.round.youReadyThisRound';
-    default:
-      // not relevant in this scenario (not playing)
-      return '';
-  }
 }

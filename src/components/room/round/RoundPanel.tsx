@@ -8,13 +8,14 @@ export function RoundPanel(props: { player: PlayerDto; opponent?: PlayerDto; roo
 
   return (
     <Stack gap={5}>
-      <RoundTitle
-        roundNumber={round?.roundNumber}
-        rounds={props.room.rounds}
-        roundStatus={round?.roundStatus}
-        roomStatus={props.room.status}
-        language={props.room.language}
-      />
+      {round || props.room.status === 'CLOSED' ? (
+        <RoundTitle
+          roundNumber={round?.roundNumber}
+          rounds={props.room.rounds}
+          roomStatus={props.room.status}
+          language={props.room.language}
+        />
+      ) : null}
       <PlayerStatsBar player={props.player} opponent={props.opponent} room={props.room} />
     </Stack>
   );

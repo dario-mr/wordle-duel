@@ -115,7 +115,7 @@ describe('useRoomTopic', () => {
     ).toEqual({});
   });
 
-  it('subscribes on connect and invalidates the room query on messages', async () => {
+  it('refetches the score board on score and match-closure events', async () => {
     const { useRoomTopic } = await import('../../src/ws/useRoomTopic');
     renderHook(() => {
       useRoomTopic('room-1');
@@ -123,11 +123,12 @@ describe('useRoomTopic', () => {
 
     const config = mocks.getLastConfig() as { onConnect?: () => void };
     config.onConnect?.();
-    mocks.getSubscribeHandler()?.({ body: '{"type":"ROOM_CREATED"}' });
+    mocks.getSubscribeHandler()?.({ body: '{"type":"SCORES_UPDATED"}' });
+    mocks.getSubscribeHandler()?.({ body: '{"type":"ROOM_CLOSED"}' });
     mocks.getSubscribeHandler()?.({ body: 'not-json' });
 
     await waitFor(() => {
-      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(2);
+      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(3);
       expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['room', 'room-1'] });
     });
   });

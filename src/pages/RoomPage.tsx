@@ -13,8 +13,8 @@ import { RoomJoinGate } from '../components/room/RoomJoinGate';
 import { RoomSharePanel } from '../components/room/RoomSharePanel';
 import { RoundStatusPanel } from '../components/room/round/RoundStatusPanel';
 import {
+  useNextRoundMutation,
   useRematchMutation,
-  useReadyForNextRoundMutation,
   useRoomQuery,
   useSubmitGuessMutation,
 } from '../query/roomQueries';
@@ -64,25 +64,21 @@ export function RoomPage() {
   const submitGuessMutation = useSubmitGuessMutation({
     roomId: roomId ?? '',
   });
+  const nextRoundMutation = useNextRoundMutation({ roomId: roomId ?? '' });
 
-  const readyForNextRoundMutation = useReadyForNextRoundMutation({
-    roomId: roomId ?? '',
-  });
   const rematchMutation = useRematchMutation({ roomId: roomId ?? '' });
 
-  const myRoundStatus = currentRound?.statusByPlayerId[myPlayerId];
-  const endedRound = currentRound?.roundStatus === 'ENDED' ? currentRound : null;
-  const isRoundEnded = Boolean(endedRound);
+  const myRoundStatus = currentRound?.playerStatus;
 
   const me = room?.players.find((p) => p.id === myPlayerId);
   const opponent = room?.players.find((p) => p.id !== myPlayerId);
 
   const letterStatusByLetter = useMemo<Partial<Record<string, GuessLetterStatus>>>(() => {
-    if (!me || !currentRound) {
+    if (!currentRound) {
       return {};
     }
 
-    const guesses = currentRound.guessesByPlayerId[me.id] ?? [];
+    const guesses = currentRound.guesses;
     const strength: Record<GuessLetterStatus, number> = {
       ABSENT: 0,
       PRESENT: 1,
@@ -103,21 +99,17 @@ export function RoomPage() {
     }
 
     return result;
-  }, [currentRound, me]);
+  }, [currentRound]);
 
-  const showGuessKeyboard =
-    room?.status === 'IN_PROGRESS' && (!myRoundStatus || myRoundStatus === 'PLAYING');
+  const showGuessKeyboard = room?.status === 'IN_PROGRESS' && myRoundStatus === 'PLAYING';
 
   const showRoundStatusPanel =
-    room?.status !== 'IN_PROGRESS' ||
-    Boolean(endedRound) ||
-    (Boolean(myRoundStatus) && myRoundStatus !== 'PLAYING');
+    room?.status !== 'IN_PROGRESS' || !currentRound || myRoundStatus !== 'PLAYING';
 
   const canSubmit =
     Boolean(roomId) &&
     Boolean(myPlayerId) &&
     room?.status === 'IN_PROGRESS' &&
-    currentRound?.roundStatus === 'PLAYING' &&
     myRoundStatus === 'PLAYING' &&
     guess.length === WORD_LENGTH &&
     !submitGuessMutation.isPending;
@@ -190,34 +182,24 @@ export function RoomPage() {
     <Stack gap={5} w="full" maxW="44rem" mx="auto" pb={4}>
       <RoundPanel player={me} opponent={opponent} room={room} />
 
-      <PlayerBoard
-        player={me}
-        opponent={opponent}
-        room={room}
-        currentGuess={showGuessKeyboard ? guess : ''}
-      />
+      {currentRound ? (
+        <PlayerBoard room={room} currentGuess={showGuessKeyboard ? guess : ''} />
+      ) : null}
 
       {showRoundStatusPanel && (
         <RoundStatusPanel
           room={room}
-          player={me}
-          opponent={opponent}
-          endedRound={endedRound}
-          myRoundStatus={myRoundStatus}
-          isReadyPending={readyForNextRoundMutation.isPending}
-          readyError={readyForNextRoundMutation.error}
+          onNextRound={() => {
+            nextRoundMutation.mutate();
+          }}
+          isNextRoundPending={nextRoundMutation.isPending}
+          nextRoundError={nextRoundMutation.error}
           onRematch={handleRematch}
           isRematchPending={rematchMutation.isPending}
           isRematchWaiting={rematchMutation.isSuccess && rematchMutation.data.roomId === null}
           rematchError={rematchMutation.error}
           onBackToHome={() => {
             void navigate('/');
-          }}
-          onReadyNextRound={(roundNumber) => {
-            if (!roomId) {
-              return;
-            }
-            readyForNextRoundMutation.mutate({ roundNumber });
           }}
         />
       )}
@@ -229,7 +211,7 @@ export function RoomPage() {
           onChange={(nextValue) => {
             setGuessState({ roundNumber: currentRoundNumber, value: nextValue });
           }}
-          disabled={isRoundEnded || myRoundStatus !== 'PLAYING'}
+          disabled={false}
           canSubmit={canSubmit}
           isSubmitting={submitGuessMutation.isPending}
           onSubmit={(word) => {

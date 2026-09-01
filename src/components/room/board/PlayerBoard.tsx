@@ -1,25 +1,19 @@
 import { Stack } from '@chakra-ui/react';
-import type { PlayerDto, RoomDto } from '../../../api/types';
+import type { RoomDto } from '../../../api/types';
 import { MAX_GUESS_ATTEMPTS } from '../../../constants.ts';
 import { useGuessRevealAnimation } from '../../../hooks/useGuessRevealAnimation';
 import { type Cell, GuessRow } from './GuessRow';
 
-export function PlayerBoard(props: {
-  player: PlayerDto;
-  opponent?: PlayerDto;
-  room: RoomDto;
-  currentGuess?: string;
-}) {
+export function PlayerBoard(props: { room: RoomDto; currentGuess?: string }) {
   const round = props.room.currentRound;
   const roundNumber = round?.roundNumber;
   const maxAttempts = round?.maxAttempts ?? MAX_GUESS_ATTEMPTS;
 
-  const guesses = round?.guessesByPlayerId[props.player.id] ?? [];
+  const guesses = round?.guesses ?? [];
 
   const { shouldAnimateGuess } = useGuessRevealAnimation({
     guesses,
     roundNumber,
-    playerId: props.player.id,
   });
 
   const rows = Array.from({ length: maxAttempts }, (_, index) => {

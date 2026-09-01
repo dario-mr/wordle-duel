@@ -19,16 +19,9 @@ function liveRoom(roomId: string) {
     currentRound: {
       roundNumber: 1,
       maxAttempts: 6,
-      guessesByPlayerId: {
-        'user-1': [],
-        'user-2': [],
-      },
-      statusByPlayerId: {
-        'user-1': 'PLAYING',
-        'user-2': 'PLAYING',
-      },
+      guesses: [],
+      playerStatus: 'PLAYING',
       roundStatus: 'PLAYING',
-      solution: 'APPLE',
     },
   };
 }
@@ -77,37 +70,39 @@ test.describe('room page flow', () => {
     await expect(page.getByText('Waiting for opponent...')).toBeVisible();
   });
 
-  test('submits a guess through the real keyboard and clears the input after success', async ({
-    page,
-  }) => {
+  test('shows the completed board until the player starts the next round', async ({ page }) => {
     await mockAuthenticatedSession(page);
 
     const initialRoom = liveRoom('room-live');
-    const updatedRoom = {
+    const completedRoom = {
       ...initialRoom,
       currentRound: {
         ...initialRoom.currentRound,
-        guessesByPlayerId: {
-          ...initialRoom.currentRound.guessesByPlayerId,
-          'user-1': [
-            {
-              word: 'APPLE',
-              attemptNumber: 1,
-              letters: [
-                { letter: 'A', status: 'CORRECT' },
-                { letter: 'P', status: 'CORRECT' },
-                { letter: 'P', status: 'CORRECT' },
-                { letter: 'L', status: 'CORRECT' },
-                { letter: 'E', status: 'CORRECT' },
-              ],
-            },
-          ],
-        },
-        statusByPlayerId: {
-          ...initialRoom.currentRound.statusByPlayerId,
-          'user-1': 'WON',
-        },
-        roundStatus: 'ENDED',
+        guesses: [
+          {
+            word: 'APPLE',
+            attemptNumber: 1,
+            letters: [
+              { letter: 'A', status: 'CORRECT' },
+              { letter: 'P', status: 'CORRECT' },
+              { letter: 'P', status: 'CORRECT' },
+              { letter: 'L', status: 'CORRECT' },
+              { letter: 'E', status: 'CORRECT' },
+            ],
+          },
+        ],
+        playerStatus: 'WON',
+        roundStatus: 'PLAYING',
+      },
+    };
+    const nextRoom = {
+      ...initialRoom,
+      currentRound: {
+        roundNumber: 2,
+        maxAttempts: 6,
+        guesses: [],
+        playerStatus: 'PLAYING',
+        roundStatus: 'PLAYING',
       },
     };
 
@@ -117,7 +112,11 @@ test.describe('room page flow', () => {
 
     await page.route('**/api/v1/rooms/room-live/guess', async (route) => {
       expect(route.request().postDataJSON()).toEqual({ word: 'APPLE' });
-      await fulfillJson(route, { room: updatedRoom });
+      await fulfillJson(route, { room: completedRoom });
+    });
+
+    await page.route('**/api/v1/rooms/room-live/next', async (route) => {
+      await fulfillJson(route, nextRoom);
     });
 
     await page.goto('/rooms/room-live');
@@ -132,5 +131,7 @@ test.describe('room page flow', () => {
 
     await expect(enterButton).toHaveCount(0);
     await expect(page.getByText('You won this round')).toBeVisible();
+    await page.getByRole('button', { name: 'Next round' }).click();
+    await expect(enterButton).toBeDisabled();
   });
 });

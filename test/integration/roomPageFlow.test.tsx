@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
   getRoom: vi.fn(),
   submitGuess: vi.fn(),
-  readyForNextRound: vi.fn(),
+  startNextRound: vi.fn(),
   useRoomTopic: vi.fn(),
   showToast: vi.fn(),
 }));
@@ -28,8 +28,8 @@ vi.mock('../../src/api/rooms', () => ({
   getRoom: mocks.getRoom,
   joinRoom: vi.fn(),
   listMyRooms: vi.fn(),
-  readyForNextRound: mocks.readyForNextRound,
   requestRematch: vi.fn(),
+  startNextRound: mocks.startNextRound,
   submitGuess: mocks.submitGuess,
 }));
 
@@ -75,13 +75,18 @@ vi.mock('../../src/components/room/round/RoundPanel.tsx', () => ({
 }));
 
 vi.mock('../../src/components/room/board/PlayerBoard', () => ({
-  PlayerBoard: ({ currentGuess }: { currentGuess?: string }) => (
-    <div data-testid="player-board">{currentGuess ?? ''}</div>
+  PlayerBoard: ({ currentGuess, room }: { currentGuess?: string; room: RoomDto }) => (
+    <div data-testid="player-board">{`${String(room.currentRound?.roundNumber)}:${currentGuess ?? ''}`}</div>
   ),
 }));
 
 vi.mock('../../src/components/room/round/RoundStatusPanel', () => ({
-  RoundStatusPanel: () => <div>round-status</div>,
+  RoundStatusPanel: ({ room, onNextRound }: { room: RoomDto; onNextRound: () => void }) =>
+    room.currentRound?.playerStatus === 'PLAYING' ? null : (
+      <button type="button" onClick={onNextRound}>
+        next-round
+      </button>
+    ),
 }));
 
 vi.mock('../../src/components/room/keyboard/GuessKeyboard', () => ({
@@ -129,24 +134,18 @@ function createRoom(roomId: string): RoomDto {
     currentRound: {
       roundNumber: 2,
       maxAttempts: 6,
-      guessesByPlayerId: {
-        'me-1': [
-          {
-            word: 'ALLEY',
-            attemptNumber: 1,
-            letters: [
-              { letter: 'A', status: 'PRESENT' },
-              { letter: 'L', status: 'ABSENT' },
-            ],
-          },
-        ],
-      },
-      statusByPlayerId: {
-        'me-1': 'PLAYING',
-        'opponent-1': 'PLAYING',
-      },
+      guesses: [
+        {
+          word: 'ALLEY',
+          attemptNumber: 1,
+          letters: [
+            { letter: 'A', status: 'PRESENT' },
+            { letter: 'L', status: 'ABSENT' },
+          ],
+        },
+      ],
+      playerStatus: 'PLAYING',
       roundStatus: 'PLAYING',
-      solution: 'APPLE',
     },
   };
 }
@@ -166,42 +165,40 @@ describe('room page flow', () => {
     resetAuthModuleMocks(mocks, { id: 'me-1', roles: ['USER'] });
     mocks.getRoom.mockReset();
     mocks.submitGuess.mockReset();
-    mocks.readyForNextRound.mockReset();
+    mocks.startNextRound.mockReset();
     mocks.useRoomTopic.mockReset();
     mocks.showToast.mockReset();
   });
 
-  it('loads the room through the real query hook and clears the guess after submit', async () => {
+  it('keeps the completed board until the player starts their next round', async () => {
     const initialRoom = createRoom('room-1');
     const currentRound = initialRoom.currentRound;
     if (!currentRound) {
       throw new Error('Expected a current round for integration test');
     }
 
-    const updatedRoom: RoomDto = {
+    const completedRoom: RoomDto = {
       ...initialRoom,
       currentRound: {
         ...currentRound,
-        guessesByPlayerId: {
-          ...currentRound.guessesByPlayerId,
-          'me-1': [
-            ...(currentRound.guessesByPlayerId['me-1'] ?? []),
-            {
-              word: 'APPLE',
-              attemptNumber: 2,
-              letters: [
-                { letter: 'A', status: 'CORRECT' },
-                { letter: 'P', status: 'CORRECT' },
-              ],
-            },
-          ],
-        },
+        playerStatus: 'WON',
+        roundStatus: 'PLAYING',
+      },
+    };
+    const nextRoom: RoomDto = {
+      ...initialRoom,
+      currentRound: {
+        roundNumber: currentRound.roundNumber + 1,
+        maxAttempts: 6,
+        guesses: [],
+        playerStatus: 'PLAYING',
+        roundStatus: 'PLAYING',
       },
     };
 
     mocks.getRoom.mockResolvedValue(initialRoom);
-    mocks.submitGuess.mockResolvedValue({ room: updatedRoom });
-    mocks.readyForNextRound.mockResolvedValue(updatedRoom);
+    mocks.submitGuess.mockResolvedValue({ room: completedRoom });
+    mocks.startNextRound.mockResolvedValue(nextRoom);
 
     const queryClient = createTestQueryClient();
 
@@ -217,7 +214,7 @@ describe('room page flow', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'type-apple' }));
     expect(screen.getByTestId('keyboard-value').textContent).toBe('APPLE');
-    expect(screen.getByTestId('player-board').textContent).toBe('APPLE');
+    expect(screen.getByTestId('player-board').textContent).toBe('2:APPLE');
 
     fireEvent.click(screen.getByRole('button', { name: 'submit-guess' }));
 
@@ -226,9 +223,17 @@ describe('room page flow', () => {
         roomId: 'room-1',
         body: { word: 'APPLE' },
       });
+      expect(screen.queryByTestId('keyboard-value')).toBeNull();
+      expect(queryClient.getQueryData(roomQueryKey('room-1'))).toEqual(completedRoom);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'next-round' }));
+
+    await waitFor(() => {
+      expect(mocks.startNextRound).toHaveBeenCalledWith('room-1');
       expect(screen.getByTestId('keyboard-value').textContent).toBe('');
-      expect(screen.getByTestId('player-board').textContent).toBe('');
-      expect(queryClient.getQueryData(roomQueryKey('room-1'))).toEqual(updatedRoom);
+      expect(screen.getByTestId('player-board').textContent).toBe('3:');
+      expect(queryClient.getQueryData(roomQueryKey('room-1'))).toEqual(nextRoom);
     });
   });
 });

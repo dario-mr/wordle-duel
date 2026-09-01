@@ -1,24 +1,17 @@
 import { Box, HStack, Text } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import type { Language, RoomRounds, RoomStatus, RoundStatus } from '../../../api/types';
+import type { Language, RoomRounds, RoomStatus } from '../../../api/types';
 import { Pill } from '../../common/Pill';
 import { RoomLanguageFlag } from '../../myrooms/RoomLanguageFlag';
 
 interface RoundTitleProps {
   roundNumber?: number | null;
   rounds?: RoomRounds | null;
-  roundStatus?: RoundStatus | null;
   roomStatus?: RoomStatus | null;
   language: Language;
 }
 
-export function RoundTitle({
-  roundNumber,
-  rounds,
-  roundStatus,
-  roomStatus,
-  language,
-}: RoundTitleProps) {
+export function RoundTitle({ roundNumber, rounds, roomStatus, language }: RoundTitleProps) {
   const { t } = useTranslation();
 
   const DASH = t('room.playerStats.dash');
@@ -32,13 +25,10 @@ export function RoundTitle({
         })
       : t('room.round.title', { roundNumber: roundNumberText });
   const isMatchComplete = roomStatus === 'CLOSED';
-  const isRoundComplete = roundStatus === 'ENDED';
-  const isStatusWithProgress = isMatchComplete || isRoundComplete;
+  const isStatusWithProgress = isMatchComplete;
   const statusLabel = isMatchComplete
     ? t('room.round.matchComplete').toUpperCase()
-    : isRoundComplete
-      ? t('room.round.roundComplete').toUpperCase()
-      : roundTitle.toUpperCase();
+    : roundTitle.toUpperCase();
 
   return (
     <HStack w="full" justifyContent="center">
