@@ -1,14 +1,13 @@
 import { Box, HStack, Stack, Text } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import type { PlayerDto, RoomDto } from '../../api/types';
-import { roomStatusTextKey, roundStatusTextKey } from '../../utils/roomStatusText';
+import { roomStatusTextKey } from '../../utils/roomStatusText';
 import { Card } from '../common/Card';
 import { Pill } from '../common/Pill';
 import { RoundPlayerStatusIcon } from '../common/RoundPlayerStatusIcon';
 import {
   getRoomPlayerStatus,
   getRoundPlayerIcon,
-  getRoundStatusStyle,
   roomStatusStyleByStatus,
 } from '../../utils/roomStatusVisuals';
 import { RoomLanguageFlag } from './RoomLanguageFlag';
@@ -46,9 +45,6 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
   const roomStatusStyle = roomStatusStyleByStatus[room.status];
 
   const roundNumber = room.currentRound?.roundNumber;
-  const roundStatusLabel = room.currentRound
-    ? t(roundStatusTextKey[room.currentRound.roundStatus]).toUpperCase()
-    : DASH;
   const roundTitle =
     room.rounds === 'ENDLESS'
       ? t('room.round.title', { roundNumber: String(roundNumber) })
@@ -56,20 +52,12 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
           roundNumber: String(roundNumber),
           rounds: String(room.rounds),
         });
-  const roundStatusStyle = getRoundStatusStyle(room.currentRound?.roundStatus);
 
-  const statusPill: StatusPillModel =
-    room.status === 'IN_PROGRESS'
-      ? {
-          label: roundStatusLabel,
-          bg: roundStatusStyle.pillBg,
-          color: roundStatusStyle.pillColor,
-        }
-      : {
-          label: roomStatusLabel,
-          bg: roomStatusStyle.pillBg,
-          color: roomStatusStyle.pillColor,
-        };
+  const statusPill: StatusPillModel = {
+    label: roomStatusLabel,
+    bg: roomStatusStyle.pillBg,
+    color: roomStatusStyle.pillColor,
+  };
 
   const myPlayerStatusRaw = getRoomPlayerStatus(
     room.status,

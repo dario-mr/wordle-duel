@@ -48,7 +48,7 @@ export default {
     errorTitle: 'Room error',
     status: {
       waitingForPlayers: 'WAITING',
-      inProgress: 'LIVE',
+      inProgress: 'IN PROGRESS',
       closed: 'CLOSED',
     },
     share: {

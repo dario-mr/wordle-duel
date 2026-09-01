@@ -48,7 +48,7 @@ export default {
     errorTitle: 'Errore stanza',
     status: {
       waitingForPlayers: 'IN ATTESA',
-      inProgress: 'LIVE',
+      inProgress: 'IN CORSO',
       closed: 'CHIUSA',
     },
     share: {

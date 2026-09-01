@@ -9,7 +9,7 @@ import {
 describe('roomStatusVisuals', () => {
   it('maps each room status to the expected card/pill visuals', () => {
     expect(roomStatusStyleByStatus).toEqual({
-      IN_PROGRESS: { borderLeftColor: 'green.600', pillBg: 'green.600', pillColor: 'white' },
+      IN_PROGRESS: { borderLeftColor: 'green.600', pillBg: 'blue.600', pillColor: 'white' },
       WAITING_FOR_PLAYERS: {
         borderLeftColor: 'yellow.400',
         pillBg: 'yellow.400',
