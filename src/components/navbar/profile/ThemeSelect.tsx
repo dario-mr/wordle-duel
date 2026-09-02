@@ -6,14 +6,29 @@ import type { ThemeMode } from '../../../state/themeStore';
 interface Props {
   themeMode: ThemeMode;
   onChange: ChangeEventHandler<HTMLSelectElement>;
+  overlay?: boolean;
 }
 
-export function ThemeSelect({ themeMode, onChange }: Props) {
+export function ThemeSelect({ themeMode, onChange, overlay = false }: Props) {
   const { t } = useTranslation();
 
   return (
-    <NativeSelect.Root w="auto">
-      <NativeSelect.Field value={themeMode} onChange={onChange} aria-label={t('common.theme')}>
+    <NativeSelect.Root
+      w={overlay ? 'full' : 'auto'}
+      h={overlay ? 'full' : undefined}
+      position={overlay ? 'absolute' : undefined}
+      inset={overlay ? 0 : undefined}
+      zIndex={overlay ? 1 : undefined}
+      opacity={overlay ? 0 : undefined}
+    >
+      <NativeSelect.Field
+        value={themeMode}
+        onChange={onChange}
+        aria-label={t('common.theme')}
+        w={overlay ? 'full' : undefined}
+        h={overlay ? 'full' : undefined}
+        cursor={overlay ? 'pointer' : undefined}
+      >
         <option value="light">{t('common.light')}</option>
         <option value="dark">{t('common.dark')}</option>
       </NativeSelect.Field>

@@ -77,6 +77,9 @@ const config = defineConfig({
           muted: {
             value: { _light: '{colors.gray.600}', _dark: '{colors.dracula.comment}' },
           },
+          navigation: {
+            value: { _light: '{colors.gray.700}', _dark: '{colors.gray.400}' },
+          },
           subtle: {
             value: { _light: '{colors.gray.400}', _dark: '{colors.dracula.comment}' },
           },

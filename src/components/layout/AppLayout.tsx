@@ -6,7 +6,7 @@ export function AppLayout() {
   return (
     <Flex direction="column" minH="100vh" bg="bg">
       <Navbar />
-      <Box as="main" flex="1">
+      <Box as="main" flex="1" pb={{ base: '3rem', md: 0 }}>
         <Container maxW={{ md: '50rem' }} py={4} px={4}>
           <Outlet />
         </Container>

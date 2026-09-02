@@ -2,6 +2,11 @@ export default {
   app: {
     name: 'Wordle Duel',
   },
+  nav: {
+    home: 'Home',
+    rooms: 'Rooms',
+    me: 'Me',
+  },
   common: {
     language: 'Language',
     theme: 'Theme',
@@ -13,6 +18,7 @@ export default {
     copied: 'Copied',
     copyLink: 'Copy link',
     share: 'Share',
+    close: 'Close',
   },
   errors: {
     unknown: 'Unknown error',
@@ -101,7 +107,6 @@ export default {
     title: 'Profile',
     loadingPlayerId: '...',
     uiLanguage: 'Language',
-    myRooms: 'My rooms',
     legal: 'Legal & Policies',
     loginWithGoogle: 'Sign in with Google',
     logout: 'Logout',

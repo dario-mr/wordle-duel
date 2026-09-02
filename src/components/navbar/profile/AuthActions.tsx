@@ -21,7 +21,7 @@ export function AuthActions({ me, logoutPending, onLogin, onLogout }: Props) {
 
         {isAuthenticated && (
           <VStack w="full">
-            <Separator w="full" mb={3} />
+            <Separator w="full" mb={3} borderColor="border.divider" />
             <AccentButton loading={logoutPending} disabled={logoutPending} onClick={onLogout}>
               {t('profile.logout')}
             </AccentButton>

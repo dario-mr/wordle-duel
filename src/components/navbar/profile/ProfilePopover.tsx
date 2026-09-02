@@ -1,6 +1,7 @@
-import { Grid, Popover, Separator, Stack, Text } from '@chakra-ui/react';
+import { Avatar, CloseButton, Drawer, Flex, Popover, Portal, Stack, Text } from '@chakra-ui/react';
+import { UserRound } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { ChangeEvent } from 'react';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -8,18 +9,21 @@ import { beginGoogleLogin, logout } from '../../../api/auth';
 import { getErrorMessage } from '../../../api/errors';
 import { meQueryKey } from '../../../query/meQueries';
 import { useSingleToast } from '../../../hooks/useSingleToast';
-import type { UiLocale } from '../../../i18n/resources';
-import { useLocaleStore } from '../../../state/localeStore';
 import { STORAGE_KEYS } from '../../../state/storageKeys';
-import { type ThemeMode, useThemeStore } from '../../../state/themeStore';
 import { useCurrentUser } from '../../../auth/useCurrentUser';
 import { AuthActions } from './AuthActions';
-import { LanguageSelect } from './LanguageSelect';
+import { ProfileMenuContent } from './ProfileMenuContent';
 import { ProfileTriggerButton } from './ProfileTriggerButton';
-import { ThemeSelect } from './ThemeSelect';
-import { PrimaryButton } from '../../common/BrandButton.tsx';
 
-export function ProfilePopover() {
+type ProfileTrigger = ReactNode | ((pictureUrl?: string | null) => ReactNode);
+
+export function ProfilePopover({
+  mobile = false,
+  trigger,
+}: {
+  mobile?: boolean;
+  trigger?: ProfileTrigger;
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -28,12 +32,6 @@ export function ProfilePopover() {
   const [open, setOpen] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
   const me = useCurrentUser();
-
-  const locale = useLocaleStore((s) => s.locale);
-  const setLocale = useLocaleStore((s) => s.setLocale);
-
-  const themeMode = useThemeStore((s) => s.theme);
-  const setTheme = useThemeStore((s) => s.setTheme);
 
   const displayedMe = logoutPending ? null : me;
   const isLoggedIn = Boolean(displayedMe);
@@ -48,12 +46,14 @@ export function ProfilePopover() {
     }
   };
 
-  const handleLocaleChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setLocale(e.target.value as UiLocale);
+  const handleUsersClick = () => {
+    setOpen(false);
+    void navigate('/users');
   };
 
-  const handleThemeChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setTheme(e.target.value as ThemeMode);
+  const handleLegalClick = () => {
+    setOpen(false);
+    void navigate('/legal');
   };
 
   const handleLogoutClick = () => {
@@ -95,89 +95,88 @@ export function ProfilePopover() {
     void runLogout();
   };
 
+  const profileTrigger = (typeof trigger === 'function'
+    ? trigger(displayedMe?.pictureUrl)
+    : trigger) ?? (
+    <ProfileTriggerButton
+      pictureUrl={isLoggedIn ? me?.pictureUrl : undefined}
+      aria-label={t('profile.title')}
+    />
+  );
+
+  const profileHeader = (
+    <Stack gap={3} w="full">
+      <Flex align="center" gap={3}>
+        <Avatar.Root size="lg" colorPalette="teal">
+          {displayedMe?.pictureUrl && <Avatar.Image src={displayedMe.pictureUrl} alt="" />}
+          <Avatar.Fallback>
+            <UserRound size={24} aria-hidden="true" />
+          </Avatar.Fallback>
+        </Avatar.Root>
+        <Text fontSize="lg" fontWeight="semibold">
+          {profileTitle}
+        </Text>
+      </Flex>
+      {!isLoggedIn && (
+        <AuthActions
+          me={displayedMe}
+          logoutPending={logoutPending}
+          onLogin={beginGoogleLogin}
+          onLogout={handleLogoutClick}
+        />
+      )}
+    </Stack>
+  );
+
+  const profileContent = (
+    <ProfileMenuContent
+      me={displayedMe}
+      logoutPending={logoutPending}
+      onUsersClick={handleUsersClick}
+      onLegalClick={handleLegalClick}
+      onLogoutClick={handleLogoutClick}
+    />
+  );
+
+  if (mobile) {
+    return (
+      <Drawer.Root open={open} onOpenChange={handleOpenChange} placement="bottom" size="sm">
+        <Drawer.Trigger asChild>{profileTrigger}</Drawer.Trigger>
+        <Portal>
+          <Drawer.Backdrop />
+          <Drawer.Positioner>
+            <Drawer.Content borderTopRadius="3xl">
+              <Drawer.CloseTrigger asChild>
+                <CloseButton size="sm" aria-label={t('common.close')} />
+              </Drawer.CloseTrigger>
+              <Drawer.Header>
+                <Drawer.Title asChild>{profileHeader}</Drawer.Title>
+              </Drawer.Header>
+              <Drawer.Body pb={0}>{profileContent}</Drawer.Body>
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Portal>
+      </Drawer.Root>
+    );
+  }
+
   return (
     <Popover.Root
       open={open}
       onOpenChange={handleOpenChange}
       positioning={{ placement: 'bottom-end' }}
     >
-      <Popover.Trigger asChild>
-        <ProfileTriggerButton
-          pictureUrl={isLoggedIn ? me?.pictureUrl : undefined}
-          aria-label={t('profile.title')}
-        />
-      </Popover.Trigger>
+      <Popover.Trigger asChild>{profileTrigger}</Popover.Trigger>
 
       <Popover.Positioner>
-        <Popover.Content>
+        <Popover.Content w="20rem" maxW="calc(100vw - 2rem)" p={0} borderRadius="3xl">
           <Popover.CloseTrigger />
-          <Popover.Header>
-            <Popover.Title fontSize="lg" fontWeight="semibold">
-              {profileTitle}
-              <Separator mt={3} w="full" />
-            </Popover.Title>
+          <Popover.Header p={4} pb={0}>
+            <Popover.Title asChild>{profileHeader}</Popover.Title>
           </Popover.Header>
 
-          <Popover.Body>
-            <Stack gap={4} align="start">
-              <Grid
-                w="full"
-                templateColumns="auto 1fr"
-                alignItems="center"
-                columnGap={4}
-                rowGap={3}
-              >
-                <Text>{t('profile.uiLanguage')}</Text>
-                <LanguageSelect locale={locale} onChange={handleLocaleChange} />
-
-                <Text>{t('common.theme')}</Text>
-                <ThemeSelect themeMode={themeMode} onChange={handleThemeChange} />
-              </Grid>
-
-              {isLoggedIn && (
-                <PrimaryButton
-                  w="full"
-                  justifyContent="flex-start"
-                  onClick={() => {
-                    setOpen(false);
-                    void navigate('/my-rooms');
-                  }}
-                >
-                  {t('profile.myRooms')}
-                </PrimaryButton>
-              )}
-
-              {isLoggedIn && displayedMe?.roles.includes('ADMIN') && (
-                <PrimaryButton
-                  w="full"
-                  justifyContent="flex-start"
-                  onClick={() => {
-                    setOpen(false);
-                    void navigate('/users');
-                  }}
-                >
-                  {t('admin.users.navLink')}
-                </PrimaryButton>
-              )}
-
-              <PrimaryButton
-                w="full"
-                justifyContent="flex-start"
-                onClick={() => {
-                  setOpen(false);
-                  void navigate('/legal');
-                }}
-              >
-                {t('profile.legal')}
-              </PrimaryButton>
-
-              <AuthActions
-                me={displayedMe}
-                logoutPending={logoutPending}
-                onLogin={beginGoogleLogin}
-                onLogout={handleLogoutClick}
-              />
-            </Stack>
+          <Popover.Body p={4} pt={3} pb={2}>
+            {profileContent}
           </Popover.Body>
         </Popover.Content>
       </Popover.Positioner>

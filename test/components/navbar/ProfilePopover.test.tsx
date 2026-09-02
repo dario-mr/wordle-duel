@@ -69,6 +69,18 @@ vi.mock('../../../src/state/themeStore', () => ({
 }));
 
 vi.mock('@chakra-ui/react', () => ({
+  Avatar: {
+    Root: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+    Image: () => null,
+    Fallback: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+  },
+  Box: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+  Button: ({ children, onClick }: { children?: ReactNode; onClick?: () => void }) => (
+    <button type="button" onClick={onClick}>
+      {children}
+    </button>
+  ),
+  Flex: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
   Grid: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
   Popover: {
     Root: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
@@ -175,11 +187,10 @@ describe('ProfilePopover', () => {
     expect(screen.queryByText('profile.myRooms')).toBeNull();
   });
 
-  it('shows admin navigation for admins', () => {
+  it('shows admin navigation', () => {
     mocks.getCurrentUser.mockReturnValue({ id: 'user-1', roles: ['ADMIN'] });
     render(<ProfilePopover />);
 
-    expect(screen.getByText('profile.myRooms')).toBeTruthy();
     expect(screen.getByText('admin.users.navLink')).toBeTruthy();
   });
 
@@ -188,7 +199,7 @@ describe('ProfilePopover', () => {
     sessionStorage.setItem('wd.auth.returnTo', '/rooms/abc');
 
     render(<ProfilePopover />);
-    fireEvent.click(screen.getByRole('button', { name: 'logout' }));
+    fireEvent.click(screen.getByRole('button', { name: 'profile.logout' }));
 
     await waitFor(() => {
       expect(mocks.cancelQueries).toHaveBeenCalledWith({ queryKey: ['room'], exact: false });
@@ -206,7 +217,7 @@ describe('ProfilePopover', () => {
     mocks.logout.mockRejectedValueOnce(new Error('boom'));
 
     render(<ProfilePopover />);
-    fireEvent.click(screen.getByRole('button', { name: 'logout' }));
+    fireEvent.click(screen.getByRole('button', { name: 'profile.logout' }));
 
     await waitFor(() => {
       expect(mocks.showToast).toHaveBeenCalledWith(
