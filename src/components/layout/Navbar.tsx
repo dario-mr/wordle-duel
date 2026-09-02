@@ -15,7 +15,7 @@ import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { ProfilePopover } from '../navbar/profile/ProfilePopover.tsx';
 
 const NAV_ICON_SIZE = 20;
-const NAV_SCROLL_THRESHOLD = 6;
+const NAV_SCROLL_THRESHOLD = 20;
 
 export function Navbar() {
   const { t } = useTranslation();
