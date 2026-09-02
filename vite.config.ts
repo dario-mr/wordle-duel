@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
       : undefined;
 
   return {
-    base: mode === 'production' ? '/wordle-duel/' : '/',
+    base: '/',
     plugins: [react(), svgr()],
     server: {
       port: 3001,

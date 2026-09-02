@@ -33,7 +33,7 @@ npm run preview
 
 Notes:
 
-- The production build is configured with `base: /wordle-duel/` (see `vite.config.ts`).
+- The production build is served from the domain root (see `vite.config.ts`).
 - In production, the frontend calls the backend through the gateway at:
   - REST: `/wordle-duel-service/api/v1/…`
   - WS: `/wordle-duel-service/ws`
