@@ -14,9 +14,9 @@ export function HomeTabs(props: { activeTab: HomeTab; onTabChange: (tab: HomeTab
     <Box
       display="grid"
       gridTemplateColumns="repeat(2, minmax(0, 1fr))"
-      gap="2px"
+      gap={1}
       p="1px"
-      m="2px"
+      m={2}
       borderWidth="1px"
       borderColor="border"
       borderRadius="full"
