@@ -23,6 +23,7 @@ export function CreateRoomForm(props: { onCreated: (roomId: string) => void }) {
       as="form"
       gap={0}
       w="full"
+      h="full"
       onSubmit={(e) => {
         e.preventDefault();
         createMutation.mutate(
@@ -108,9 +109,8 @@ export function CreateRoomForm(props: { onCreated: (roomId: string) => void }) {
         disabled={createMutation.isPending}
         type="submit"
         w="full"
-        minH="3rem"
-        mt={1}
-        fontSize="1.05rem"
+        minH={'2rem'}
+        mt="auto"
       >
         {t('home.createRoom.button')}
       </PrimaryButton>

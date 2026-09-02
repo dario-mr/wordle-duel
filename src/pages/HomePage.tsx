@@ -31,7 +31,7 @@ export function HomePage() {
   };
 
   return (
-    <Stack gap={8} pt={8} pb={16} mx={2}>
+    <Stack gap={8} pt={8} pb={16}>
       <Stack gap={2} align="center" textAlign="center">
         <Heading size="3xl" lineHeight="1.2">
           {t('home.welcome')}
@@ -41,14 +41,43 @@ export function HomePage() {
         </Text>
       </Stack>
 
-      <HomeTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      <Stack
+        gap={0}
+        borderWidth="1px"
+        borderColor="border"
+        borderRadius="3xl"
+        overflow="hidden"
+        bg="bg.card"
+      >
+        <HomeTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div id="create-room-panel" role="tabpanel" hidden={activeTab !== 'create'}>
-        <CreateRoomForm onCreated={goToRoom} />
-      </div>
-      <div id="join-room-panel" role="tabpanel" hidden={activeTab !== 'join'}>
-        <JoinRoomForm onJoined={goToRoom} />
-      </div>
+        <Stack gap={0} p={{ base: 5, sm: 8 }} display="grid">
+          <Stack
+            as="div"
+            id="create-room-panel"
+            role="tabpanel"
+            gap={0}
+            gridArea="1 / 1"
+            visibility={activeTab === 'create' ? 'visible' : 'hidden'}
+            pointerEvents={activeTab === 'create' ? 'auto' : 'none'}
+            aria-hidden={activeTab !== 'create'}
+          >
+            <CreateRoomForm onCreated={goToRoom} />
+          </Stack>
+          <Stack
+            as="div"
+            id="join-room-panel"
+            role="tabpanel"
+            gap={0}
+            gridArea="1 / 1"
+            visibility={activeTab === 'join' ? 'visible' : 'hidden'}
+            pointerEvents={activeTab === 'join' ? 'auto' : 'none'}
+            aria-hidden={activeTab !== 'join'}
+          >
+            <JoinRoomForm onJoined={goToRoom} />
+          </Stack>
+        </Stack>
+      </Stack>
     </Stack>
   );
 }

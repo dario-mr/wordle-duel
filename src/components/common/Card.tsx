@@ -1,26 +1,13 @@
 import { Box, type BoxProps } from '@chakra-ui/react';
 import type { PropsWithChildren } from 'react';
 
-type CardProps = PropsWithChildren<
-  {
-    borderLeftColor?: BoxProps['borderLeftColor'];
-  } & Omit<BoxProps, 'borderLeftColor'>
->;
+type CardProps = PropsWithChildren<BoxProps>;
 
 export function Card(props: CardProps) {
-  const { borderLeftColor = 'fg.primary', children, ...rest } = props;
+  const { children, ...rest } = props;
 
   return (
-    <Box
-      p={4.5}
-      borderWidth="1px"
-      borderLeftWidth="3px"
-      borderRadius="3xl"
-      bg="bg.card"
-      borderLeftColor={borderLeftColor}
-      boxShadow="sm"
-      {...rest}
-    >
+    <Box p={4.5} borderWidth="1px" borderRadius="3xl" bg="bg.card" boxShadow="sm" {...rest}>
       {children}
     </Box>
   );

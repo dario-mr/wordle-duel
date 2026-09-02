@@ -62,7 +62,6 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
   return (
     <Card
       borderLeftWidth="default"
-      borderLeftColor="default"
       as="button"
       textAlign="left"
       cursor="pointer"

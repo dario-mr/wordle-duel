@@ -10,7 +10,7 @@ export function MyRoomsSkeleton() {
 
       <Stack gap={4}>
         {Array.from({ length: cards }).map((_, idx) => (
-          <Card key={idx} borderLeftWidth="default" borderLeftColor="default" borderRadius="3xl">
+          <Card key={idx} borderLeftWidth="default" borderRadius="3xl">
             <Stack gap={2} w="full">
               <Box display="flex" justifyContent="space-between" alignItems="center" gap={3}>
                 <Skeleton height="28px" width="160px" borderRadius="md" />

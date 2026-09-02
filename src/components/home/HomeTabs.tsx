@@ -16,10 +16,10 @@ export function HomeTabs(props: { activeTab: HomeTab; onTabChange: (tab: HomeTab
       gridTemplateColumns="repeat(2, minmax(0, 1fr))"
       gap="2px"
       p="1px"
+      m="2px"
       borderWidth="1px"
-      borderColor="border.muted"
+      borderColor="border"
       borderRadius="full"
-      bg="bg"
       role="tablist"
     >
       {tabs.map((tab) => {
@@ -34,7 +34,7 @@ export function HomeTabs(props: { activeTab: HomeTab; onTabChange: (tab: HomeTab
             aria-selected={isActive}
             aria-controls={tab.panelId}
             variant="plain"
-            minH="2.5rem"
+            minH="2rem"
             px={4}
             borderRadius="full"
             fontWeight="semibold"
