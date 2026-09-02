@@ -16,6 +16,7 @@ import { ProfilePopover } from '../navbar/profile/ProfilePopover.tsx';
 
 const NAV_ICON_SIZE = 20;
 const NAV_SCROLL_THRESHOLD = 20;
+const NAV_SCROLL_EDGE_TOLERANCE = 32;
 
 export function Navbar() {
   const { t } = useTranslation();
@@ -23,15 +24,38 @@ export function Navbar() {
   const [mobileNavHidden, setMobileNavHidden] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const lastScrollY = useRef(0);
+  const scrollEdge = useRef<'top' | 'bottom' | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      const maxScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
 
       if (currentScrollY <= 0) {
+        scrollEdge.current = 'top';
         lastScrollY.current = 0;
         setMobileNavHidden(false);
         return;
+      }
+
+      const atBottom =
+        maxScrollY > NAV_SCROLL_EDGE_TOLERANCE &&
+        currentScrollY >= maxScrollY - NAV_SCROLL_EDGE_TOLERANCE;
+
+      if (atBottom) {
+        scrollEdge.current = 'bottom';
+        lastScrollY.current = currentScrollY;
+        setMobileNavHidden(true);
+        return;
+      }
+
+      if (scrollEdge.current === 'bottom') {
+        if (currentScrollY >= maxScrollY - NAV_SCROLL_EDGE_TOLERANCE * 2) {
+          return;
+        }
+        scrollEdge.current = null;
+      } else if (scrollEdge.current === 'top') {
+        scrollEdge.current = null;
       }
 
       const scrollDelta = currentScrollY - lastScrollY.current;
