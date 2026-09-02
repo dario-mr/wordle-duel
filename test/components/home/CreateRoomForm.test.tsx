@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CreateRoomCard } from '../../../src/components/home/CreateRoomCard';
+import { CreateRoomForm } from '../../../src/components/home/CreateRoomForm';
 
 const mocks = vi.hoisted(() => ({
   mutate: vi.fn(),
@@ -93,7 +93,7 @@ vi.mock('../../../src/components/common/ErrorAlert', () => ({
   ),
 }));
 
-describe('CreateRoomCard', () => {
+describe('CreateRoomForm', () => {
   beforeEach(() => {
     mocks.mutate.mockReset();
   });
@@ -110,7 +110,7 @@ describe('CreateRoomCard', () => {
       },
     );
 
-    render(<CreateRoomCard onCreated={onCreated} />);
+    render(<CreateRoomForm onCreated={onCreated} />);
     const form = screen.getByRole('button').closest('form');
     expect(form).not.toBeNull();
     if (!form) {
@@ -134,7 +134,7 @@ describe('CreateRoomCard', () => {
       },
     );
 
-    render(<CreateRoomCard onCreated={onCreated} />);
+    render(<CreateRoomForm onCreated={onCreated} />);
     const roundsSelect = screen.getAllByRole('combobox')[1];
     fireEvent.change(roundsSelect, { target: { value: '10' } });
     const form = screen.getByRole('button').closest('form');

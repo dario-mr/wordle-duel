@@ -19,10 +19,36 @@ vi.mock('react-i18next', () => ({
 vi.mock('@chakra-ui/react', () => ({
   Heading: ({ children }: { children?: ReactNode }) => <h1>{children}</h1>,
   Stack: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+  Text: ({ children }: { children?: ReactNode }) => <p>{children}</p>,
 }));
 
-vi.mock('../../src/components/home/CreateRoomCard', () => ({
-  CreateRoomCard: ({ onCreated }: { onCreated: (roomId: string) => void }) => (
+vi.mock('../../src/components/home/HomeTabs', () => ({
+  HomeTabs: ({ onTabChange }: { onTabChange: (tab: 'create' | 'join') => void }) => (
+    <>
+      <button
+        type="button"
+        role="tab"
+        onClick={() => {
+          onTabChange('create');
+        }}
+      >
+        home.createRoom.title
+      </button>
+      <button
+        type="button"
+        role="tab"
+        onClick={() => {
+          onTabChange('join');
+        }}
+      >
+        home.joinRoom.title
+      </button>
+    </>
+  ),
+}));
+
+vi.mock('../../src/components/home/CreateRoomForm', () => ({
+  CreateRoomForm: ({ onCreated }: { onCreated: (roomId: string) => void }) => (
     <button
       type="button"
       onClick={() => {
@@ -34,8 +60,8 @@ vi.mock('../../src/components/home/CreateRoomCard', () => ({
   ),
 }));
 
-vi.mock('../../src/components/home/JoinRoomCard', () => ({
-  JoinRoomCard: ({ onJoined }: { onJoined: (roomId: string) => void }) => (
+vi.mock('../../src/components/home/JoinRoomForm', () => ({
+  JoinRoomForm: ({ onJoined }: { onJoined: (roomId: string) => void }) => (
     <button
       type="button"
       onClick={() => {
@@ -75,7 +101,7 @@ describe('HomePage', () => {
     expect(navigate).not.toHaveBeenCalledWith('https://evil.test');
   });
 
-  it('navigates to the created room when the create card succeeds', () => {
+  it('navigates to the created room when the create form succeeds', () => {
     render(<HomePage />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Create room' }));
@@ -83,11 +109,24 @@ describe('HomePage', () => {
     expect(navigate).toHaveBeenCalledWith('/rooms/created-room');
   });
 
-  it('navigates to the joined room when the join card succeeds', () => {
+  it('navigates to the joined room when the join form succeeds', () => {
     render(<HomePage />);
 
+    fireEvent.click(screen.getByRole('tab', { name: 'home.joinRoom.title' }));
     fireEvent.click(screen.getByRole('button', { name: 'Join room' }));
 
     expect(navigate).toHaveBeenCalledWith('/rooms/joined-room');
+  });
+
+  it('switches between the create and join screens', () => {
+    render(<HomePage />);
+
+    expect(screen.getByRole('button', { name: 'Create room' })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'home.joinRoom.title' }));
+    expect(screen.getByRole('button', { name: 'Join room' })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'home.createRoom.title' }));
+    expect(screen.getByRole('button', { name: 'Create room' })).toBeTruthy();
   });
 });

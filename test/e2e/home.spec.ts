@@ -40,7 +40,8 @@ test.describe('home flows', () => {
     });
 
     await page.goto('/');
-    await page.getByRole('button', { name: 'Create room' }).click();
+    await page.getByRole('tab', { name: 'Create room' }).click();
+    await page.getByRole('button', { name: 'Create', exact: true }).click();
 
     await expect(page).toHaveURL(/\/rooms\/room-created$/);
     await expect(page.getByText('Waiting for opponent...')).toBeVisible();
@@ -58,6 +59,7 @@ test.describe('home flows', () => {
     });
 
     await page.goto('/');
+    await page.getByRole('tab', { name: 'Join room' }).click();
     await page.getByPlaceholder('Room ID').fill('room-join');
     await page.getByRole('button', { name: 'Join' }).click();
 

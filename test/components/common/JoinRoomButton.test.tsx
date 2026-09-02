@@ -36,7 +36,7 @@ vi.mock('@chakra-ui/react', () => ({
 }));
 
 vi.mock('../../../src/components/common/BrandButton', () => ({
-  AccentButton: ({
+  PrimaryButton: ({
     children,
     onClick,
     disabled,

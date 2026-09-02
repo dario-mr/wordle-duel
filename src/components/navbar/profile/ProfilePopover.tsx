@@ -102,7 +102,10 @@ export function ProfilePopover() {
       positioning={{ placement: 'bottom-end' }}
     >
       <Popover.Trigger asChild>
-        <ProfileTriggerButton pictureUrl={isLoggedIn ? me?.pictureUrl : undefined} />
+        <ProfileTriggerButton
+          pictureUrl={isLoggedIn ? me?.pictureUrl : undefined}
+          aria-label={t('profile.title')}
+        />
       </Popover.Trigger>
 
       <Popover.Positioner>

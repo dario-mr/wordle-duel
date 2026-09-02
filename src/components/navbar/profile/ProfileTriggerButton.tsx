@@ -1,25 +1,15 @@
 import { Avatar, Box, Button, type ButtonProps } from '@chakra-ui/react';
 import { forwardRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import UserIcon from '../../../assets/icons/user.svg?react';
 
-type Props = Omit<ButtonProps, 'aria-label'> & {
+type Props = ButtonProps & {
   pictureUrl?: string | null;
 };
 
 export const ProfileTriggerButton = forwardRef<HTMLButtonElement, Props>(
   ({ pictureUrl, ...props }, ref) => {
-    const { t } = useTranslation();
-
     return (
-      <Button
-        ref={ref}
-        variant="ghost"
-        p={0}
-        minW="auto"
-        {...props}
-        aria-label={t('nav.openProfileAria')}
-      >
+      <Button ref={ref} variant="ghost" p={0} minW="auto" {...props}>
         <Avatar.Root size="sm" colorPalette="teal">
           {pictureUrl && <Avatar.Image src={pictureUrl} />}
           <Avatar.Fallback>

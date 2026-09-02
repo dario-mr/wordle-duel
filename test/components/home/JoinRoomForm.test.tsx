@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { JoinRoomCard } from '../../../src/components/home/JoinRoomCard';
+import { JoinRoomForm } from '../../../src/components/home/JoinRoomForm';
 
 const mocks = vi.hoisted(() => ({
   joinRoom: vi.fn(),
@@ -87,13 +87,13 @@ vi.mock('../../../src/components/common/JoinRoomButton', () => ({
   ),
 }));
 
-describe('JoinRoomCard', () => {
+describe('JoinRoomForm', () => {
   beforeEach(() => {
     mocks.joinRoom.mockReset();
   });
 
   it('submits the trimmed room id through the form handler', () => {
-    render(<JoinRoomCard onJoined={() => undefined} />);
+    render(<JoinRoomForm onJoined={() => undefined} />);
 
     fireEvent.change(screen.getByPlaceholderText('home.joinRoom.roomIdPlaceholder'), {
       target: { value: ' room-1 ' },
@@ -109,7 +109,7 @@ describe('JoinRoomCard', () => {
   });
 
   it('uses the same join action for button clicks', () => {
-    render(<JoinRoomCard onJoined={() => undefined} />);
+    render(<JoinRoomForm onJoined={() => undefined} />);
 
     fireEvent.change(screen.getByPlaceholderText('home.joinRoom.roomIdPlaceholder'), {
       target: { value: 'room-2' },

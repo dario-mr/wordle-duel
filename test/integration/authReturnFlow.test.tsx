@@ -51,6 +51,10 @@ vi.mock('@chakra-ui/react', () => ({
   Text: ({ children }: { children?: ReactNode }) => <p>{children}</p>,
 }));
 
+vi.mock('../../src/components/home/HomeTabs', () => ({
+  HomeTabs: () => null,
+}));
+
 vi.mock('../../src/components/common/BrandButton', () => ({
   GoogleLoginButton: ({ onClick }: { onClick: () => void }) => (
     <button
@@ -64,12 +68,12 @@ vi.mock('../../src/components/common/BrandButton', () => ({
   ),
 }));
 
-vi.mock('../../src/components/home/CreateRoomCard', () => ({
-  CreateRoomCard: () => <div>create-room-card</div>,
+vi.mock('../../src/components/home/CreateRoomForm', () => ({
+  CreateRoomForm: () => <div>create-room-form</div>,
 }));
 
-vi.mock('../../src/components/home/JoinRoomCard', () => ({
-  JoinRoomCard: () => <div>join-room-card</div>,
+vi.mock('../../src/components/home/JoinRoomForm', () => ({
+  JoinRoomForm: () => <div>join-room-form</div>,
 }));
 
 function LocationDisplay() {

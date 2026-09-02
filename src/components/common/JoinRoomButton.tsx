@@ -1,7 +1,7 @@
 import { type ButtonProps, Stack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { useJoinRoomAction } from '../../hooks/useJoinRoomAction';
-import { AccentButton } from './BrandButton';
+import { PrimaryButton } from './BrandButton';
 
 export function JoinRoomButton(props: {
   roomId: string | undefined;
@@ -17,7 +17,7 @@ export function JoinRoomButton(props: {
 
   return (
     <Stack gap={2} align="center">
-      <AccentButton
+      <PrimaryButton
         loading={isPending}
         disabled={!props.roomId || isPending}
         onClick={() => {
@@ -26,7 +26,7 @@ export function JoinRoomButton(props: {
         {...props.buttonProps}
       >
         {t('common.join')}
-      </AccentButton>
+      </PrimaryButton>
     </Stack>
   );
 }

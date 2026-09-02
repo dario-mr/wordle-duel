@@ -80,11 +80,7 @@ export interface SubmitGuessResponse {
 }
 
 export type RoomEventType =
-  | 'ROOM_CREATED'
-  | 'PLAYER_JOINED'
-  | 'SCORES_UPDATED'
-  | 'ROOM_CLOSED'
-  | 'REMATCH_STARTED';
+  'ROOM_CREATED' | 'PLAYER_JOINED' | 'SCORES_UPDATED' | 'ROOM_CLOSED' | 'REMATCH_STARTED';
 
 export interface RematchStartedPayload {
   roomId: string;

@@ -31,7 +31,7 @@ test.describe('profile and admin flows', () => {
     await page.evaluate(() => {
       window.sessionStorage.setItem('wd.auth.returnTo', '/rooms/room-1');
     });
-    await page.getByRole('button', { name: 'Open profile' }).click();
+    await page.getByRole('button', { name: 'Profile' }).click();
     await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
 
     await page.getByRole('button', { name: 'Logout' }).click();
@@ -42,7 +42,7 @@ test.describe('profile and admin flows', () => {
     );
     expect(storedReturnTo).toBeNull();
 
-    await page.getByRole('button', { name: 'Open profile' }).click();
+    await page.getByRole('button', { name: 'Profile' }).click();
     await expect(page.getByRole('button', { name: 'Sign in with Google' })).toBeVisible();
   });
 

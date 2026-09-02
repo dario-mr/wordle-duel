@@ -13,11 +13,7 @@ export function LanguageSelect({ locale, onChange }: Props) {
 
   return (
     <NativeSelect.Root w="auto">
-      <NativeSelect.Field
-        value={locale}
-        onChange={onChange}
-        aria-label={t('profile.uiLanguageAria')}
-      >
+      <NativeSelect.Field value={locale} onChange={onChange} aria-label={t('profile.uiLanguage')}>
         <option value="en">{t('locales.en')}</option>
         <option value="it">{t('locales.it')}</option>
       </NativeSelect.Field>
