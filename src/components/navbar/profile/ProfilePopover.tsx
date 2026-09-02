@@ -20,9 +20,11 @@ type ProfileTrigger = ReactNode | ((pictureUrl?: string | null) => ReactNode);
 export function ProfilePopover({
   mobile = false,
   trigger,
+  onOpenStateChange,
 }: {
   mobile?: boolean;
   trigger?: ProfileTrigger;
+  onOpenStateChange?: (open: boolean) => void;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -38,8 +40,13 @@ export function ProfilePopover({
 
   const profileTitle = isLoggedIn ? (me?.fullName ?? t('profile.title')) : t('profile.title');
 
+  const updateOpenState = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    onOpenStateChange?.(nextOpen);
+  };
+
   const handleOpenChange = (details: { open: boolean }) => {
-    setOpen(details.open);
+    updateOpenState(details.open);
 
     if (details.open) {
       setLogoutPending(false);
@@ -47,12 +54,12 @@ export function ProfilePopover({
   };
 
   const handleUsersClick = () => {
-    setOpen(false);
+    updateOpenState(false);
     void navigate('/users');
   };
 
   const handleLegalClick = () => {
-    setOpen(false);
+    updateOpenState(false);
     void navigate('/legal');
   };
 
@@ -65,7 +72,7 @@ export function ProfilePopover({
 
     const runLogout = async () => {
       try {
-        setOpen(false);
+        updateOpenState(false);
 
         await logout();
 

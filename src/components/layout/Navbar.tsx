@@ -9,15 +9,48 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { House, type LucideIcon, UserRound, Users } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { ProfilePopover } from '../navbar/profile/ProfilePopover.tsx';
 
 const NAV_ICON_SIZE = 20;
+const NAV_SCROLL_THRESHOLD = 8;
 
 export function Navbar() {
   const { t } = useTranslation();
   const location = useLocation();
+  const [mobileNavHidden, setMobileNavHidden] = useState(false);
+  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY <= 0) {
+        lastScrollY.current = 0;
+        setMobileNavHidden(false);
+        return;
+      }
+
+      const scrollDelta = currentScrollY - lastScrollY.current;
+      if (Math.abs(scrollDelta) < NAV_SCROLL_THRESHOLD) {
+        return;
+      }
+
+      lastScrollY.current = currentScrollY;
+      setMobileNavHidden(scrollDelta > 0);
+    };
+
+    lastScrollY.current = window.scrollY;
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const mobileNavVisible = !mobileNavHidden || mobileProfileOpen;
   const navItems = [
     { to: '/', label: t('nav.home'), icon: House },
     { to: '/my-rooms', label: t('nav.rooms'), icon: Users },
@@ -75,6 +108,9 @@ export function Navbar() {
         bottom={0}
         zIndex="sticky"
         w="full"
+        transform={mobileNavVisible ? 'translateY(0)' : 'translateY(100%)'}
+        transition="transform 0.2s ease-in-out"
+        pointerEvents={mobileNavVisible ? 'auto' : 'none'}
         px={2}
         pt={1}
         pb="calc(env(safe-area-inset-bottom) + 0.25rem)"
@@ -95,6 +131,7 @@ export function Navbar() {
         <Box flex="1" display="flex">
           <ProfilePopover
             mobile
+            onOpenStateChange={setMobileProfileOpen}
             trigger={(pictureUrl) => (
               <NavigationItem
                 label={t('nav.me')}
