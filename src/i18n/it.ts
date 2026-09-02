@@ -23,7 +23,7 @@ export default {
     requestFailedWithStatus: 'Richiesta fallita con stato {{status}}',
   },
   home: {
-    welcome: 'Benvenuto su Wordle Duel!',
+    welcome: 'Gioca a Wordle Duel!',
     subtitle: 'Sfida un amico in una partita di Wordle',
     createRoom: {
       title: 'Crea stanza',

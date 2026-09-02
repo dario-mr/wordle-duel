@@ -24,7 +24,7 @@ export default {
   },
   home: {
     welcome: 'Welcome to Wordle Duel!',
-    subtitle: 'Challenge a friend in a head-to-head Wordle match',
+    subtitle: 'Challenge a friend in a Wordle match',
     createRoom: {
       title: 'Create room',
       description: 'Set up a new match and invite a friend.',

@@ -1,1 +1,4 @@
 - map BE error messages in FE so that they can be localized
+- bottom navbar
+- Simplified chat (emoji?) at the end of the match?
+- Share does not work on android
