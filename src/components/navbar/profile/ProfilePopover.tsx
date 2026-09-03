@@ -152,7 +152,7 @@ export function ProfilePopover({
         <Portal>
           <Drawer.Backdrop />
           <Drawer.Positioner>
-            <Drawer.Content borderTopRadius="3xl">
+            <Drawer.Content borderTopRadius="3xl" bg="bg.card">
               <Drawer.CloseTrigger asChild>
                 <CloseButton size="sm" aria-label={t('common.close')} />
               </Drawer.CloseTrigger>
@@ -176,7 +176,7 @@ export function ProfilePopover({
       <Popover.Trigger asChild>{profileTrigger}</Popover.Trigger>
 
       <Popover.Positioner>
-        <Popover.Content w="20rem" maxW="calc(100vw - 2rem)" p={0} borderRadius="3xl">
+        <Popover.Content w="20rem" maxW="calc(100vw - 2rem)" p={0} borderRadius="3xl" bg="bg.card">
           <Popover.CloseTrigger />
           <Popover.Header p={4} pb={0}>
             <Popover.Title asChild>{profileHeader}</Popover.Title>
