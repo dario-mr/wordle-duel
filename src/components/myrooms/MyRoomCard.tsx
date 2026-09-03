@@ -78,7 +78,7 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
           <Text fontSize="lg" fontWeight="bold" truncate>
             {meName} vs {opponentName}
           </Text>
-          <Pill bg={statusPill.bg} color={statusPill.color}>
+          <Pill bg={statusPill.bg} color={statusPill.color} fontSize="2xs">
             {statusPill.label}
           </Pill>
         </Box>

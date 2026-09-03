@@ -114,6 +114,8 @@ export default {
   myRooms: {
     title: 'Le mie stanze',
     empty: 'Nessuna stanza',
+    noActive: 'Nessuna stanza attiva',
+    history: 'Storico ({{count}})',
   },
   login: {
     title: 'Accesso richiesto',

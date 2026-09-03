@@ -1,3 +1,4 @@
 - map BE error messages in FE so that they can be localized
 - Simplified chat (emoji?) at the end of the match?
 - better header icon
+- paging for get rooms endpoint?

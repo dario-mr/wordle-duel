@@ -114,6 +114,8 @@ export default {
   myRooms: {
     title: 'My rooms',
     empty: 'No rooms yet',
+    noActive: 'No active rooms',
+    history: 'History ({{count}})',
   },
   login: {
     title: 'Login required',
