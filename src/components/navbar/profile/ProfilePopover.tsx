@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { beginGoogleLogin, logout } from '../../../api/auth';
 import { getErrorMessage } from '../../../api/errors';
+import { ERROR_TOAST_DURATION_MS } from '../../../constants';
 import { meQueryKey } from '../../../query/meQueries';
 import { useSingleToast } from '../../../hooks/useSingleToast';
 import { STORAGE_KEYS } from '../../../state/storageKeys';
@@ -91,7 +92,7 @@ export function ProfilePopover({
           type: 'warning',
           title: t('toasts.logoutFailed'),
           description: getErrorMessage(err),
-          duration: 2000,
+          duration: ERROR_TOAST_DURATION_MS,
           closable: true,
         });
       } finally {

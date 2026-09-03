@@ -2,8 +2,8 @@ export class WdsApiError extends Error {
   status: number;
   code: string;
 
-  constructor(args: { status: number; code: string; message: string }) {
-    super(args.message);
+  constructor(args: { status: number; code: string }) {
+    super(args.code);
     this.name = 'WdsApiError';
     this.status = args.status;
     this.code = args.code;
@@ -59,7 +59,6 @@ export interface RoomDto {
 
 export interface ErrorResponseDto {
   code: string;
-  message: string;
 }
 
 export interface CreateRoomRequest {

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { getErrorMessage } from '../api/errors';
+import { ERROR_TOAST_DURATION_MS } from '../constants';
 import { useJoinRoomMutation } from '../query/roomQueries';
 import { useSingleToast } from './useSingleToast';
 
@@ -22,10 +23,10 @@ export function useJoinRoomAction(args?: { onJoined?: (roomId: string) => void }
         },
         onError: (err) => {
           showToast({
-            type: 'error',
+            type: 'warning',
             title: t('toasts.joinRoomFailed'),
             description: getErrorMessage(err),
-            duration: 2000,
+            duration: ERROR_TOAST_DURATION_MS,
             closable: true,
           });
         },

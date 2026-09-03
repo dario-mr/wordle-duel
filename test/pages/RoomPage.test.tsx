@@ -285,7 +285,6 @@ describe('RoomPage', () => {
       error: new WdsApiError({
         status: 401,
         code: UNAUTHENTICATED_CODE,
-        message: 'Unauthenticated',
       }),
     };
 

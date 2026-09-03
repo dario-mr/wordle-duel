@@ -1,4 +1,3 @@
-import { i18n } from '../i18n';
 import { redirectToLogin } from '../auth/redirectToLogin';
 import { UNAUTHENTICATED_CODE, UNEXPECTED_RESPONSE_CODE } from '../constants.ts';
 import { apiFetch } from './apiFetch';
@@ -62,7 +61,6 @@ async function parseJsonResponse<T>(res: Response): Promise<T> {
 
 async function parseApiError(res: Response): Promise<WdsApiError> {
   let code = 'UNEXPECTED_ERROR';
-  let message = i18n.t('errors.requestFailedWithStatus', { status: res.status });
 
   const contentType = getContentType(res);
   if (contentType.includes('text/html')) {
@@ -76,14 +74,13 @@ async function parseApiError(res: Response): Promise<WdsApiError> {
       const raw = (await res.json()) as unknown;
       if (isErrorResponseDto(raw)) {
         code = raw.code;
-        message = raw.message;
       }
     } catch {
       // ignore
     }
   }
 
-  return new WdsApiError({ status: res.status, code, message });
+  return new WdsApiError({ status: res.status, code });
 }
 
 function withJsonHeaders(init: RequestInit | undefined): RequestInit {
@@ -119,7 +116,7 @@ function isErrorResponseDto(value: unknown): value is ErrorResponseDto {
     return false;
   }
   const record = value as Record<string, unknown>;
-  return typeof record.code === 'string' && typeof record.message === 'string';
+  return typeof record.code === 'string';
 }
 
 function getContentType(res: Response): string {
@@ -135,7 +132,6 @@ function makeUnauthenticatedError(): WdsApiError {
   return new WdsApiError({
     status: 401,
     code: UNAUTHENTICATED_CODE,
-    message: i18n.t('errors.unauthenticated'),
   });
 }
 
@@ -143,6 +139,5 @@ function makeUnexpectedResponseError(status: number): WdsApiError {
   return new WdsApiError({
     status,
     code: UNEXPECTED_RESPONSE_CODE,
-    message: i18n.t('errors.unexpectedResponse'),
   });
 }

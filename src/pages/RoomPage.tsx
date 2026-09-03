@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getErrorMessage } from '../api/errors';
 import { type GuessLetterStatus, WdsApiError } from '../api/types';
 import { useCurrentUser } from '../auth/useCurrentUser';
-import { UNAUTHENTICATED_CODE, WORD_LENGTH } from '../constants';
+import { ERROR_TOAST_DURATION_MS, UNAUTHENTICATED_CODE, WORD_LENGTH } from '../constants';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import { GuessKeyboard } from '../components/room/keyboard/GuessKeyboard';
 import { PlayerBoard } from '../components/room/board/PlayerBoard';
@@ -120,7 +120,7 @@ export function RoomPage() {
       type: 'warning',
       title: t('room.guess.rejectedTitle'),
       description: message,
-      duration: 1500,
+      duration: ERROR_TOAST_DURATION_MS,
       closable: true,
     });
   };

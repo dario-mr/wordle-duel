@@ -45,9 +45,7 @@ describe('api/users', () => {
 
   it('returns null when the current-user endpoint returns 401', async () => {
     const api = await import('../../src/api/users');
-    mocks.getJson.mockRejectedValueOnce(
-      new WdsApiError({ status: 401, code: 'UNAUTHENTICATED', message: 'Unauthenticated' }),
-    );
+    mocks.getJson.mockRejectedValueOnce(new WdsApiError({ status: 401, code: 'UNAUTHENTICATED' }));
 
     await expect(api.getMe()).resolves.toBeNull();
   });

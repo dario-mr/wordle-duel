@@ -111,7 +111,7 @@ describe('JoinRoomButton', () => {
 
     expect(mocks.showToast).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'error',
+        type: 'warning',
         title: 'toasts.joinRoomFailed',
         description: 'Join failed',
       }),

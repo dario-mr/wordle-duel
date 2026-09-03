@@ -3,9 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   redirectToLogin: vi.fn(),
   apiFetch: vi.fn(),
-  t: vi.fn((key: string, params?: { status?: number }) =>
-    key === 'errors.requestFailedWithStatus' ? `status:${String(params?.status ?? '')}` : key,
-  ),
 }));
 
 vi.mock('../../src/auth/redirectToLogin', () => ({
@@ -14,12 +11,6 @@ vi.mock('../../src/auth/redirectToLogin', () => ({
 
 vi.mock('../../src/api/apiFetch', () => ({
   apiFetch: mocks.apiFetch,
-}));
-
-vi.mock('../../src/i18n', () => ({
-  i18n: {
-    t: mocks.t,
-  },
 }));
 
 async function loadClient() {
@@ -44,7 +35,6 @@ describe('wdsClient', () => {
   beforeEach(() => {
     mocks.redirectToLogin.mockReset();
     mocks.apiFetch.mockReset();
-    mocks.t.mockClear();
   });
 
   it('uses the session cookie and parses JSON without a bearer header', async () => {
@@ -101,7 +91,7 @@ describe('wdsClient', () => {
     const client = await loadClient();
     mocks.apiFetch.mockResolvedValueOnce(
       jsonResponse(
-        { code: 'ROOM_FULL', message: 'Room is full' },
+        { code: 'ROOM_FULL' },
         { status: 409, headers: { 'content-type': 'application/json' } },
       ),
     );
@@ -109,7 +99,6 @@ describe('wdsClient', () => {
     await expect(client.getJson('/api/test')).rejects.toMatchObject({
       status: 409,
       code: 'ROOM_FULL',
-      message: 'Room is full',
     });
   });
 

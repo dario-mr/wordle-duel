@@ -194,7 +194,6 @@ describe('UsersPage', () => {
     mocks.queryResult.error = new WdsApiError({
       status: 403,
       code: 'FORBIDDEN',
-      message: 'Forbidden',
     });
 
     render(<UsersPage />);
