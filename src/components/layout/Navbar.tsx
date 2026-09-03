@@ -89,7 +89,7 @@ export function Navbar() {
               <Image
                 src={`${import.meta.env.BASE_URL}header.png`}
                 alt=""
-                boxSize={{ base: '2.2rem', md: '2.5rem' }}
+                boxSize={{ base: '1.7rem', md: '2rem' }}
                 objectFit="contain"
               />
               <Heading fontSize={{ base: 'lg', md: 'xl' }}>{t('app.name')}</Heading>
