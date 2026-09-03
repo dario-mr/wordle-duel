@@ -43,6 +43,8 @@ export default {
       INVALID_WORD: 'Il tentativo non è valido',
       ROOM_CLOSED: 'Questa stanza è chiusa',
       ROOM_BUSY: 'La stanza è occupata. Riprova',
+      CHAT_MESSAGE_LIMIT_REACHED:
+        'Aspetta la risposta del tuo avversario prima di inviare un altro messaggio',
       DICTIONARY_EMPTY: 'Il dizionario di gioco non è disponibile. Riprova più tardi',
       GENERIC_BAD_REQUEST: 'Richiesta non valida',
       UNKNOWN_ERROR: 'Si è verificato un errore. Riprova',
@@ -119,6 +121,26 @@ export default {
       status: 'Stato:',
       dash: '—',
       winner: 'VINCITORE',
+    },
+    chat: {
+      title: 'Chat',
+      open: 'Apri chat',
+      unread: '{{count}} messaggi non letti',
+      loading: 'Caricamento messaggi...',
+      empty: 'Ancora nessun messaggio',
+      sendRejectedTitle: 'Messaggio non inviato',
+      waitForOpponentReply:
+        'Aspetta la risposta del tuo avversario prima di inviare un altro messaggio.',
+      you: 'Tu',
+      opponent: 'Avversario',
+      presets: {
+        GOOD_LUCK: 'Buona fortuna!',
+        WOW: 'Wow!',
+        LOL: 'LOL',
+        SWEAT_SMILE: '😅',
+        GOOD_GAME: 'Bella partita!',
+        REMATCH: 'Rivincita?',
+      },
     },
   },
   locales: {

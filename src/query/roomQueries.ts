@@ -4,13 +4,21 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { type CreateRoomRequest, type RoomDto, type SubmitGuessResponse } from '../api/types';
+import {
+  type CreateRoomRequest,
+  type RoomDto,
+  type RoomMessageDto,
+  type RoomMessagePreset,
+  type SubmitGuessResponse,
+} from '../api/types';
 import {
   createRoom,
   getRoom,
   joinRoom,
+  listRoomMessages,
   listMyRooms,
   requestRematch,
+  sendRoomMessage,
   startNextRound,
   submitGuess,
 } from '../api/rooms';
@@ -18,6 +26,10 @@ import { i18n } from '../i18n';
 
 export function roomQueryKey(roomId: string) {
   return ['room', roomId] as const;
+}
+
+export function roomMessagesQueryKey(roomId: string) {
+  return ['roomMessages', roomId] as const;
 }
 
 export function useRoomQuery(roomId: string | undefined, args?: { enabled?: boolean }) {
@@ -38,6 +50,19 @@ export function useMyRoomsQuery(args: { enabled: boolean }) {
     queryKey: ['myRooms'],
     queryFn: ({ signal }) => listMyRooms({ signal }),
     enabled: args.enabled,
+  });
+}
+
+export function useRoomMessagesQuery(roomId: string | undefined, args?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: roomId ? roomMessagesQueryKey(roomId) : ['roomMessages', 'missing'],
+    enabled: (args?.enabled ?? true) && !!roomId,
+    queryFn: ({ signal }) => {
+      if (!roomId) {
+        throw new Error(i18n.t('errors.missingRoomId'));
+      }
+      return listRoomMessages(roomId, { signal });
+    },
   });
 }
 
@@ -101,5 +126,23 @@ export function useNextRoundMutation(args: { roomId: string }) {
 export function useRematchMutation(args: { roomId: string }) {
   return useMutation({
     mutationFn: () => requestRematch(args.roomId),
+  });
+}
+
+export function useSendRoomMessageMutation(args: { roomId: string }) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (preset: RoomMessagePreset) =>
+      sendRoomMessage({ roomId: args.roomId, body: { preset } }),
+    onSuccess: (message: RoomMessageDto) => {
+      queryClient.setQueryData<RoomMessageDto[]>(roomMessagesQueryKey(args.roomId), (messages) => [
+        ...(messages ?? []),
+        message,
+      ]);
+    },
+    onError: () => {
+      void queryClient.invalidateQueries({ queryKey: roomMessagesQueryKey(args.roomId) });
+    },
   });
 }

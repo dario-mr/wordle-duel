@@ -78,8 +78,35 @@ export interface SubmitGuessResponse {
   room: RoomDto;
 }
 
+export const ROOM_MESSAGE_PRESETS = [
+  'GOOD_LUCK',
+  'WOW',
+  'LOL',
+  'SWEAT_SMILE',
+  'GOOD_GAME',
+  'REMATCH',
+] as const;
+
+export type RoomMessagePreset = (typeof ROOM_MESSAGE_PRESETS)[number];
+
+export interface RoomMessageDto {
+  id: number;
+  senderPlayerId: string;
+  preset: RoomMessagePreset;
+  createdAt: string;
+}
+
+export interface SendRoomMessageRequest {
+  preset: RoomMessagePreset;
+}
+
 export type RoomEventType =
-  'ROOM_CREATED' | 'PLAYER_JOINED' | 'SCORES_UPDATED' | 'ROOM_CLOSED' | 'REMATCH_STARTED';
+  | 'ROOM_CREATED'
+  | 'PLAYER_JOINED'
+  | 'SCORES_UPDATED'
+  | 'ROOM_CLOSED'
+  | 'REMATCH_STARTED'
+  | 'ROOM_MESSAGE_SENT';
 
 export interface RematchStartedPayload {
   roomId: string;
@@ -89,6 +116,8 @@ export interface RoomEventDto {
   type: RoomEventType;
   payload: unknown;
 }
+
+export type RoomMessagePayload = RoomMessageDto;
 
 export interface UserMeDto {
   id: string;

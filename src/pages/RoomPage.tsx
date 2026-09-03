@@ -1,5 +1,5 @@
 import { Stack } from '@chakra-ui/react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getErrorMessage } from '../api/errors';
@@ -10,12 +10,15 @@ import { ErrorAlert } from '../components/common/ErrorAlert';
 import { GuessKeyboard } from '../components/room/keyboard/GuessKeyboard';
 import { PlayerBoard } from '../components/room/board/PlayerBoard';
 import { RoomJoinGate } from '../components/room/RoomJoinGate';
+import { RoomChatDrawer } from '../components/room/RoomChatDrawer';
 import { RoomSharePanel } from '../components/room/RoomSharePanel';
 import { RoundStatusPanel } from '../components/room/round/RoundStatusPanel';
 import {
   useNextRoundMutation,
   useRematchMutation,
+  useRoomMessagesQuery,
   useRoomQuery,
+  useSendRoomMessageMutation,
   useSubmitGuessMutation,
 } from '../query/roomQueries';
 import { useRoomTopic } from '../ws/useRoomTopic';
@@ -47,11 +50,13 @@ export function RoomPage() {
   } = useRoomQuery(roomId, {
     enabled: authResolved,
   });
-  useRoomTopic(meUser ? roomId : undefined, { onRematchStarted: handleRematchStarted });
-
   const [guessState, setGuessState] = useState<{ roundNumber?: number; value: string }>({
     value: '',
   });
+  const [chatOpen, setChatOpen] = useState(false);
+  // ponytail: unread count lasts only for this room view; persist per-player read IDs if cross-session badges matter.
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const chatOpenRef = useRef(false);
 
   const currentRound = room?.currentRound ?? null;
   const currentRoundNumber = currentRound?.roundNumber;
@@ -72,6 +77,34 @@ export function RoomPage() {
 
   const me = room?.players.find((p) => p.id === myPlayerId);
   const opponent = room?.players.find((p) => p.id !== myPlayerId);
+  const isChatReady = Boolean(
+    me && room?.status !== 'WAITING_FOR_PLAYERS' && room?.players.length === 2,
+  );
+  const messagesQuery = useRoomMessagesQuery(roomId, { enabled: isChatReady });
+  const sendMessageMutation = useSendRoomMessageMutation({ roomId: roomId ?? '' });
+  const messages = messagesQuery.data ?? [];
+  const isMessageSendBlocked =
+    messages.length >= 3 &&
+    messages.slice(-3).every((message) => message.senderPlayerId === myPlayerId);
+  const handleChatOpenChange = useCallback((open: boolean) => {
+    chatOpenRef.current = open;
+    setChatOpen(open);
+    if (open) {
+      setUnreadMessageCount(0);
+    }
+  }, []);
+  const handleRoomMessageSent = useCallback(
+    (message: { senderPlayerId: string }) => {
+      if (message.senderPlayerId !== myPlayerId && !chatOpenRef.current) {
+        setUnreadMessageCount((count) => count + 1);
+      }
+    },
+    [myPlayerId],
+  );
+  useRoomTopic(meUser && me ? roomId : undefined, {
+    onRematchStarted: handleRematchStarted,
+    onRoomMessageSent: handleRoomMessageSent,
+  });
 
   const letterStatusByLetter = useMemo<Partial<Record<string, GuessLetterStatus>>>(() => {
     if (!currentRound) {
@@ -119,6 +152,15 @@ export function RoomPage() {
     showToast({
       type: 'warning',
       title: t('room.guess.rejectedTitle'),
+      description: message,
+      duration: ERROR_TOAST_DURATION_MS,
+      closable: true,
+    });
+  };
+  const showChatErrorToast = (message: string) => {
+    showToast({
+      type: 'warning',
+      title: t('room.chat.sendRejectedTitle'),
       description: message,
       duration: ERROR_TOAST_DURATION_MS,
       closable: true,
@@ -180,7 +222,31 @@ export function RoomPage() {
 
   return (
     <Stack gap={5} w="full" maxW="44rem" mx="auto" pb={4}>
-      <RoundPanel player={me} opponent={opponent} room={room} />
+      <RoundPanel
+        player={me}
+        opponent={opponent}
+        room={room}
+        chat={
+          <RoomChatDrawer
+            messages={messages}
+            players={room.players}
+            myPlayerId={myPlayerId}
+            unreadCount={unreadMessageCount}
+            open={chatOpen}
+            isLoading={messagesQuery.isLoading}
+            isSending={sendMessageMutation.isPending}
+            isSendBlocked={isMessageSendBlocked}
+            onOpenChange={handleChatOpenChange}
+            onSend={(preset) => {
+              sendMessageMutation.mutate(preset, {
+                onError: (err) => {
+                  showChatErrorToast(getErrorMessage(err));
+                },
+              });
+            }}
+          />
+        }
+      />
 
       {currentRound ? (
         <PlayerBoard room={room} currentGuess={showGuessKeyboard ? guess : ''} />

@@ -1,2 +1,2 @@
-- Simplified chat (emoji?) at the end of the match?
 - paging for get rooms endpoint?
+- navbar always visible

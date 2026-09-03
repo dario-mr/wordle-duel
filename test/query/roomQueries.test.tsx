@@ -7,7 +7,9 @@ import {
   useJoinRoomMutation,
   useNextRoundMutation,
   useRematchMutation,
+  useRoomMessagesQuery,
   useRoomQuery,
+  useSendRoomMessageMutation,
   useSubmitGuessMutation,
 } from '../../src/query/roomQueries';
 import { createQueryClientWrapper } from '../testUtils/queryClient';
@@ -16,8 +18,10 @@ const mocks = vi.hoisted(() => ({
   createRoom: vi.fn(),
   getRoom: vi.fn(),
   joinRoom: vi.fn(),
+  listRoomMessages: vi.fn(),
   listMyRooms: vi.fn(),
   requestRematch: vi.fn(),
+  sendRoomMessage: vi.fn(),
   startNextRound: vi.fn(),
   submitGuess: vi.fn(),
 }));
@@ -26,8 +30,10 @@ vi.mock('../../src/api/rooms', () => ({
   createRoom: mocks.createRoom,
   getRoom: mocks.getRoom,
   joinRoom: mocks.joinRoom,
+  listRoomMessages: mocks.listRoomMessages,
   listMyRooms: mocks.listMyRooms,
   requestRematch: mocks.requestRematch,
+  sendRoomMessage: mocks.sendRoomMessage,
   startNextRound: mocks.startNextRound,
   submitGuess: mocks.submitGuess,
 }));
@@ -54,8 +60,10 @@ describe('roomQueries', () => {
     mocks.createRoom.mockReset();
     mocks.getRoom.mockReset();
     mocks.joinRoom.mockReset();
+    mocks.listRoomMessages.mockReset();
     mocks.listMyRooms.mockReset();
     mocks.requestRematch.mockReset();
+    mocks.sendRoomMessage.mockReset();
     mocks.startNextRound.mockReset();
     mocks.submitGuess.mockReset();
   });
@@ -76,6 +84,21 @@ describe('roomQueries', () => {
       });
 
       expect(mocks.getRoom).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('useRoomMessagesQuery', () => {
+    it('does not fetch when disabled', async () => {
+      const { wrapper } = createQueryClientWrapper();
+      const { result } = renderHook(() => useRoomMessagesQuery('room-1', { enabled: false }), {
+        wrapper,
+      });
+
+      await waitFor(() => {
+        expect(result.current.fetchStatus).toBe('idle');
+      });
+
+      expect(mocks.listRoomMessages).not.toHaveBeenCalled();
     });
   });
 
@@ -165,6 +188,33 @@ describe('roomQueries', () => {
       await waitFor(() => {
         expect(result.current.data).toEqual(response);
       });
+    });
+  });
+
+  describe('useSendRoomMessageMutation', () => {
+    it('adds a sent message to the room message cache', async () => {
+      const { queryClient, wrapper } = createQueryClientWrapper();
+      const message = {
+        id: 1,
+        senderPlayerId: 'player-1',
+        preset: 'GOOD_LUCK' as const,
+        createdAt: '2026-09-03T12:00:00Z',
+      };
+      mocks.sendRoomMessage.mockResolvedValue(message);
+
+      const { result } = renderHook(() => useSendRoomMessageMutation({ roomId: 'room-1' }), {
+        wrapper,
+      });
+
+      await act(async () => {
+        await result.current.mutateAsync('GOOD_LUCK');
+      });
+
+      expect(mocks.sendRoomMessage).toHaveBeenCalledWith({
+        roomId: 'room-1',
+        body: { preset: 'GOOD_LUCK' },
+      });
+      expect(queryClient.getQueryData(['roomMessages', 'room-1'])).toEqual([message]);
     });
   });
 });

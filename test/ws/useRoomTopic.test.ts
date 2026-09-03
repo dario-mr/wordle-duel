@@ -41,6 +41,7 @@ const mocks = vi.hoisted(() => {
     deactivate,
     activate,
     getWsBrokerUrl: vi.fn(() => 'ws://localhost/ws'),
+    roomMessagesQueryKey: vi.fn((roomId: string) => ['roomMessages', roomId] as const),
     roomQueryKey: vi.fn((roomId: string) => ['room', roomId] as const),
   };
 });
@@ -65,6 +66,7 @@ vi.mock('../../src/config/wds', () => ({
 }));
 
 vi.mock('../../src/query/roomQueries', () => ({
+  roomMessagesQueryKey: mocks.roomMessagesQueryKey,
   roomQueryKey: mocks.roomQueryKey,
 }));
 
@@ -74,6 +76,7 @@ describe('useRoomTopic', () => {
     mocks.deactivate.mockReset();
     mocks.activate.mockReset();
     mocks.getWsBrokerUrl.mockClear();
+    mocks.roomMessagesQueryKey.mockClear();
     mocks.roomQueryKey.mockClear();
   });
 
@@ -157,6 +160,41 @@ describe('useRoomTopic', () => {
       expect(onRematchStarted).toHaveBeenCalledTimes(1);
       expect(onRematchStarted).toHaveBeenCalledWith('room-2');
       expect(mocks.invalidateQueries).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('refetches messages without refetching the room for a chat event', async () => {
+    const { useRoomTopic } = await import('../../src/ws/useRoomTopic');
+    const onRoomMessageSent = vi.fn();
+    renderHook(() => {
+      useRoomTopic('room-1', { onRoomMessageSent });
+    });
+
+    const config = mocks.getLastConfig() as { onConnect?: () => void };
+    config.onConnect?.();
+    mocks.getSubscribeHandler()?.({
+      body: JSON.stringify({
+        type: 'ROOM_MESSAGE_SENT',
+        payload: {
+          id: 1,
+          senderPlayerId: 'player-2',
+          preset: 'WOW',
+          createdAt: '2026-09-03T12:00:00Z',
+        },
+      }),
+    });
+
+    await waitFor(() => {
+      expect(mocks.invalidateQueries).toHaveBeenCalledWith({
+        queryKey: ['roomMessages', 'room-1'],
+      });
+      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(1);
+      expect(onRoomMessageSent).toHaveBeenCalledWith({
+        id: 1,
+        senderPlayerId: 'player-2',
+        preset: 'WOW',
+        createdAt: '2026-09-03T12:00:00Z',
+      });
     });
   });
 });

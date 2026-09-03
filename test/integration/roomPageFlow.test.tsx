@@ -12,6 +12,8 @@ import { withMemoryRouter, Route } from '../testUtils/router';
 const mocks = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
   getRoom: vi.fn(),
+  listRoomMessages: vi.fn(),
+  sendRoomMessage: vi.fn(),
   submitGuess: vi.fn(),
   startNextRound: vi.fn(),
   useRoomTopic: vi.fn(),
@@ -27,8 +29,10 @@ vi.mock('../../src/api/rooms', () => ({
   createRoom: vi.fn(),
   getRoom: mocks.getRoom,
   joinRoom: vi.fn(),
+  listRoomMessages: mocks.listRoomMessages,
   listMyRooms: vi.fn(),
   requestRematch: vi.fn(),
+  sendRoomMessage: mocks.sendRoomMessage,
   startNextRound: mocks.startNextRound,
   submitGuess: mocks.submitGuess,
 }));
@@ -68,6 +72,10 @@ vi.mock('../../src/components/room/RoomJoinGate', () => ({
 
 vi.mock('../../src/components/room/RoomSharePanel', () => ({
   RoomSharePanel: ({ roomId }: { roomId?: string }) => <div>{`share-panel:${roomId ?? ''}`}</div>,
+}));
+
+vi.mock('../../src/components/room/RoomChatDrawer', () => ({
+  RoomChatDrawer: () => <div>room-chat</div>,
 }));
 
 vi.mock('../../src/components/room/round/RoundPanel.tsx', () => ({
@@ -164,6 +172,9 @@ describe('room page flow', () => {
   beforeEach(() => {
     resetAuthModuleMocks(mocks, { id: 'me-1', roles: ['USER'] });
     mocks.getRoom.mockReset();
+    mocks.listRoomMessages.mockReset();
+    mocks.listRoomMessages.mockResolvedValue([]);
+    mocks.sendRoomMessage.mockReset();
     mocks.submitGuess.mockReset();
     mocks.startNextRound.mockReset();
     mocks.useRoomTopic.mockReset();

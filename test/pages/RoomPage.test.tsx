@@ -1,7 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { WdsApiError, type GuessLetterStatus, type RoomDto } from '../../src/api/types';
+import {
+  WdsApiError,
+  type GuessLetterStatus,
+  type RoomDto,
+  type RoomMessageDto,
+} from '../../src/api/types';
 import { UNAUTHENTICATED_CODE } from '../../src/constants';
 import { RoomPage } from '../../src/pages/RoomPage';
 
@@ -18,6 +23,10 @@ interface SubmitGuessCallbacks {
   onError?: (err: unknown) => void;
 }
 
+interface SendMessageCallbacks {
+  onError?: (err: unknown) => void;
+}
+
 const mocks = vi.hoisted(() => ({
   roomId: 'room-1' as string | undefined,
   navigate: vi.fn(),
@@ -30,6 +39,8 @@ const mocks = vi.hoisted(() => ({
     error: null,
   } as MockRoomQueryResult,
   lastRoomQueryArgs: undefined as
+    { roomId: string | undefined; enabled: boolean | undefined } | undefined,
+  lastMessagesQueryArgs: undefined as
     { roomId: string | undefined; enabled: boolean | undefined } | undefined,
   useRoomTopic: vi.fn(),
   submitMutate: vi.fn(),
@@ -47,6 +58,14 @@ const mocks = vi.hoisted(() => ({
     error: null as Error | null,
     isSuccess: false,
     data: undefined as { roomId: string | null } | undefined,
+    mutate: vi.fn(),
+  },
+  messagesQuery: {
+    data: [],
+    isLoading: false,
+  },
+  sendMessageMutation: {
+    isPending: false,
     mutate: vi.fn(),
   },
   showToast: vi.fn(),
@@ -74,6 +93,11 @@ vi.mock('../../src/query/roomQueries', () => ({
   useSubmitGuessMutation: () => mocks.submitMutation,
   useNextRoundMutation: () => mocks.nextRoundMutation,
   useRematchMutation: () => mocks.rematchMutation,
+  useRoomMessagesQuery: (roomId: string | undefined, args?: { enabled?: boolean }) => {
+    mocks.lastMessagesQueryArgs = { roomId, enabled: args?.enabled };
+    return mocks.messagesQuery;
+  },
+  useSendRoomMessageMutation: () => mocks.sendMessageMutation,
 }));
 
 vi.mock('../../src/ws/useRoomTopic', () => ({
@@ -110,8 +134,49 @@ vi.mock('../../src/components/room/RoomSharePanel', () => ({
   RoomSharePanel: ({ roomId }: { roomId?: string }) => <div>{`share-panel:${roomId ?? ''}`}</div>,
 }));
 
+vi.mock('../../src/components/room/RoomChatDrawer', () => ({
+  RoomChatDrawer: ({
+    isSendBlocked,
+    onOpenChange,
+    onSend,
+    unreadCount,
+  }: {
+    isSendBlocked: boolean;
+    unreadCount: number;
+    onOpenChange: (open: boolean) => void;
+    onSend: (preset: 'GOOD_LUCK') => void;
+  }) => (
+    <div>
+      <div>{'chat-unread:' + String(unreadCount)}</div>
+      <div>{'chat-send-blocked:' + String(isSendBlocked)}</div>
+      <button
+        type="button"
+        onClick={() => {
+          onOpenChange(true);
+        }}
+      >
+        open-chat
+      </button>
+      <button
+        type="button"
+        disabled={isSendBlocked}
+        onClick={() => {
+          onSend('GOOD_LUCK');
+        }}
+      >
+        send-chat
+      </button>
+    </div>
+  ),
+}));
+
 vi.mock('../../src/components/room/round/RoundPanel.tsx', () => ({
-  RoundPanel: () => <div>round-panel</div>,
+  RoundPanel: ({ chat }: { chat?: ReactNode }) => (
+    <div>
+      round-panel
+      {chat}
+    </div>
+  ),
 }));
 
 vi.mock('../../src/components/room/board/PlayerBoard', () => ({
@@ -245,6 +310,7 @@ describe('RoomPage', () => {
       error: null,
     };
     mocks.lastRoomQueryArgs = undefined;
+    mocks.lastMessagesQueryArgs = undefined;
     mocks.useRoomTopic.mockReset();
     mocks.submitMutate.mockReset();
     mocks.submitMutation = {
@@ -263,6 +329,14 @@ describe('RoomPage', () => {
       error: null,
       isSuccess: false,
       data: undefined,
+      mutate: vi.fn(),
+    };
+    mocks.messagesQuery = {
+      data: [],
+      isLoading: false,
+    };
+    mocks.sendMessageMutation = {
+      isPending: false,
       mutate: vi.fn(),
     };
     mocks.showToast.mockReset();
@@ -313,6 +387,73 @@ describe('RoomPage', () => {
     render(<RoomPage />);
 
     expect(screen.getByText('join-gate:room-1')).toBeTruthy();
+  });
+
+  it('keeps chat unavailable while waiting for the opponent', () => {
+    mocks.roomQueryResult.data = createRoom({ status: 'WAITING_FOR_PLAYERS' });
+
+    render(<RoomPage />);
+
+    expect(screen.getByText('share-panel:room-1')).toBeTruthy();
+    expect(screen.queryByText('open-chat')).toBeNull();
+    expect(mocks.lastMessagesQueryArgs).toEqual({ roomId: 'room-1', enabled: false });
+  });
+
+  it('blocks chat after three consecutive messages from the current player', () => {
+    mocks.messagesQuery.data = [1, 2, 3].map((id): RoomMessageDto => ({
+      id,
+      senderPlayerId: 'me-1',
+      preset: 'GOOD_LUCK',
+      createdAt: '2026-09-03T12:00:0' + String(id) + 'Z',
+    }));
+
+    render(<RoomPage />);
+
+    expect(screen.getByText('chat-send-blocked:true')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'send-chat' }).hasAttribute('disabled')).toBe(true);
+  });
+
+  it('shows a toast when the server rejects a chat message', () => {
+    mocks.sendMessageMutation.mutate = vi.fn(
+      (_preset: 'GOOD_LUCK', options?: SendMessageCallbacks) => {
+        options?.onError?.(
+          new WdsApiError({
+            status: 409,
+            code: 'CHAT_MESSAGE_LIMIT_REACHED',
+          }),
+        );
+      },
+    );
+
+    render(<RoomPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'send-chat' }));
+
+    expect(mocks.showToast).toHaveBeenCalledWith({
+      type: 'warning',
+      title: 'room.chat.sendRejectedTitle',
+      description: 'CHAT_MESSAGE_LIMIT_REACHED',
+      duration: 3000,
+      closable: true,
+    });
+  });
+
+  it('marks an opponent message as read when chat opens', async () => {
+    render(<RoomPage />);
+
+    const [, options] = mocks.useRoomTopic.mock.calls[0] as [
+      string | undefined,
+      { onRoomMessageSent?: (message: { senderPlayerId: string }) => void },
+    ];
+    options.onRoomMessageSent?.({ senderPlayerId: 'opponent-1' });
+
+    await waitFor(() => {
+      expect(screen.getByText('chat-unread:1')).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'open-chat' }));
+
+    expect(screen.getByText('chat-unread:0')).toBeTruthy();
   });
 
   it('keeps the completed final board visible while the player waits for match closure', () => {

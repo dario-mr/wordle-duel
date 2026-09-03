@@ -2,6 +2,8 @@ import type {
   CreateRoomRequest,
   RematchResponseDto,
   RoomDto,
+  RoomMessageDto,
+  SendRoomMessageRequest,
   SubmitGuessRequest,
   SubmitGuessResponse,
 } from './types';
@@ -37,6 +39,17 @@ export function startNextRound(roomId: string): Promise<RoomDto> {
 
 export function requestRematch(roomId: string): Promise<RematchResponseDto> {
   return postJson<RematchResponseDto>(roomUrl(roomId, '/rematch'));
+}
+
+export function listRoomMessages(roomId: string, init?: RequestInit): Promise<RoomMessageDto[]> {
+  return getJson<RoomMessageDto[]>(roomUrl(roomId, '/messages'), init);
+}
+
+export function sendRoomMessage(args: {
+  roomId: string;
+  body: SendRoomMessageRequest;
+}): Promise<RoomMessageDto> {
+  return postJson<RoomMessageDto>(roomUrl(args.roomId, '/messages'), args.body);
 }
 
 function roomUrl(roomId: string, suffix = ''): string {

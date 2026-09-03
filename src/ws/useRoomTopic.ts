@@ -2,15 +2,19 @@ import { Client, type IMessage } from '@stomp/stompjs';
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { getWsBrokerUrl } from '../config/wds';
-import type { RematchStartedPayload, RoomEventDto } from '../api/types';
-import { roomQueryKey } from '../query/roomQueries';
+import type { RematchStartedPayload, RoomEventDto, RoomMessagePayload } from '../api/types';
+import { roomMessagesQueryKey, roomQueryKey } from '../query/roomQueries';
 
 export function useRoomTopic(
   roomId: string | undefined,
-  options?: { onRematchStarted?: (roomId: string) => void },
+  options?: {
+    onRematchStarted?: (roomId: string) => void;
+    onRoomMessageSent?: (message: RoomMessagePayload) => void;
+  },
 ) {
   const queryClient = useQueryClient();
   const onRematchStarted = options?.onRematchStarted;
+  const onRoomMessageSent = options?.onRoomMessageSent;
 
   useEffect(() => {
     if (!roomId) {
@@ -30,6 +34,13 @@ export function useRoomTopic(
                 return;
               }
             }
+            if (event.type === 'ROOM_MESSAGE_SENT') {
+              if (isRoomMessagePayload(event.payload)) {
+                onRoomMessageSent?.(event.payload);
+              }
+              void queryClient.invalidateQueries({ queryKey: roomMessagesQueryKey(roomId) });
+              return;
+            }
           } catch {
             // ignore payload parsing for now
           }
@@ -46,7 +57,22 @@ export function useRoomTopic(
     return () => {
       void client.deactivate();
     };
-  }, [onRematchStarted, queryClient, roomId]);
+  }, [onRematchStarted, onRoomMessageSent, queryClient, roomId]);
+}
+
+function isRoomMessagePayload(value: unknown): value is RoomMessagePayload {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    typeof value.id === 'number' &&
+    'senderPlayerId' in value &&
+    typeof value.senderPlayerId === 'string' &&
+    'preset' in value &&
+    typeof value.preset === 'string' &&
+    'createdAt' in value &&
+    typeof value.createdAt === 'string'
+  );
 }
 
 function isRematchStartedPayload(value: unknown): value is RematchStartedPayload {
