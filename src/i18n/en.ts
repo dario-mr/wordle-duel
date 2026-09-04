@@ -97,7 +97,7 @@ export default {
       titleWithRounds: 'Round {{roundNumber}} of {{rounds}}',
       compactTitle: 'Round {{roundNumber}}/{{rounds}}',
       notInProgressYet: 'Game not in progress yet.',
-      matchComplete: 'Match complete',
+      matchComplete: 'Complete',
       playAgain: 'Play again',
       playAgainFailed: 'Could not start another game',
       backToHome: 'Back to home',

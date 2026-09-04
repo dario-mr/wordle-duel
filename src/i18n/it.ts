@@ -98,7 +98,7 @@ export default {
       titleWithRounds: 'Round {{roundNumber}} di {{rounds}}',
       compactTitle: 'Round {{roundNumber}}/{{rounds}}',
       notInProgressYet: 'La partita non è ancora iniziata.',
-      matchComplete: 'Partita completata',
+      matchComplete: 'Completata',
       playAgain: 'Gioca ancora',
       playAgainFailed: 'Impossibile iniziare una nuova partita',
       backToHome: 'Torna alla home',
