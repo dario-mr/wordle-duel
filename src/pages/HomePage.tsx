@@ -33,7 +33,14 @@ export function HomePage() {
   return (
     <Stack gap={8} pt={8} pb={16}>
       <Stack gap={2} align="center" textAlign="center">
-        <Heading size="5xl" lineHeight="1.2" letterSpacing="wide" fontWeight="bold">
+        <Heading
+          fontSize="3.25rem"
+          lineHeight="1.2"
+          letterSpacing="wider"
+          fontWeight="medium"
+          fontFamily="Sniglet"
+          css={{ WebkitTextStroke: '3px currentColor' }}
+        >
           {t('app.name')}
         </Heading>
         <Text color="fg" opacity={0.6} fontSize="md">

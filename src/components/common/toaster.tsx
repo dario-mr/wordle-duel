@@ -6,7 +6,7 @@ export function Toaster() {
     <Portal>
       <ChakraToaster toaster={toaster} insetInline={{ mdDown: '4' }}>
         {(toast) => (
-          <Toast.Root width={{ base: 'full', md: 'sm' }}>
+          <Toast.Root width={{ base: 'full', md: 'sm' }} borderRadius="2xl">
             {toast.type === 'loading' ? (
               <Spinner size="sm" color="blue.solid" />
             ) : (

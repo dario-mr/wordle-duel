@@ -1,3 +1,2 @@
 - paging for get rooms endpoint?
 - revise my-rooms design, it should show one card per "player vs player" with current score and historical cumulated score
-- rematch should work better, now you need to refresh to get the player's accept response

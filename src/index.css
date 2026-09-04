@@ -1,3 +1,19 @@
+@font-face {
+  font-family: 'Sniglet';
+  src: url('./assets/fonts/Sniglet-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sniglet';
+  src: url('./assets/fonts/Sniglet-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -24,12 +40,14 @@ body {
   z-index: -1;
   inset: -100%;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='480' viewBox='0 0 480 480'%3E%3Cg fill='%232f80ed' font-family='monospace' font-size='40' font-weight='700' letter-spacing='6' opacity='.04'%3E%3Ctext x='0' y='34'%3EQMZKWJRXTPBNGDVHY%3C/text%3E%3Ctext x='15' y='74'%3ECLFUSAEIOQWMZKJRX%3C/text%3E%3Ctext x='0' y='114'%3ETPBNGDVHYCLFUSAEI%3C/text%3E%3Ctext x='15' y='154'%3EOQWMZKJRXTPBNGDVH%3C/text%3E%3Ctext x='0' y='194'%3EYCLFUSAEIOQWMZKJR%3C/text%3E%3Ctext x='15' y='234'%3EXTPBNGDVHYCLFUSAE%3C/text%3E%3Ctext x='0' y='274'%3EIOQWMZKJRXTPBNGDV%3C/text%3E%3Ctext x='15' y='314'%3EHYCLFUSAEIOQWMZKJ%3C/text%3E%3Ctext x='0' y='354'%3ERXTPBNGDVHYCLFUSA%3C/text%3E%3Ctext x='15' y='394'%3EEIOQWMZKJRXTPBNGD%3C/text%3E%3Ctext x='0' y='434'%3EVHYCLFUSAEIOQWMZK%3C/text%3E%3Ctext x='15' y='474'%3EJRXTPBNGDVHYCLFUS%3C/text%3E%3C/g%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 900px 900px;
+  background-color: #2f80ed;
+  -webkit-mask: url('./assets/background-letters.svg') 0 0 / 900px 900px repeat;
+  mask: url('./assets/background-letters.svg') 0 0 / 900px 900px repeat;
+  opacity: 0.04;
   transform: rotate(-45deg);
 }
 
 html.dark .background-letters {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='480' viewBox='0 0 480 480'%3E%3Cg fill='%238be9fd' font-family='monospace' font-size='40' font-weight='700' letter-spacing='6' opacity='.02'%3E%3Ctext x='0' y='34'%3EQMZKWJRXTPBNGDVHY%3C/text%3E%3Ctext x='15' y='74'%3ECLFUSAEIOQWMZKJRX%3C/text%3E%3Ctext x='0' y='114'%3ETPBNGDVHYCLFUSAEI%3C/text%3E%3Ctext x='15' y='154'%3EOQWMZKJRXTPBNGDVH%3C/text%3E%3Ctext x='0' y='194'%3EYCLFUSAEIOQWMZKJR%3C/text%3E%3Ctext x='15' y='234'%3EXTPBNGDVHYCLFUSAE%3C/text%3E%3Ctext x='0' y='274'%3EIOQWMZKJRXTPBNGDV%3C/text%3E%3Ctext x='15' y='314'%3EHYCLFUSAEIOQWMZKJ%3C/text%3E%3Ctext x='0' y='354'%3ERXTPBNGDVHYCLFUSA%3C/text%3E%3Ctext x='15' y='394'%3EEIOQWMZKJRXTPBNGD%3C/text%3E%3Ctext x='0' y='434'%3EVHYCLFUSAEIOQWMZK%3C/text%3E%3Ctext x='15' y='474'%3EJRXTPBNGDVHYCLFUS%3C/text%3E%3C/g%3E%3C/svg%3E");
+  background-color: #8be9fd;
+  opacity: 0.02;
 }
