@@ -53,11 +53,10 @@ export default {
     },
   },
   home: {
-    welcome: 'Gioca a Wordle Duel!',
     subtitle: 'Sfida un amico in una partita di Wordle',
     createRoom: {
       title: 'Crea stanza',
-      description: 'Imposta una nuova partita e invita un amico.',
+      description: 'Crea una nuova partita e invita un amico.',
       failedTitle: 'Creazione stanza fallita',
       button: 'Crea',
       roomLanguageLabel: 'Lingua della stanza',

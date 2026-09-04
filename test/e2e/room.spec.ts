@@ -110,6 +110,10 @@ test.describe('room page flow', () => {
       await fulfillJson(route, initialRoom);
     });
 
+    await page.route('**/api/v1/rooms/room-live/messages', async (route) => {
+      await fulfillJson(route, { messages: [], unreadCount: 0 });
+    });
+
     await page.route('**/api/v1/rooms/room-live/guess', async (route) => {
       expect(route.request().postDataJSON()).toEqual({ word: 'APPLE' });
       await fulfillJson(route, { room: completedRoom });

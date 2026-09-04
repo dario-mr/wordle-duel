@@ -1,7 +1,7 @@
 {
   "name": "wordle-duel",
   "private": true,
-  "version": "0.26.1",
+  "version": "0.26.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,11 +9,9 @@
     "postbuild": "node scripts/generate-health-info.mjs",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "playwright:install": "playwright install chromium",
     "test:e2e": "playwright test",
-    "test:e2e:setup": "playwright install chromium && playwright test",
     "test:e2e:headed": "playwright test --headed",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

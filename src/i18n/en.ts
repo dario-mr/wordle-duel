@@ -52,7 +52,6 @@ export default {
     },
   },
   home: {
-    welcome: 'Welcome to Wordle Duel!',
     subtitle: 'Challenge a friend in a Wordle match',
     createRoom: {
       title: 'Create room',

@@ -22,7 +22,7 @@ export function JoinRoomForm(props: { onJoined: (roomId: string) => void }) {
         joinRoom(roomIdToJoin);
       }}
     >
-      <Text color="fg" opacity={0.6} fontSize="md" mb={8}>
+      <Text color="fg" opacity={0.6} fontSize="md" mb={8} textAlign="center">
         {t('home.joinRoom.description')}
       </Text>
 

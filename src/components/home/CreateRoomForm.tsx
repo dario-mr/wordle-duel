@@ -39,7 +39,7 @@ export function CreateRoomForm(props: { onCreated: (roomId: string) => void }) {
         );
       }}
     >
-      <Text color="fg" opacity={0.6} fontSize="md" mb={8}>
+      <Text color="fg" opacity={0.6} fontSize="md" mb={8} textAlign="center">
         {t('home.createRoom.description')}
       </Text>
 

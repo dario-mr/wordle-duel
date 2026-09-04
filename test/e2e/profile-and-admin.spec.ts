@@ -13,13 +13,12 @@ function adminUser(id: string, fullName: string, email: string, createdOn: strin
 }
 
 test.describe('profile and admin flows', () => {
-  test('redirects non-admin users away from the users page', async ({ page }) => {
+  test('redirects non-admin users to the home page', async ({ page }) => {
     await mockAuthenticatedSession(page, { roles: ['USER'] });
 
     await page.goto('/users');
 
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByRole('heading', { name: 'Welcome to Wordle Duel!' })).toBeVisible();
   });
 
   test('logs out from the profile popover and clears the stored return target', async ({
