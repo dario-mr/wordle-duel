@@ -4,7 +4,15 @@ import { Navbar } from './Navbar';
 
 export function AppLayout() {
   return (
-    <Flex direction="column" minH="100vh" bg="bg">
+    <Flex
+      direction="column"
+      minH="100vh"
+      bg="bg"
+      position="relative"
+      overflow="hidden"
+      isolation="isolate"
+    >
+      <Box aria-hidden className="background-letters" />
       <Navbar />
       <Box as="main" flex="1" pb={{ base: '3rem', md: 0 }}>
         <Container maxW={{ md: '50rem' }} py={4} px={4}>

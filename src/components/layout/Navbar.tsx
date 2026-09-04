@@ -26,7 +26,13 @@ export function Navbar() {
 
   return (
     <>
-      <Box as="header" borderBottomWidth="1px" borderColor="border.divider" position="relative">
+      <Box
+        as="header"
+        bg="bg"
+        borderBottomWidth="1px"
+        borderColor="border.divider"
+        position="relative"
+      >
         <Flex w="full" mx="auto" py={2} px={4} align="center" justify="space-between">
           <ChakraLink asChild display="inline-flex" alignItems="center" gap={2}>
             <RouterLink to="/">
