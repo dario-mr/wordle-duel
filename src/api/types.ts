@@ -83,6 +83,7 @@ export const ROOM_MESSAGE_PRESETS = [
   'WOW',
   'LOL',
   'SWEAT_SMILE',
+  'ANGRY_FACE',
   'GOOD_GAME',
   'REMATCH',
 ] as const;

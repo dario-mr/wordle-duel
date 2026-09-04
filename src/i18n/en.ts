@@ -135,6 +135,7 @@ export default {
         WOW: 'Wow!',
         LOL: 'LOL',
         SWEAT_SMILE: '😅',
+        ANGRY_FACE: '😡',
         GOOD_GAME: 'Good game!',
         REMATCH: 'Rematch?',
       },
