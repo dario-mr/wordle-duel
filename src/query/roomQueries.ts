@@ -8,6 +8,7 @@ import {
   type CreateRoomRequest,
   type RoomDto,
   type RoomMessageDto,
+  type RoomMessagesDto,
   type RoomMessagePreset,
   type SubmitGuessResponse,
 } from '../api/types';
@@ -17,6 +18,7 @@ import {
   joinRoom,
   listRoomMessages,
   listMyRooms,
+  markRoomMessagesRead,
   requestRematch,
   sendRoomMessage,
   startNextRound,
@@ -136,13 +138,24 @@ export function useSendRoomMessageMutation(args: { roomId: string }) {
     mutationFn: (preset: RoomMessagePreset) =>
       sendRoomMessage({ roomId: args.roomId, body: { preset } }),
     onSuccess: (message: RoomMessageDto) => {
-      queryClient.setQueryData<RoomMessageDto[]>(roomMessagesQueryKey(args.roomId), (messages) => [
-        ...(messages ?? []),
-        message,
-      ]);
+      queryClient.setQueryData<RoomMessagesDto>(roomMessagesQueryKey(args.roomId), (data) => ({
+        messages: [...(data?.messages ?? []), message],
+        unreadCount: data?.unreadCount ?? 0,
+      }));
     },
     onError: () => {
       void queryClient.invalidateQueries({ queryKey: roomMessagesQueryKey(args.roomId) });
+    },
+  });
+}
+
+export function useMarkRoomMessagesReadMutation(args: { roomId: string }) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => markRoomMessagesRead(args.roomId),
+    onSuccess: (data: RoomMessagesDto) => {
+      queryClient.setQueryData(roomMessagesQueryKey(args.roomId), data);
     },
   });
 }

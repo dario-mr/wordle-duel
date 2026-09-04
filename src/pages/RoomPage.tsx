@@ -14,6 +14,7 @@ import { RoomChatDrawer } from '../components/room/RoomChatDrawer';
 import { RoomSharePanel } from '../components/room/RoomSharePanel';
 import { RoundStatusPanel } from '../components/room/round/RoundStatusPanel';
 import {
+  useMarkRoomMessagesReadMutation,
   useNextRoundMutation,
   useRematchMutation,
   useRoomMessagesQuery,
@@ -54,8 +55,6 @@ export function RoomPage() {
     value: '',
   });
   const [chatOpen, setChatOpen] = useState(false);
-  // ponytail: unread count lasts only for this room view; persist per-player read IDs if cross-session badges matter.
-  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const chatOpenRef = useRef(false);
 
   const currentRound = room?.currentRound ?? null;
@@ -82,24 +81,30 @@ export function RoomPage() {
   );
   const messagesQuery = useRoomMessagesQuery(roomId, { enabled: isChatReady });
   const sendMessageMutation = useSendRoomMessageMutation({ roomId: roomId ?? '' });
-  const messages = messagesQuery.data ?? [];
+  const markMessagesReadMutation = useMarkRoomMessagesReadMutation({ roomId: roomId ?? '' });
+  const markMessagesRead = markMessagesReadMutation.mutate;
+  const messages = messagesQuery.data?.messages ?? [];
+  const unreadMessageCount = messagesQuery.data?.unreadCount ?? 0;
   const isMessageSendBlocked =
     messages.length >= 3 &&
     messages.slice(-3).every((message) => message.senderPlayerId === myPlayerId);
-  const handleChatOpenChange = useCallback((open: boolean) => {
-    chatOpenRef.current = open;
-    setChatOpen(open);
-    if (open) {
-      setUnreadMessageCount(0);
-    }
-  }, []);
-  const handleRoomMessageSent = useCallback(
-    (message: { senderPlayerId: string }) => {
-      if (message.senderPlayerId !== myPlayerId && !chatOpenRef.current) {
-        setUnreadMessageCount((count) => count + 1);
+  const handleChatOpenChange = useCallback(
+    (open: boolean) => {
+      chatOpenRef.current = open;
+      setChatOpen(open);
+      if (open) {
+        markMessagesRead();
       }
     },
-    [myPlayerId],
+    [markMessagesRead],
+  );
+  const handleRoomMessageSent = useCallback(
+    (message: { senderPlayerId: string }) => {
+      if (message.senderPlayerId !== myPlayerId && chatOpenRef.current) {
+        markMessagesRead();
+      }
+    },
+    [markMessagesRead, myPlayerId],
   );
   useRoomTopic(meUser && me ? roomId : undefined, {
     onRematchStarted: handleRematchStarted,

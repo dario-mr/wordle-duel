@@ -3,6 +3,7 @@ import type {
   RematchResponseDto,
   RoomDto,
   RoomMessageDto,
+  RoomMessagesDto,
   SendRoomMessageRequest,
   SubmitGuessRequest,
   SubmitGuessResponse,
@@ -41,8 +42,12 @@ export function requestRematch(roomId: string): Promise<RematchResponseDto> {
   return postJson<RematchResponseDto>(roomUrl(roomId, '/rematch'));
 }
 
-export function listRoomMessages(roomId: string, init?: RequestInit): Promise<RoomMessageDto[]> {
-  return getJson<RoomMessageDto[]>(roomUrl(roomId, '/messages'), init);
+export function listRoomMessages(roomId: string, init?: RequestInit): Promise<RoomMessagesDto> {
+  return getJson<RoomMessagesDto>(roomUrl(roomId, '/messages'), init);
+}
+
+export function markRoomMessagesRead(roomId: string): Promise<RoomMessagesDto> {
+  return postJson<RoomMessagesDto>(roomUrl(roomId, '/messages/read'));
 }
 
 export function sendRoomMessage(args: {

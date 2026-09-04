@@ -43,6 +43,7 @@ describe('api/rooms', () => {
     void api.startNextRound('room/1');
     void api.requestRematch('room/1');
     void api.listRoomMessages('room/1');
+    void api.markRoomMessagesRead('room/1');
     void api.sendRoomMessage({ roomId: 'room/1', body: { preset: 'GOOD_LUCK' } });
 
     expect(mocks.postJson).toHaveBeenNthCalledWith(1, 'https://api.test/rooms/room%2F1/join');
@@ -56,7 +57,11 @@ describe('api/rooms', () => {
       'https://api.test/rooms/room%2F1/messages',
       undefined,
     );
-    expect(mocks.postJson).toHaveBeenNthCalledWith(5, 'https://api.test/rooms/room%2F1/messages', {
+    expect(mocks.postJson).toHaveBeenNthCalledWith(
+      5,
+      'https://api.test/rooms/room%2F1/messages/read',
+    );
+    expect(mocks.postJson).toHaveBeenNthCalledWith(6, 'https://api.test/rooms/room%2F1/messages', {
       preset: 'GOOD_LUCK',
     });
   });

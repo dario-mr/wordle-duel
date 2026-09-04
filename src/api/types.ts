@@ -96,6 +96,11 @@ export interface RoomMessageDto {
   createdAt: string;
 }
 
+export interface RoomMessagesDto {
+  messages: RoomMessageDto[];
+  unreadCount: number;
+}
+
 export interface SendRoomMessageRequest {
   preset: RoomMessagePreset;
 }

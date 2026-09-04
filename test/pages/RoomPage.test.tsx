@@ -6,6 +6,7 @@ import {
   type GuessLetterStatus,
   type RoomDto,
   type RoomMessageDto,
+  type RoomMessagesDto,
 } from '../../src/api/types';
 import { UNAUTHENTICATED_CODE } from '../../src/constants';
 import { RoomPage } from '../../src/pages/RoomPage';
@@ -61,8 +62,11 @@ const mocks = vi.hoisted(() => ({
     mutate: vi.fn(),
   },
   messagesQuery: {
-    data: [],
+    data: { messages: [], unreadCount: 0 } as RoomMessagesDto,
     isLoading: false,
+  },
+  markMessagesReadMutation: {
+    mutate: vi.fn(),
   },
   sendMessageMutation: {
     isPending: false,
@@ -98,6 +102,7 @@ vi.mock('../../src/query/roomQueries', () => ({
     return mocks.messagesQuery;
   },
   useSendRoomMessageMutation: () => mocks.sendMessageMutation,
+  useMarkRoomMessagesReadMutation: () => mocks.markMessagesReadMutation,
 }));
 
 vi.mock('../../src/ws/useRoomTopic', () => ({
@@ -332,8 +337,11 @@ describe('RoomPage', () => {
       mutate: vi.fn(),
     };
     mocks.messagesQuery = {
-      data: [],
+      data: { messages: [], unreadCount: 0 },
       isLoading: false,
+    };
+    mocks.markMessagesReadMutation = {
+      mutate: vi.fn(),
     };
     mocks.sendMessageMutation = {
       isPending: false,
@@ -400,12 +408,15 @@ describe('RoomPage', () => {
   });
 
   it('blocks chat after three consecutive messages from the current player', () => {
-    mocks.messagesQuery.data = [1, 2, 3].map((id): RoomMessageDto => ({
-      id,
-      senderPlayerId: 'me-1',
-      preset: 'GOOD_LUCK',
-      createdAt: '2026-09-03T12:00:0' + String(id) + 'Z',
-    }));
+    mocks.messagesQuery.data = {
+      messages: [1, 2, 3].map((id): RoomMessageDto => ({
+        id,
+        senderPlayerId: 'me-1',
+        preset: 'GOOD_LUCK',
+        createdAt: '2026-09-03T12:00:0' + String(id) + 'Z',
+      })),
+      unreadCount: 0,
+    };
 
     render(<RoomPage />);
 
@@ -438,22 +449,25 @@ describe('RoomPage', () => {
     });
   });
 
-  it('marks an opponent message as read when chat opens', async () => {
+  it('marks an opponent message as read when chat opens', () => {
+    mocks.messagesQuery.data = { messages: [], unreadCount: 1 };
+
     render(<RoomPage />);
 
     const [, options] = mocks.useRoomTopic.mock.calls[0] as [
       string | undefined,
       { onRoomMessageSent?: (message: { senderPlayerId: string }) => void },
     ];
-    options.onRoomMessageSent?.({ senderPlayerId: 'opponent-1' });
 
-    await waitFor(() => {
-      expect(screen.getByText('chat-unread:1')).toBeTruthy();
-    });
+    expect(screen.getByText('chat-unread:1')).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: 'open-chat' }));
 
-    expect(screen.getByText('chat-unread:0')).toBeTruthy();
+    expect(mocks.markMessagesReadMutation.mutate).toHaveBeenCalledTimes(1);
+
+    options.onRoomMessageSent?.({ senderPlayerId: 'opponent-1' });
+
+    expect(mocks.markMessagesReadMutation.mutate).toHaveBeenCalledTimes(2);
   });
 
   it('keeps the completed final board visible while the player waits for match closure', () => {

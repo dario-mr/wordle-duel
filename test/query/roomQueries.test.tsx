@@ -1,10 +1,11 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { RoomDto } from '../../src/api/types';
+import type { RoomDto, RoomMessagesDto } from '../../src/api/types';
 import {
   roomQueryKey,
   useCreateRoomMutation,
   useJoinRoomMutation,
+  useMarkRoomMessagesReadMutation,
   useNextRoundMutation,
   useRematchMutation,
   useRoomMessagesQuery,
@@ -20,6 +21,7 @@ const mocks = vi.hoisted(() => ({
   joinRoom: vi.fn(),
   listRoomMessages: vi.fn(),
   listMyRooms: vi.fn(),
+  markRoomMessagesRead: vi.fn(),
   requestRematch: vi.fn(),
   sendRoomMessage: vi.fn(),
   startNextRound: vi.fn(),
@@ -32,6 +34,7 @@ vi.mock('../../src/api/rooms', () => ({
   joinRoom: mocks.joinRoom,
   listRoomMessages: mocks.listRoomMessages,
   listMyRooms: mocks.listMyRooms,
+  markRoomMessagesRead: mocks.markRoomMessagesRead,
   requestRematch: mocks.requestRematch,
   sendRoomMessage: mocks.sendRoomMessage,
   startNextRound: mocks.startNextRound,
@@ -62,6 +65,7 @@ describe('roomQueries', () => {
     mocks.joinRoom.mockReset();
     mocks.listRoomMessages.mockReset();
     mocks.listMyRooms.mockReset();
+    mocks.markRoomMessagesRead.mockReset();
     mocks.requestRematch.mockReset();
     mocks.sendRoomMessage.mockReset();
     mocks.startNextRound.mockReset();
@@ -214,7 +218,29 @@ describe('roomQueries', () => {
         roomId: 'room-1',
         body: { preset: 'GOOD_LUCK' },
       });
-      expect(queryClient.getQueryData(['roomMessages', 'room-1'])).toEqual([message]);
+      expect(queryClient.getQueryData(['roomMessages', 'room-1'])).toEqual({
+        messages: [message],
+        unreadCount: 0,
+      });
+    });
+  });
+
+  describe('useMarkRoomMessagesReadMutation', () => {
+    it('replaces the room message cache with the acknowledged response', async () => {
+      const { queryClient, wrapper } = createQueryClientWrapper();
+      const data: RoomMessagesDto = { messages: [], unreadCount: 0 };
+      mocks.markRoomMessagesRead.mockResolvedValue(data);
+
+      const { result } = renderHook(() => useMarkRoomMessagesReadMutation({ roomId: 'room-1' }), {
+        wrapper,
+      });
+
+      await act(async () => {
+        await result.current.mutateAsync();
+      });
+
+      expect(mocks.markRoomMessagesRead).toHaveBeenCalledWith('room-1');
+      expect(queryClient.getQueryData(['roomMessages', 'room-1'])).toEqual(data);
     });
   });
 });

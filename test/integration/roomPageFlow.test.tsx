@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
   getRoom: vi.fn(),
   listRoomMessages: vi.fn(),
+  markRoomMessagesRead: vi.fn(),
   sendRoomMessage: vi.fn(),
   submitGuess: vi.fn(),
   startNextRound: vi.fn(),
@@ -31,6 +32,7 @@ vi.mock('../../src/api/rooms', () => ({
   joinRoom: vi.fn(),
   listRoomMessages: mocks.listRoomMessages,
   listMyRooms: vi.fn(),
+  markRoomMessagesRead: mocks.markRoomMessagesRead,
   requestRematch: vi.fn(),
   sendRoomMessage: mocks.sendRoomMessage,
   startNextRound: mocks.startNextRound,
@@ -75,11 +77,31 @@ vi.mock('../../src/components/room/RoomSharePanel', () => ({
 }));
 
 vi.mock('../../src/components/room/RoomChatDrawer', () => ({
-  RoomChatDrawer: () => <div>room-chat</div>,
+  RoomChatDrawer: ({
+    unreadCount,
+    onOpenChange,
+  }: {
+    unreadCount: number;
+    onOpenChange: (open: boolean) => void;
+  }) => (
+    <button
+      type="button"
+      onClick={() => {
+        onOpenChange(true);
+      }}
+    >
+      {'room-chat:' + String(unreadCount)}
+    </button>
+  ),
 }));
 
 vi.mock('../../src/components/room/round/RoundPanel.tsx', () => ({
-  RoundPanel: () => <div>round-panel</div>,
+  RoundPanel: ({ chat }: { chat?: ReactNode }) => (
+    <div>
+      round-panel
+      {chat}
+    </div>
+  ),
 }));
 
 vi.mock('../../src/components/room/board/PlayerBoard', () => ({
@@ -173,7 +195,8 @@ describe('room page flow', () => {
     resetAuthModuleMocks(mocks, { id: 'me-1', roles: ['USER'] });
     mocks.getRoom.mockReset();
     mocks.listRoomMessages.mockReset();
-    mocks.listRoomMessages.mockResolvedValue([]);
+    mocks.listRoomMessages.mockResolvedValue({ messages: [], unreadCount: 0 });
+    mocks.markRoomMessagesRead.mockReset();
     mocks.sendRoomMessage.mockReset();
     mocks.submitGuess.mockReset();
     mocks.startNextRound.mockReset();
@@ -245,6 +268,25 @@ describe('room page flow', () => {
       expect(screen.getByTestId('keyboard-value').textContent).toBe('');
       expect(screen.getByTestId('player-board').textContent).toBe('3:');
       expect(queryClient.getQueryData(roomQueryKey('room-1'))).toEqual(nextRoom);
+    });
+  });
+
+  it('uses the persisted unread count and marks messages read when chat opens', async () => {
+    mocks.getRoom.mockResolvedValue(createRoom('room-1'));
+    mocks.listRoomMessages.mockResolvedValue({ messages: [], unreadCount: 2 });
+    mocks.markRoomMessagesRead.mockResolvedValue({ messages: [], unreadCount: 0 });
+
+    renderRoomPage(createTestQueryClient());
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'room-chat:2' })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'room-chat:2' }));
+
+    await waitFor(() => {
+      expect(mocks.markRoomMessagesRead).toHaveBeenCalledWith('room-1');
+      expect(screen.getByRole('button', { name: 'room-chat:0' })).toBeTruthy();
     });
   });
 });
