@@ -118,7 +118,7 @@ describe('useRoomTopic', () => {
     ).toEqual({});
   });
 
-  it('refetches the score board on score and match-closure events', async () => {
+  it('refetches the room and room list on match lifecycle events', async () => {
     const { useRoomTopic } = await import('../../src/ws/useRoomTopic');
     renderHook(() => {
       useRoomTopic('room-1');
@@ -127,39 +127,33 @@ describe('useRoomTopic', () => {
     const config = mocks.getLastConfig() as { onConnect?: () => void };
     config.onConnect?.();
     mocks.getSubscribeHandler()?.({ body: '{"type":"SCORES_UPDATED"}' });
-    mocks.getSubscribeHandler()?.({ body: '{"type":"ROOM_CLOSED"}' });
+    mocks.getSubscribeHandler()?.({ body: '{"type":"MATCH_FINISHED"}' });
+    mocks.getSubscribeHandler()?.({ body: '{"type":"MATCH_RESTARTED"}' });
     mocks.getSubscribeHandler()?.({ body: 'not-json' });
 
     await waitFor(() => {
-      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(3);
+      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(6);
       expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['room', 'room-1'] });
+      expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['myRooms'] });
     });
   });
 
-  it('handles valid rematch events without refetching the old room', async () => {
+  it('does not validate or redirect from a rematch payload', async () => {
     const { useRoomTopic } = await import('../../src/ws/useRoomTopic');
-    const onRematchStarted = vi.fn();
     renderHook(() => {
-      useRoomTopic('room-1', { onRematchStarted });
+      useRoomTopic('room-1');
     });
 
     const config = mocks.getLastConfig() as { onConnect?: () => void };
     config.onConnect?.();
-    const subscribeHandler = mocks.getSubscribeHandler();
-    subscribeHandler?.({
-      body: JSON.stringify({ type: 'REMATCH_STARTED', payload: { roomId: 'room-2' } }),
-    });
-    subscribeHandler?.({
-      body: JSON.stringify({ type: 'REMATCH_STARTED', payload: { roomId: '' } }),
-    });
-    subscribeHandler?.({
-      body: JSON.stringify({ type: 'REMATCH_STARTED', payload: { roomId: 2 } }),
+    mocks.getSubscribeHandler()?.({
+      body: JSON.stringify({ type: 'MATCH_RESTARTED', payload: { roomId: 'room-2' } }),
     });
 
     await waitFor(() => {
-      expect(onRematchStarted).toHaveBeenCalledTimes(1);
-      expect(onRematchStarted).toHaveBeenCalledWith('room-2');
       expect(mocks.invalidateQueries).toHaveBeenCalledTimes(2);
+      expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['room', 'room-1'] });
+      expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['myRooms'] });
     });
   });
 

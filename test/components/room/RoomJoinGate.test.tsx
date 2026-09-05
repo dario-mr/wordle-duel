@@ -21,7 +21,7 @@ const baseRoom = {
   language: 'IT' as const,
   rounds: 5 as const,
   status: 'WAITING_FOR_PLAYERS' as const,
-  players: [{ id: 'p1', score: 0, displayName: 'Alice' }],
+  players: [{ id: 'p1', wins: 0, matchScore: null, displayName: 'Alice' }],
   currentRound: null,
 };
 
@@ -38,7 +38,10 @@ describe('RoomJoinGate', () => {
       <RoomJoinGate
         room={{
           ...baseRoom,
-          players: [...baseRoom.players, { id: 'p2', score: 0, displayName: 'Bob' }],
+          players: [
+            ...baseRoom.players,
+            { id: 'p2', wins: 0, matchScore: null, displayName: 'Bob' },
+          ],
         }}
         roomId="room-1"
       />,

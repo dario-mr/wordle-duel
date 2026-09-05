@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import type { RoomDto } from '../../../src/api/types';
@@ -47,11 +47,11 @@ function room(id: string, status: RoomDto['status']): RoomDto {
 }
 
 describe('MyRoomsView', () => {
-  it('shows active rooms together and hides closed rooms by default', () => {
+  it('shows finished rooms as ordinary cards after active rooms', () => {
     render(
       <MyRoomsView
         rooms={[
-          room('closed', 'CLOSED'),
+          room('finished', 'MATCH_FINISHED'),
           room('waiting', 'WAITING_FOR_PLAYERS'),
           room('progress', 'IN_PROGRESS'),
         ]}
@@ -62,20 +62,12 @@ describe('MyRoomsView', () => {
 
     expect(screen.getByTestId('room-progress')).toBeTruthy();
     expect(screen.getByTestId('room-waiting')).toBeTruthy();
-    expect(screen.queryByTestId('room-closed')).toBeNull();
-    expect(
-      screen.getByRole('button', { name: /myRooms.history/ }).getAttribute('aria-expanded'),
-    ).toBe('false');
-  });
-
-  it('reveals regular history cards when history is opened', () => {
-    render(<MyRoomsView rooms={[room('closed', 'CLOSED')]} myPlayerId="me" onOpenRoom={vi.fn()} />);
-
-    fireEvent.click(screen.getByRole('button', { name: /myRooms.history/ }));
-
-    expect(screen.getByTestId('room-closed')).toBeTruthy();
-    expect(
-      screen.getByRole('button', { name: /myRooms.history/ }).getAttribute('aria-expanded'),
-    ).toBe('true');
+    expect(screen.getByTestId('room-finished')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /myRooms.history/ })).toBeNull();
+    expect(screen.getAllByRole('article').map((card) => card.dataset.testid)).toEqual([
+      'room-progress',
+      'room-waiting',
+      'room-finished',
+    ]);
   });
 });

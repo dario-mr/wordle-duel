@@ -13,8 +13,8 @@ function liveRoom(roomId: string) {
     rounds: 5,
     status: 'IN_PROGRESS',
     players: [
-      { id: 'user-1', score: 0, displayName: 'Alice Example' },
-      { id: 'user-2', score: 0, displayName: 'Bob Example' },
+      { id: 'user-1', wins: 0, matchScore: 0, displayName: 'Alice Example' },
+      { id: 'user-2', wins: 0, matchScore: 0, displayName: 'Bob Example' },
     ],
     currentRound: {
       roundNumber: 1,
@@ -55,8 +55,8 @@ test.describe('room page flow', () => {
       await fulfillJson(route, {
         ...roomDto('room-join-me'),
         players: [
-          { id: 'user-2', score: 0, displayName: 'Bob Example' },
-          { id: 'user-1', score: 0, displayName: 'Alice Example' },
+          { id: 'user-2', wins: 0, matchScore: null, displayName: 'Bob Example' },
+          { id: 'user-1', wins: 0, matchScore: null, displayName: 'Alice Example' },
         ],
       });
     });

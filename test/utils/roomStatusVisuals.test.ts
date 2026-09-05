@@ -10,7 +10,7 @@ describe('roomStatusVisuals', () => {
         pillBg: 'yellow.400',
         pillColor: 'black',
       },
-      CLOSED: { borderLeftColor: 'gray.500', pillBg: 'gray.600', pillColor: 'white' },
+      MATCH_FINISHED: { borderLeftColor: 'gray.500', pillBg: 'gray.600', pillColor: 'white' },
     });
   });
 });

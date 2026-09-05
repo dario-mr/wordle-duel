@@ -158,8 +158,8 @@ function createRoom(roomId: string): RoomDto {
     rounds: 5,
     status: 'IN_PROGRESS',
     players: [
-      { id: 'me-1', score: 10, displayName: 'Me' },
-      { id: 'opponent-1', score: 9, displayName: 'Opponent' },
+      { id: 'me-1', wins: 10, matchScore: 2, displayName: 'Me' },
+      { id: 'opponent-1', wins: 9, matchScore: 1, displayName: 'Opponent' },
     ],
     currentRound: {
       roundNumber: 2,

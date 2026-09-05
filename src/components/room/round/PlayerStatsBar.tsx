@@ -8,14 +8,19 @@ export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto;
   const DASH = t('room.playerStats.dash');
   const meName = `${props.player.displayName} (${t('room.playerStats.me')})`;
   const opponentName = props.opponent?.displayName ?? t('room.playerStats.opponent');
-  const opponentScore = props.opponent?.score ?? DASH;
-  const isMatchComplete = props.room.status === 'CLOSED';
-  const meIsWinner = Boolean(
-    isMatchComplete && props.opponent && props.player.score > props.opponent.score,
-  );
-  const opponentIsWinner = Boolean(
-    isMatchComplete && props.opponent && props.opponent.score > props.player.score,
-  );
+  const meScore = props.player.matchScore ?? DASH;
+  const opponentScore = props.opponent?.matchScore ?? DASH;
+  const isMatchComplete = props.room.status === 'MATCH_FINISHED';
+  const meIsWinner =
+    isMatchComplete &&
+    props.player.matchScore != null &&
+    props.opponent?.matchScore != null &&
+    props.player.matchScore > props.opponent.matchScore;
+  const opponentIsWinner =
+    isMatchComplete &&
+    props.player.matchScore != null &&
+    props.opponent?.matchScore != null &&
+    props.opponent.matchScore > props.player.matchScore;
   const meScoreColor = opponentIsWinner ? 'fg.muted' : 'fg';
   const opponentScoreColor = meIsWinner ? 'fg.muted' : 'fg';
   const winnerLabel = t('room.playerStats.winner');
@@ -54,7 +59,7 @@ export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto;
         whiteSpace="nowrap"
       >
         <Text fontSize="3xl" lineHeight="1" fontWeight="bold" color={meScoreColor}>
-          {props.player.score}
+          {meScore}
         </Text>
         <Text fontSize="2xl" lineHeight="1" color="fg.subtle">
           {DASH}

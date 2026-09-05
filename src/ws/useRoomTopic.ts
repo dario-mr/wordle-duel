@@ -2,18 +2,16 @@ import { Client, type IMessage } from '@stomp/stompjs';
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { getWsBrokerUrl } from '../config/wds';
-import type { RematchStartedPayload, RoomEventDto, RoomMessagePayload } from '../api/types';
+import type { RoomEventDto, RoomMessagePayload } from '../api/types';
 import { roomMessagesQueryKey, roomQueryKey } from '../query/roomQueries';
 
 export function useRoomTopic(
   roomId: string | undefined,
   options?: {
-    onRematchStarted?: (roomId: string) => void;
     onRoomMessageSent?: (message: RoomMessagePayload) => void;
   },
 ) {
   const queryClient = useQueryClient();
-  const onRematchStarted = options?.onRematchStarted;
   const onRoomMessageSent = options?.onRoomMessageSent;
 
   useEffect(() => {
@@ -28,17 +26,18 @@ export function useRoomTopic(
         client.subscribe(`/topic/rooms/${roomId}`, (message: IMessage) => {
           try {
             const event = JSON.parse(message.body) as RoomEventDto;
-            if (event.type === 'REMATCH_STARTED' && isRematchStartedPayload(event.payload)) {
-              onRematchStarted?.(event.payload.roomId);
-              if (onRematchStarted) {
-                return;
-              }
-            }
             if (event.type === 'ROOM_MESSAGE_SENT') {
               if (isRoomMessagePayload(event.payload)) {
                 onRoomMessageSent?.(event.payload);
               }
               void queryClient.invalidateQueries({ queryKey: roomMessagesQueryKey(roomId) });
+              return;
+            }
+            if (event.type === 'MATCH_FINISHED' || event.type === 'MATCH_RESTARTED') {
+              void Promise.all([
+                queryClient.invalidateQueries({ queryKey: roomQueryKey(roomId) }),
+                queryClient.invalidateQueries({ queryKey: ['myRooms'] }),
+              ]);
               return;
             }
           } catch {
@@ -57,7 +56,7 @@ export function useRoomTopic(
     return () => {
       void client.deactivate();
     };
-  }, [onRematchStarted, onRoomMessageSent, queryClient, roomId]);
+  }, [onRoomMessageSent, queryClient, roomId]);
 }
 
 function isRoomMessagePayload(value: unknown): value is RoomMessagePayload {
@@ -72,15 +71,5 @@ function isRoomMessagePayload(value: unknown): value is RoomMessagePayload {
     typeof value.preset === 'string' &&
     'createdAt' in value &&
     typeof value.createdAt === 'string'
-  );
-}
-
-function isRematchStartedPayload(value: unknown): value is RematchStartedPayload {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'roomId' in value &&
-    typeof value.roomId === 'string' &&
-    value.roomId.length > 0
   );
 }

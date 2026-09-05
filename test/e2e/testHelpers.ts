@@ -59,7 +59,8 @@ export function roomDto(roomId: string, args?: { playerId?: string; displayName?
     players: [
       {
         id: args?.playerId ?? 'user-1',
-        score: 0,
+        wins: 0,
+        matchScore: null,
         displayName: args?.displayName ?? 'Alice Example',
       },
     ],

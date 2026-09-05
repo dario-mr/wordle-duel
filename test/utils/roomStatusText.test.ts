@@ -6,7 +6,7 @@ describe('roomStatusText', () => {
     expect(roomStatusTextKey).toEqual({
       WAITING_FOR_PLAYERS: 'room.status.waitingForPlayers',
       IN_PROGRESS: 'room.status.inProgress',
-      CLOSED: 'room.status.closed',
+      MATCH_FINISHED: 'room.status.matchFinished',
     });
   });
 });

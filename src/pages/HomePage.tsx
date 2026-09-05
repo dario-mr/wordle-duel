@@ -34,8 +34,8 @@ export function HomePage() {
     <Stack gap={8} pt={8} pb={16}>
       <Stack gap={2} align="center" textAlign="center">
         <Heading
-          fontSize="3.25rem"
-          lineHeight="1.2"
+          fontSize="3.5rem"
+          lineHeight="0.8"
           letterSpacing="wider"
           fontWeight="medium"
           fontFamily="Sniglet"
@@ -43,7 +43,7 @@ export function HomePage() {
         >
           {t('app.name')}
         </Heading>
-        <Text color="fg" opacity={0.6} fontSize="md">
+        <Text color="fg" opacity={0.6} fontSize="lg" fontWeight="medium" fontFamily="Sniglet">
           {t('home.subtitle')}
         </Text>
       </Stack>

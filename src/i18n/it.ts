@@ -41,7 +41,7 @@ export default {
       INVALID_ROUND_NUMBER: 'Numero del round non valido',
       WORD_NOT_ALLOWED: 'Questa parola non è nel dizionario',
       INVALID_WORD: 'Il tentativo non è valido',
-      ROOM_CLOSED: 'Questa stanza è chiusa',
+      ROOM_CLOSED: 'Questa partita è terminata',
       ROOM_BUSY: 'La stanza è occupata. Riprova',
       CHAT_MESSAGE_LIMIT_REACHED:
         'Aspetta la risposta del tuo avversario prima di inviare un altro messaggio',
@@ -79,7 +79,7 @@ export default {
     status: {
       waitingForPlayers: 'IN ATTESA',
       inProgress: 'IN CORSO',
-      closed: 'CHIUSA',
+      matchFinished: 'TERMINATA',
     },
     share: {
       waitingTitle: "In attesa dell'avversario...",
@@ -116,8 +116,8 @@ export default {
     playerStats: {
       me: 'Io',
       opponent: 'Avversario',
-      score: 'Punteggio:',
-      status: 'Stato:',
+      matchScore: 'Punteggio:',
+      wins: 'Storico partite',
       dash: '—',
       winner: 'VINCITORE',
     },
@@ -158,8 +158,6 @@ export default {
   myRooms: {
     title: 'Le mie stanze',
     empty: 'Nessuna stanza',
-    noActive: 'Nessuna stanza attiva',
-    history: 'Storico ({{count}})',
   },
   login: {
     title: 'Accesso richiesto',

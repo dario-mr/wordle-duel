@@ -58,7 +58,7 @@ const mocks = vi.hoisted(() => ({
     isPending: false,
     error: null as Error | null,
     isSuccess: false,
-    data: undefined as { roomId: string | null } | undefined,
+    data: undefined as { started: boolean } | undefined,
     mutate: vi.fn(),
   },
   messagesQuery: {
@@ -202,12 +202,12 @@ vi.mock('../../src/components/room/round/RoundStatusPanel', () => ({
   }) => (
     <div>
       <div>{`round-status:${room.currentRound ? 'active' : 'waiting'}`}</div>
-      {room.status === 'CLOSED' && (
+      {room.status === 'MATCH_FINISHED' && (
         <button type="button" onClick={onRematch}>
           room.round.playAgain
         </button>
       )}
-      {room.status === 'CLOSED' && (
+      {room.status === 'MATCH_FINISHED' && (
         <button type="button" onClick={onBackToHome}>
           room.round.backToHome
         </button>
@@ -261,12 +261,12 @@ function createRoom(args?: {
   const includeMe = args?.includeMe ?? true;
   const players = includeMe
     ? [
-        { id: meId, score: 10, displayName: 'Me' },
-        { id: 'opponent-1', score: 8, displayName: 'Opponent' },
+        { id: meId, wins: 10, matchScore: 2, displayName: 'Me' },
+        { id: 'opponent-1', wins: 8, matchScore: 1, displayName: 'Opponent' },
       ]
     : [
-        { id: 'opponent-1', score: 8, displayName: 'Opponent' },
-        { id: 'opponent-2', score: 6, displayName: 'Second' },
+        { id: 'opponent-1', wins: 8, matchScore: null, displayName: 'Opponent' },
+        { id: 'opponent-2', wins: 6, matchScore: null, displayName: 'Second' },
       ];
 
   return {
@@ -382,10 +382,10 @@ describe('RoomPage', () => {
 
     const [topicRoomId, topicOptions] = mocks.useRoomTopic.mock.calls[0] as [
       string | undefined,
-      { onRematchStarted?: unknown },
+      { onRoomMessageSent?: unknown },
     ];
     expect(topicRoomId).toBeUndefined();
-    expect(typeof topicOptions.onRematchStarted).toBe('function');
+    expect(typeof topicOptions.onRoomMessageSent).toBe('function');
   });
 
   it('shows the join gate when the authenticated user is not part of the room', () => {
@@ -505,37 +505,29 @@ describe('RoomPage', () => {
     });
   });
 
-  it('navigates to the room returned by a rematch request', () => {
-    mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', currentRound: null });
+  it('stays on the current room after a rematch request', () => {
+    mocks.roomQueryResult.data = createRoom({ status: 'MATCH_FINISHED', currentRound: null });
 
     render(<RoomPage />);
 
     fireEvent.click(screen.getByRole('button', { name: 'room.round.playAgain' }));
 
-    expect(mocks.rematchMutation.mutate).toHaveBeenCalledWith(undefined, expect.any(Object));
-
-    const calls = mocks.rematchMutation.mutate.mock.calls as unknown[][];
-    const options = calls[0]?.[1] as
-      { onSuccess?: (response: { roomId: string | null }) => void } | undefined;
-    options?.onSuccess?.({ roomId: 'room-2' });
-
-    expect(mocks.navigate).toHaveBeenCalledWith('/rooms/room-2');
+    expect(mocks.rematchMutation.mutate).toHaveBeenCalledWith();
+    expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
-  it('navigates to the room announced by the rematch event', () => {
-    mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', currentRound: null });
+  it('does not register a rematch redirect callback', () => {
+    mocks.roomQueryResult.data = createRoom({ status: 'MATCH_FINISHED', currentRound: null });
 
     render(<RoomPage />);
 
     const options = mocks.useRoomTopic.mock.calls[0]?.[1] as
-      { onRematchStarted?: (roomId: string) => void } | undefined;
-    options?.onRematchStarted?.('room-2');
-
-    expect(mocks.navigate).toHaveBeenCalledWith('/rooms/room-2');
+      { onRematchStarted?: unknown } | undefined;
+    expect(options).not.toHaveProperty('onRematchStarted');
   });
 
   it('returns to home from a completed match', () => {
-    mocks.roomQueryResult.data = createRoom({ status: 'CLOSED', currentRound: null });
+    mocks.roomQueryResult.data = createRoom({ status: 'MATCH_FINISHED', currentRound: null });
 
     render(<RoomPage />);
 

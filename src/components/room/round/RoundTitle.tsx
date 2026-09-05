@@ -32,7 +32,7 @@ export function RoundTitle({
           rounds: String(rounds),
         })
       : t('room.round.title', { roundNumber: roundNumberText });
-  const isMatchComplete = roomStatus === 'CLOSED';
+  const isMatchComplete = roomStatus === 'MATCH_FINISHED';
   const isStatusWithProgress = isMatchComplete;
   const statusLabel = isMatchComplete
     ? t('room.round.matchComplete').toUpperCase()

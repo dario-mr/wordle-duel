@@ -176,9 +176,9 @@ describe('roomQueries', () => {
   });
 
   describe('useRematchMutation', () => {
-    it('requests a rematch without changing the room cache', async () => {
+    it('keeps the current room while waiting for the opponent', async () => {
       const { queryClient, wrapper } = createQueryClientWrapper();
-      const response = { roomId: null };
+      const response = { started: false };
       mocks.requestRematch.mockResolvedValue(response);
 
       const { result } = renderHook(() => useRematchMutation({ roomId: 'room-1' }), { wrapper });
@@ -189,6 +189,25 @@ describe('roomQueries', () => {
 
       expect(mocks.requestRematch).toHaveBeenCalledWith('room-1');
       expect(queryClient.getQueryData(roomQueryKey('room-1'))).toBeUndefined();
+      await waitFor(() => {
+        expect(result.current.data).toEqual(response);
+      });
+    });
+
+    it('refreshes the current room and room list when the rematch starts', async () => {
+      const { queryClient, wrapper } = createQueryClientWrapper();
+      const response = { started: true };
+      const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
+      mocks.requestRematch.mockResolvedValue(response);
+
+      const { result } = renderHook(() => useRematchMutation({ roomId: 'room-1' }), { wrapper });
+
+      await act(async () => {
+        await result.current.mutateAsync();
+      });
+
+      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: roomQueryKey('room-1') });
+      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['myRooms'] });
       await waitFor(() => {
         expect(result.current.data).toEqual(response);
       });

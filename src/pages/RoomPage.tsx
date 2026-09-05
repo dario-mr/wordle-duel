@@ -34,13 +34,6 @@ export function RoomPage() {
   const meUser = useCurrentUser();
 
   const myPlayerId = meUser?.id ?? '';
-  const handleRematchStarted = useCallback(
-    (newRoomId: string) => {
-      void navigate(`/rooms/${newRoomId}`);
-    },
-    [navigate],
-  );
-
   const authResolved = meUser !== undefined;
   const {
     data: room,
@@ -106,10 +99,7 @@ export function RoomPage() {
     },
     [markMessagesRead, myPlayerId],
   );
-  useRoomTopic(meUser && me ? roomId : undefined, {
-    onRematchStarted: handleRematchStarted,
-    onRoomMessageSent: handleRoomMessageSent,
-  });
+  useRoomTopic(meUser && me ? roomId : undefined, { onRoomMessageSent: handleRoomMessageSent });
 
   const letterStatusByLetter = useMemo<Partial<Record<string, GuessLetterStatus>>>(() => {
     if (!currentRound) {
@@ -177,13 +167,7 @@ export function RoomPage() {
       return;
     }
 
-    rematchMutation.mutate(undefined, {
-      onSuccess: ({ roomId: newRoomId }) => {
-        if (newRoomId) {
-          handleRematchStarted(newRoomId);
-        }
-      },
-    });
+    rematchMutation.mutate();
   };
 
   if (!roomId) {
@@ -267,7 +251,7 @@ export function RoomPage() {
           nextRoundError={nextRoundMutation.error}
           onRematch={handleRematch}
           isRematchPending={rematchMutation.isPending}
-          isRematchWaiting={rematchMutation.isSuccess && rematchMutation.data.roomId === null}
+          isRematchWaiting={rematchMutation.isSuccess && !rematchMutation.data.started}
           rematchError={rematchMutation.error}
           onBackToHome={() => {
             void navigate('/');

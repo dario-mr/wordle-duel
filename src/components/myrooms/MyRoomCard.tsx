@@ -33,8 +33,18 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
   const meName = getPlayerLabel(mePlayer, 'Me');
   const opponentName = getPlayerLabel(opponent, '?');
 
-  const meScore = mePlayer?.score ?? 0;
-  const opponentScore = opponent?.score ?? 0;
+  const playerRows = [
+    {
+      name: meName,
+      matchScore: mePlayer?.matchScore ?? DASH,
+      wins: mePlayer?.wins ?? 0,
+    },
+    {
+      name: opponent ? opponentName : DASH,
+      matchScore: opponent?.matchScore ?? DASH,
+      wins: opponent?.wins ?? DASH,
+    },
+  ];
 
   const roomStatusLabel = t(roomStatusTextKey[room.status]);
   const roomStatusStyle = roomStatusStyleByStatus[room.status];
@@ -53,11 +63,6 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
     bg: roomStatusStyle.pillBg,
     color: roomStatusStyle.pillColor,
   };
-
-  const playerRows = [
-    { name: meName, score: meScore },
-    { name: opponent ? opponentName : DASH, score: opponentScore },
-  ];
 
   return (
     <Card
@@ -92,16 +97,34 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
           </HStack>
         ) : null}
 
-        <Box my={2} borderTopWidth="1px" borderColor="border.divider" />
-        <Stack gap={3}>
+        {room.status === 'IN_PROGRESS' ? (
+          <>
+            <Stack gap={2}>
+              {playerRows.map((row, index) => (
+                <Box key={`${room.id}-match-${String(index)}`} w="full">
+                  <Box display="grid" gridTemplateColumns="1fr auto" alignItems="center" gap={4}>
+                    <Text fontWeight="semibold" truncate>
+                      {row.name}
+                    </Text>
+                    <Text fontWeight="bold">{row.matchScore}</Text>
+                  </Box>
+                </Box>
+              ))}
+            </Stack>
+            <Box my={2} borderTopWidth="1px" borderColor="border.divider" />
+          </>
+        ) : null}
+        <Stack gap={2}>
+          <Text fontSize="sm" color="fg" opacity={0.6}>
+            {t('room.playerStats.wins')}
+          </Text>
           {playerRows.map((row, index) => (
-            <Box key={`${room.id}-${String(index)}`} w="full">
+            <Box key={`${room.id}-wins-${String(index)}`} w="full">
               <Box display="grid" gridTemplateColumns="1fr auto" alignItems="center" gap={4}>
                 <Text fontWeight="semibold" truncate>
                   {row.name}
                 </Text>
-
-                <Text fontWeight="bold">{row.score}</Text>
+                <Text fontWeight="bold">{row.wins}</Text>
               </Box>
             </Box>
           ))}

@@ -14,7 +14,7 @@ export function RoundPanel(props: {
 
   return (
     <Stack gap={5}>
-      {round || props.room.status === 'CLOSED' ? (
+      {round || props.room.status === 'MATCH_FINISHED' ? (
         <RoundTitle
           roundNumber={round?.roundNumber}
           rounds={props.room.rounds}

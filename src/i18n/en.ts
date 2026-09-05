@@ -41,7 +41,7 @@ export default {
       INVALID_ROUND_NUMBER: 'Invalid round number',
       WORD_NOT_ALLOWED: "This word isn't in the dictionary",
       INVALID_WORD: 'Your guess is invalid',
-      ROOM_CLOSED: 'This room is closed',
+      ROOM_CLOSED: 'This match is finished',
       ROOM_BUSY: 'This room is busy. Try again',
       CHAT_MESSAGE_LIMIT_REACHED: 'Wait for your opponent to reply before sending another message',
       DICTIONARY_EMPTY: 'The game dictionary is unavailable. Try again later',
@@ -78,7 +78,7 @@ export default {
     status: {
       waitingForPlayers: 'WAITING',
       inProgress: 'IN PROGRESS',
-      closed: 'CLOSED',
+      matchFinished: 'FINISHED',
     },
     share: {
       waitingTitle: 'Waiting for opponent...',
@@ -115,8 +115,8 @@ export default {
     playerStats: {
       me: 'Me',
       opponent: 'Opponent',
-      score: 'Score:',
-      status: 'Status:',
+      matchScore: 'Score:',
+      wins: 'Scoreboard',
       dash: '—',
       winner: 'WINNER',
     },
@@ -156,8 +156,6 @@ export default {
   myRooms: {
     title: 'My rooms',
     empty: 'No rooms yet',
-    noActive: 'No active rooms',
-    history: 'History ({{count}})',
   },
   login: {
     title: 'Login required',

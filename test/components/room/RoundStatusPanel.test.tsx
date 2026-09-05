@@ -40,7 +40,7 @@ vi.mock('../../../src/components/common/BrandButton.tsx', () => ({
 }));
 
 function room(args?: {
-  status?: 'IN_PROGRESS' | 'CLOSED';
+  status?: 'IN_PROGRESS' | 'MATCH_FINISHED';
   roundNumber?: number;
   playerStatus?: 'WON' | 'LOST';
 }) {
@@ -94,10 +94,10 @@ describe('RoundStatusPanel', () => {
     expect(screen.queryByRole('button', { name: 'room.round.nextRound' })).toBeNull();
   });
 
-  it('hides the round result after room closure', () => {
+  it('hides the round result after the match finishes', () => {
     render(
       <RoundStatusPanel
-        {...panelProps(room({ status: 'CLOSED', roundNumber: 5, playerStatus: 'WON' }))}
+        {...panelProps(room({ status: 'MATCH_FINISHED', roundNumber: 5, playerStatus: 'WON' }))}
       />,
     );
 
@@ -105,10 +105,10 @@ describe('RoundStatusPanel', () => {
     expect(screen.getByRole('button', { name: 'room.round.playAgain' })).toBeTruthy();
   });
 
-  it('keeps the lost round solution visible after room closure', () => {
+  it('keeps the lost round solution visible after the match finishes', () => {
     render(
       <RoundStatusPanel
-        {...panelProps(room({ status: 'CLOSED', roundNumber: 5, playerStatus: 'LOST' }))}
+        {...panelProps(room({ status: 'MATCH_FINISHED', roundNumber: 5, playerStatus: 'LOST' }))}
       />,
     );
 

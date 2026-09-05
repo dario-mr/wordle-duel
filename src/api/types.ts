@@ -14,11 +14,12 @@ export type Language = 'IT';
 
 export type RoomRounds = 5 | 10 | 'ENDLESS';
 
-export type RoomStatus = 'WAITING_FOR_PLAYERS' | 'IN_PROGRESS' | 'CLOSED';
+export type RoomStatus = 'WAITING_FOR_PLAYERS' | 'IN_PROGRESS' | 'MATCH_FINISHED';
 
 export interface PlayerDto {
   id: string;
-  score: number;
+  wins: number;
+  matchScore: number | null;
   displayName: string;
 }
 
@@ -71,7 +72,7 @@ export interface SubmitGuessRequest {
 }
 
 export interface RematchResponseDto {
-  roomId: string | null;
+  started: boolean;
 }
 
 export interface SubmitGuessResponse {
@@ -110,13 +111,9 @@ export type RoomEventType =
   | 'ROOM_CREATED'
   | 'PLAYER_JOINED'
   | 'SCORES_UPDATED'
-  | 'ROOM_CLOSED'
-  | 'REMATCH_STARTED'
+  | 'MATCH_FINISHED'
+  | 'MATCH_RESTARTED'
   | 'ROOM_MESSAGE_SENT';
-
-export interface RematchStartedPayload {
-  roomId: string;
-}
 
 export interface RoomEventDto {
   type: RoomEventType;

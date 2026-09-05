@@ -126,8 +126,18 @@ export function useNextRoundMutation(args: { roomId: string }) {
 }
 
 export function useRematchMutation(args: { roomId: string }) {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: () => requestRematch(args.roomId),
+    onSuccess: ({ started }) => {
+      if (started) {
+        void Promise.all([
+          queryClient.invalidateQueries({ queryKey: roomQueryKey(args.roomId) }),
+          queryClient.invalidateQueries({ queryKey: ['myRooms'] }),
+        ]);
+      }
+    },
   });
 }
 

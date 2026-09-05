@@ -1,2 +1,2 @@
 - paging for get rooms endpoint?
-- revise my-rooms design, it should show one card per "player vs player" with current score and historical cumulated score
+- bg letters in room or not?

@@ -45,7 +45,7 @@ export function RoundStatusPanel(props: {
       </Stack>
     ) : null;
 
-  if (props.room.status === 'CLOSED') {
+  if (props.room.status === 'MATCH_FINISHED') {
     return (
       <Stack gap={2} align="center" pt={2}>
         {currentRound?.playerStatus === 'LOST' ? result : null}
