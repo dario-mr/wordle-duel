@@ -31,11 +31,11 @@ export function RoundStatusPanel(props: {
     currentRound.roundNumber === props.room.rounds;
   const result =
     currentRound?.playerStatus === 'WON' ? (
-      <Stack gap={1} align="center">
+      <Stack gap={1} mb={3} align="center">
         <Text textAlign="center">{t('room.round.youWonThisRound')}</Text>
       </Stack>
     ) : currentRound?.playerStatus === 'LOST' ? (
-      <Stack gap={1} align="center">
+      <Stack gap={1} mb={3} align="center">
         <Text textAlign="center">{t('room.round.youLostThisRound')}</Text>
         {currentRound.solution ? (
           <Text fontSize="sm">

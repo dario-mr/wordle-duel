@@ -33,10 +33,18 @@ export function RoundTitle({
         })
       : t('room.round.title', { roundNumber: roundNumberText });
   const isMatchComplete = roomStatus === 'MATCH_FINISHED';
-  const isStatusWithProgress = isMatchComplete;
+  const isMatchInProgress = roomStatus === 'IN_PROGRESS';
+  const isStatusWithProgress = isMatchComplete || isMatchInProgress;
   const statusLabel = isMatchComplete
     ? t('room.round.matchComplete').toUpperCase()
-    : roundTitle.toUpperCase();
+    : isMatchInProgress
+      ? t('room.status.inProgress').toUpperCase()
+      : roundTitle.toUpperCase();
+  const statusColor = isMatchComplete
+    ? 'fg.success'
+    : isMatchInProgress
+      ? 'yellow.400'
+      : 'fg.primary';
 
   return (
     <HStack w="full" justifyContent="center" position="relative">
@@ -47,17 +55,11 @@ export function RoundTitle({
         borderWidth="1px"
         borderColor="border.muted"
         bg="bg.panel"
-        color={isStatusWithProgress ? 'fg.success' : 'fg.primary'}
+        color={statusColor}
         px={4}
         py={1.5}
       >
-        <Box
-          aria-hidden="true"
-          boxSize="8px"
-          borderRadius="full"
-          bg={isStatusWithProgress ? 'fg.success' : 'fg.primary'}
-          flexShrink={0}
-        />
+        <Box aria-hidden="true" boxSize="8px" borderRadius="full" bg={statusColor} flexShrink={0} />
         <Text fontSize={{ base: '2xs', md: 'xs' }} fontWeight="semibold" letterSpacing="wide">
           {statusLabel}
         </Text>
