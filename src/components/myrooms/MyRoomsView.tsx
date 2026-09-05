@@ -26,7 +26,7 @@ export function MyRoomsView({ rooms, myPlayerId, onOpenRoom }: MyRoomsViewProps)
   });
 
   return (
-    <Stack gap={6}>
+    <Stack gap={4}>
       <Heading size="lg" textAlign="center">
         {t('myRooms.title')}
       </Heading>

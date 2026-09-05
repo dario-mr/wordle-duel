@@ -42,9 +42,23 @@ function room(status: RoomDto['status']): RoomDto {
 }
 
 describe('MyRoomCard', () => {
-  it('shows live match scores and cumulative wins for an active match', () => {
+  it('shows live match scores, round, and cumulative wins for an active match', () => {
     render(<MyRoomCard room={room('IN_PROGRESS')} myPlayerId="me" onOpen={vi.fn()} />);
 
+    expect(screen.getByText('room.status.inProgress')).toBeTruthy();
+    expect(screen.getByText('room.playerStats.wins')).toBeTruthy();
+    expect(screen.getByText('room.round.titleWithRounds')).toBeTruthy();
+    expect(screen.getByText('2')).toBeTruthy();
+    expect(screen.getByText('1')).toBeTruthy();
+    expect(screen.getByText('10')).toBeTruthy();
+    expect(screen.getByText('8')).toBeTruthy();
+  });
+
+  it('shows completion, final match scores, and cumulative wins after the match finishes', () => {
+    render(<MyRoomCard room={room('MATCH_FINISHED')} myPlayerId="me" onOpen={vi.fn()} />);
+
+    expect(screen.getByText(/room\.round\.matchComplete/i)).toBeTruthy();
+    expect(screen.getByText('room.round.titleWithRounds')).toBeTruthy();
     expect(screen.getByText('room.playerStats.wins')).toBeTruthy();
     expect(screen.getByText('2')).toBeTruthy();
     expect(screen.getByText('1')).toBeTruthy();
@@ -52,14 +66,11 @@ describe('MyRoomCard', () => {
     expect(screen.getByText('8')).toBeTruthy();
   });
 
-  it('shows final match scores and cumulative wins after the match finishes', () => {
-    render(<MyRoomCard room={room('MATCH_FINISHED')} myPlayerId="me" onOpen={vi.fn()} />);
+  it('shows waiting placeholders and zero leaderboard scores before an opponent joins', () => {
+    render(<MyRoomCard room={room('WAITING_FOR_PLAYERS')} myPlayerId="me" onOpen={vi.fn()} />);
 
-    expect(screen.getByText('room.status.matchFinished')).toBeTruthy();
+    expect(screen.getByText('room.status.waitingForPlayers')).toBeTruthy();
     expect(screen.getByText('room.playerStats.wins')).toBeTruthy();
-    expect(screen.getByText('2')).toBeTruthy();
-    expect(screen.getByText('1')).toBeTruthy();
-    expect(screen.getByText('10')).toBeTruthy();
-    expect(screen.getByText('8')).toBeTruthy();
+    expect(screen.getAllByText('0')).toHaveLength(2);
   });
 });
