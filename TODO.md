@@ -1,3 +1,3 @@
 - paging for get rooms endpoint?
 - bg letters in room or not?
-- round pill: show "in progress" text
+- clear chat in new match in same room?

@@ -117,7 +117,7 @@ export default {
       me: 'Io',
       opponent: 'Avversario',
       matchScore: 'Punteggio:',
-      wins: 'Storico partite',
+      wins: 'Vittorie',
       dash: '—',
       winner: 'VINCITORE',
     },

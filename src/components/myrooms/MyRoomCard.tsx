@@ -1,4 +1,5 @@
 import { Box, HStack, Stack, Text } from '@chakra-ui/react';
+import { Trophy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { PlayerDto, RoomDto } from '../../api/types';
 import { roomStatusTextKey } from '../../utils/roomStatusText';
@@ -118,9 +119,18 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
         </Card>
 
         <Stack gap={2}>
-          <Text mt={3} px={3} fontSize="sm" color="fg" opacity={0.6} textAlign="left">
-            {t('room.playerStats.wins')}
-          </Text>
+          <Box
+            mt={3}
+            color="fg"
+            opacity={0.6}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            gap={2}
+          >
+            <Trophy size={18} strokeWidth={1.75} aria-hidden="true" />
+            <Text fontSize="sm">{t('room.playerStats.wins')}</Text>
+          </Box>
           <Box borderWidth="1px" borderStyle="dashed" borderColor="border.muted" borderRadius="xl">
             {playerRows.map((row, index) => (
               <Box
