@@ -42,16 +42,18 @@ describe('PlayerStatsBar', () => {
     expect(screen.queryByText('room.playerStats.winner')).toBeNull();
   });
 
-  it('does not infer a finished-match winner from cumulative wins', () => {
+  it('shows final match scores and winner', () => {
     render(
       <PlayerStatsBar
         room={room('MATCH_FINISHED')}
-        player={{ id: 'me', wins: 10, matchScore: null, displayName: 'Me' }}
-        opponent={{ id: 'opponent', wins: 20, matchScore: null, displayName: 'Opponent' }}
+        player={{ id: 'me', wins: 10, matchScore: 2, displayName: 'Me' }}
+        opponent={{ id: 'opponent', wins: 20, matchScore: 1, displayName: 'Opponent' }}
       />,
     );
 
-    expect(screen.queryByText('room.playerStats.winner')).toBeNull();
-    expect(screen.getAllByText('room.playerStats.dash')).toHaveLength(3);
+    expect(screen.getByText('2')).toBeTruthy();
+    expect(screen.getByText('1')).toBeTruthy();
+    expect(screen.getByText('room.playerStats.winner')).toBeTruthy();
+    expect(screen.getAllByText('room.playerStats.dash')).toHaveLength(1);
   });
 });

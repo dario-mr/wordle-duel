@@ -52,14 +52,13 @@ describe('MyRoomCard', () => {
     expect(screen.getByText('8')).toBeTruthy();
   });
 
-  it('shows cumulative wins only after the match finishes', () => {
+  it('shows final match scores and cumulative wins after the match finishes', () => {
     render(<MyRoomCard room={room('MATCH_FINISHED')} myPlayerId="me" onOpen={vi.fn()} />);
 
     expect(screen.getByText('room.status.matchFinished')).toBeTruthy();
-    expect(screen.queryByText('room.playerStats.matchScore')).toBeNull();
     expect(screen.getByText('room.playerStats.wins')).toBeTruthy();
-    expect(screen.queryByText('2')).toBeNull();
-    expect(screen.queryByText('1')).toBeNull();
+    expect(screen.getByText('2')).toBeTruthy();
+    expect(screen.getByText('1')).toBeTruthy();
     expect(screen.getByText('10')).toBeTruthy();
     expect(screen.getByText('8')).toBeTruthy();
   });

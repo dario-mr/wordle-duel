@@ -1,7 +1,7 @@
 {
   "name": "wordle-duel",
   "private": true,
-  "version": "0.29.0",
+  "version": "0.29.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -53,5 +53,9 @@
     "vite": "8.1.4",
     "vite-plugin-svgr": "5.2.0",
     "vitest": "4.1.2"
+  },
+  "allowScripts": {
+    "fsevents@2.3.2": true,
+    "fsevents@2.3.3": true
   }
 }

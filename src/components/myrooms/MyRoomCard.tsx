@@ -97,7 +97,7 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
           </HStack>
         ) : null}
 
-        {room.status === 'IN_PROGRESS' ? (
+        {room.status !== 'WAITING_FOR_PLAYERS' ? (
           <>
             <Stack gap={2}>
               {playerRows.map((row, index) => (
