@@ -91,7 +91,7 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
           <RoomLanguageFlag language={room.language} fontSize="lg" />
         </Box>
 
-        <Card borderRadius="2xl" bg="bg.panel" py={2.5}>
+        <Card boxShadow="none" borderRadius="2xl" bg="bg.panel" py={2.5}>
           <Stack gap={3} w="full">
             <Stack gap={1} align="center">
               {room.status === 'WAITING_FOR_PLAYERS' ? (
