@@ -135,6 +135,7 @@ export function useRematchMutation(args: { roomId: string }) {
         void Promise.all([
           queryClient.invalidateQueries({ queryKey: roomQueryKey(args.roomId) }),
           queryClient.invalidateQueries({ queryKey: ['myRooms'] }),
+          queryClient.invalidateQueries({ queryKey: roomMessagesQueryKey(args.roomId) }),
         ]);
       }
     },

@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RoomDto, RoomMessagesDto } from '../../src/api/types';
 import {
+  roomMessagesQueryKey,
   roomQueryKey,
   useCreateRoomMutation,
   useJoinRoomMutation,
@@ -208,6 +209,9 @@ describe('roomQueries', () => {
 
       expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: roomQueryKey('room-1') });
       expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['myRooms'] });
+      expect(invalidateQueries).toHaveBeenCalledWith({
+        queryKey: roomMessagesQueryKey('room-1'),
+      });
       await waitFor(() => {
         expect(result.current.data).toEqual(response);
       });

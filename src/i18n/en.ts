@@ -113,7 +113,6 @@ export default {
       enter: 'Enter',
     },
     playerStats: {
-      me: 'Me',
       opponent: 'Opponent',
       matchScore: 'Score:',
       wins: 'Scoreboard',

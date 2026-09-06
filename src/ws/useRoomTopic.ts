@@ -33,7 +33,15 @@ export function useRoomTopic(
               void queryClient.invalidateQueries({ queryKey: roomMessagesQueryKey(roomId) });
               return;
             }
-            if (event.type === 'MATCH_FINISHED' || event.type === 'MATCH_RESTARTED') {
+            if (event.type === 'MATCH_RESTARTED') {
+              void Promise.all([
+                queryClient.invalidateQueries({ queryKey: roomQueryKey(roomId) }),
+                queryClient.invalidateQueries({ queryKey: ['myRooms'] }),
+                queryClient.invalidateQueries({ queryKey: roomMessagesQueryKey(roomId) }),
+              ]);
+              return;
+            }
+            if (event.type === 'MATCH_FINISHED') {
               void Promise.all([
                 queryClient.invalidateQueries({ queryKey: roomQueryKey(roomId) }),
                 queryClient.invalidateQueries({ queryKey: ['myRooms'] }),

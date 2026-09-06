@@ -114,7 +114,6 @@ export default {
       enter: 'Invio',
     },
     playerStats: {
-      me: 'Io',
       opponent: 'Avversario',
       matchScore: 'Punteggio:',
       wins: 'Vittorie',

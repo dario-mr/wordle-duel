@@ -132,9 +132,12 @@ describe('useRoomTopic', () => {
     mocks.getSubscribeHandler()?.({ body: 'not-json' });
 
     await waitFor(() => {
-      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(6);
+      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(7);
       expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['room', 'room-1'] });
       expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['myRooms'] });
+      expect(mocks.invalidateQueries).toHaveBeenCalledWith({
+        queryKey: ['roomMessages', 'room-1'],
+      });
     });
   });
 
@@ -151,9 +154,12 @@ describe('useRoomTopic', () => {
     });
 
     await waitFor(() => {
-      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(2);
+      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(3);
       expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['room', 'room-1'] });
       expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['myRooms'] });
+      expect(mocks.invalidateQueries).toHaveBeenCalledWith({
+        queryKey: ['roomMessages', 'room-1'],
+      });
     });
   });
 

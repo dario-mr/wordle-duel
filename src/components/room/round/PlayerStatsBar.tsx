@@ -6,7 +6,7 @@ export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto;
   const { t } = useTranslation();
 
   const DASH = t('room.playerStats.dash');
-  const meName = `${props.player.displayName} (${t('room.playerStats.me')})`;
+  const meName = props.player.displayName;
   const opponentName = props.opponent?.displayName ?? t('room.playerStats.opponent');
   const meScore = props.player.matchScore ?? DASH;
   const opponentScore = props.opponent?.matchScore ?? DASH;
