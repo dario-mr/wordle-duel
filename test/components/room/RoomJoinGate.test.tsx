@@ -4,7 +4,10 @@ import { describe, expect, it, vi } from 'vitest';
 import { RoomJoinGate } from '../../../src/components/room/RoomJoinGate';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: string, options?: { opponentName?: string }) =>
+      options?.opponentName ? `${options.opponentName} is waiting for an opponent.` : key,
+  }),
 }));
 
 vi.mock('@chakra-ui/react', () => ({
@@ -30,6 +33,7 @@ describe('RoomJoinGate', () => {
     render(<RoomJoinGate room={baseRoom} roomId="room-1" />);
 
     expect(screen.getByText('room.joinGate.joinThisRoom')).toBeTruthy();
+    expect(screen.getByText('Alice is waiting for an opponent.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'room-1' })).toBeTruthy();
   });
 

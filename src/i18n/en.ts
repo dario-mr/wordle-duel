@@ -85,7 +85,7 @@ export default {
     },
     joinGate: {
       joinThisRoom: 'Join this room',
-      waitingForOpponent: 'A player is waiting for an opponent.',
+      waitingForOpponent: '{{opponentName}} is waiting for an opponent.',
       notAPlayer: 'You are not a player in this room.',
     },
     round: {

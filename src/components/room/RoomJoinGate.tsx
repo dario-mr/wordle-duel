@@ -6,13 +6,15 @@ import { JoinRoomButton } from '../common/JoinRoomButton';
 export function RoomJoinGate(props: { room: RoomDto; roomId: string | undefined }) {
   const { t } = useTranslation();
   if (props.room.players.length === 1) {
+    const opponentName = props.room.players[0].displayName;
+
     return (
       <Stack gap={6} minH="50vh" align="center" justify="center" textAlign="center">
         <Text fontSize="2xl" fontWeight="semibold">
           {t('room.joinGate.joinThisRoom')}
         </Text>
         <Text fontSize="md" color="fg.info">
-          {t('room.joinGate.waitingForOpponent')}
+          {t('room.joinGate.waitingForOpponent', { opponentName })}
         </Text>
         <JoinRoomButton roomId={props.roomId} />
       </Stack>
