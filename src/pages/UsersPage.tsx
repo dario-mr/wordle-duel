@@ -19,8 +19,8 @@ import { getErrorMessage } from '../api/errors';
 import { UNAUTHENTICATED_CODE } from '../constants';
 import { WdsApiError } from '../api/types';
 import { useCurrentUser } from '../auth/useCurrentUser';
-import { UsersSkeleton } from '../components/admin/UsersSkeleton.tsx';
-import { UsersTable } from '../components/admin/UsersTable.tsx';
+import { UsersSkeleton } from '../components/admin/users/UsersSkeleton.tsx';
+import { UsersTable } from '../components/admin/users/UsersTable.tsx';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import { useAdminUsersQuery } from '../query/adminQueries';
 

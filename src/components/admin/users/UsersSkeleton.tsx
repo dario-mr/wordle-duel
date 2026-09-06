@@ -1,6 +1,6 @@
 import { Box, Heading, Input, Skeleton, Stack, Table, VStack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import type { UsersSortField } from '../../admin/usersSorts';
+import type { UsersSortField } from '../../../admin/usersSorts';
 import { SortHeaderButton } from './SortHeaderButton';
 import {
   USERS_COL_WIDTHS,

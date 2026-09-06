@@ -12,9 +12,9 @@ import {
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
-import type { UsersFilterField, UsersFilters } from '../../admin/usersFilters';
-import type { UsersSort, UsersSortField } from '../../admin/usersSorts';
-import type { AdminUserDto } from '../../api/types';
+import type { UsersFilterField, UsersFilters } from '../../../admin/usersFilters';
+import type { UsersSort, UsersSortField } from '../../../admin/usersSorts';
+import type { AdminUserDto } from '../../../api/types';
 import { FilterHeader } from './FilterHeader';
 import { SortHeaderButton } from './SortHeaderButton';
 import {
@@ -220,10 +220,10 @@ export function UsersTable({
     onColumnSizingChange: setColumnSizing,
   });
   const resizeLabels: Record<UsersColumn, string> = {
-    fullName: t('admin.users.resizeColumn', { column: t('admin.users.columns.fullName') }),
-    displayName: t('admin.users.resizeColumn', { column: t('admin.users.columns.displayName') }),
-    email: t('admin.users.resizeColumn', { column: t('admin.users.columns.email') }),
-    joined: t('admin.users.resizeColumn', { column: t('admin.users.columns.joined') }),
+    fullName: t('admin.users.columns.fullName'),
+    displayName: t('admin.users.columns.displayName'),
+    email: t('admin.users.columns.email'),
+    joined: t('admin.users.columns.joined'),
   };
 
   return (

@@ -1,16 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { roomStatusStyleByStatus } from '../../src/utils/roomStatusVisuals';
+import { roomStatusColorByStatus } from '../../src/utils/roomStatusVisuals';
 
 describe('roomStatusVisuals', () => {
-  it('maps each room status to the expected card/pill visuals', () => {
-    expect(roomStatusStyleByStatus).toEqual({
-      IN_PROGRESS: { borderLeftColor: 'green.600', pillBg: 'blue.600', pillColor: 'white' },
-      WAITING_FOR_PLAYERS: {
-        borderLeftColor: 'yellow.400',
-        pillBg: 'yellow.400',
-        pillColor: 'black',
-      },
-      MATCH_FINISHED: { borderLeftColor: 'gray.500', pillBg: 'gray.600', pillColor: 'white' },
+  it('maps each room status to its shared color', () => {
+    expect(roomStatusColorByStatus).toEqual({
+      WAITING_FOR_PLAYERS: 'fg.muted',
+      IN_PROGRESS: 'yellow.400',
+      MATCH_FINISHED: 'fg.success',
     });
   });
 });

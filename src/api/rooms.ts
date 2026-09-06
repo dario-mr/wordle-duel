@@ -8,8 +8,10 @@ import type {
   SubmitGuessRequest,
   SubmitGuessResponse,
 } from './types';
-import { getJson, postJson } from './wdsClient';
-import { apiV1Url } from './url';
+import { deleteRequest, getJson, postJson } from './wdsClient';
+import { apiV1Url, backendUrl, withQuery } from './url';
+import type { AdminRoomsFilters } from '../admin/roomsFilters';
+import type { AdminRoomsResponse } from './types';
 
 export function createRoom(body: CreateRoomRequest): Promise<RoomDto> {
   return postJson<RoomDto>(apiV1Url('/rooms'), body);
@@ -25,6 +27,50 @@ export function getRoom(roomId: string, init?: RequestInit): Promise<RoomDto> {
 
 export function listMyRooms(init?: RequestInit): Promise<RoomDto[]> {
   return getJson<RoomDto[]>(apiV1Url('/rooms'), init);
+}
+
+export function getAdminRooms(
+  params?: Partial<AdminRoomsFilters> & { page?: number; size?: number; sort?: string },
+  init?: RequestInit,
+): Promise<AdminRoomsResponse> {
+  const queryEntries: [string, string | number][] = [];
+
+  if (params?.page !== undefined) {
+    queryEntries.push(['page', params.page]);
+  }
+  if (params?.size !== undefined) {
+    queryEntries.push(['size', params.size]);
+  }
+  if (params?.sort !== undefined) {
+    queryEntries.push(['sort', params.sort]);
+  }
+  for (const status of params?.statuses ?? []) {
+    queryEntries.push(['status', status]);
+  }
+  if (params?.language) {
+    queryEntries.push(['language', params.language]);
+  }
+  if (params?.rounds) {
+    queryEntries.push(['rounds', params.rounds]);
+  }
+  if (params?.roomId !== undefined) {
+    queryEntries.push(['roomId', params.roomId]);
+  }
+  if (params?.playerSearch !== undefined) {
+    queryEntries.push(['playerSearch', params.playerSearch]);
+  }
+  if (params?.createdAt !== undefined) {
+    queryEntries.push(['createdAt', params.createdAt]);
+  }
+  if (params?.lastUpdatedAt !== undefined) {
+    queryEntries.push(['lastUpdatedAt', params.lastUpdatedAt]);
+  }
+
+  return getJson<AdminRoomsResponse>(withQuery(backendUrl('/admin/rooms'), queryEntries), init);
+}
+
+export function deleteAdminRoom(roomId: string): Promise<void> {
+  return deleteRequest(backendUrl(`/admin/rooms/${encodeURIComponent(roomId)}`));
 }
 
 export function submitGuess(args: {

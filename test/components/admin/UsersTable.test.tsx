@@ -9,7 +9,7 @@ import type {
 } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import type { AdminUserDto } from '../../../src/api/types';
-import { UsersTable } from '../../../src/components/admin/UsersTable';
+import { UsersTable } from '../../../src/components/admin/users/UsersTable';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -117,7 +117,7 @@ describe('UsersTable', () => {
       />,
     );
 
-    const handle = screen.getByRole('separator', { name: 'Resize email column' });
+    const handle = screen.getByRole('separator', { name: 'email' });
     const header = handle.parentElement;
     expect(header).not.toBeNull();
     Object.defineProperty(header, 'getBoundingClientRect', { value: () => ({ width: 200 }) });

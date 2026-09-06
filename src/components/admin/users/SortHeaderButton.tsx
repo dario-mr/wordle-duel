@@ -1,5 +1,5 @@
 import { Button } from '@chakra-ui/react';
-import type { UsersSort, UsersSortField } from '../../admin/usersSorts';
+import type { UsersSort, UsersSortField } from '../../../admin/usersSorts';
 
 interface SortHeaderButtonProps {
   label: string;

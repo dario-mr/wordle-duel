@@ -135,7 +135,7 @@ export function RoomChatDrawer({
             borderTopRadius={{ base: '3xl', md: 0 }}
           >
             <Drawer.CloseTrigger asChild>
-              <CloseButton size="sm" aria-label={t('common.close')} />
+              <CloseButton size="sm" />
             </Drawer.CloseTrigger>
             <Drawer.Header py={3}>
               <Drawer.Title>{opponentName}</Drawer.Title>

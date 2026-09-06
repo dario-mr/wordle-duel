@@ -191,7 +191,7 @@ describe('ProfilePopover', () => {
     mocks.getCurrentUser.mockReturnValue({ id: 'user-1', roles: ['ADMIN'] });
     render(<ProfilePopover />);
 
-    expect(screen.getByText('admin.users.navLink')).toBeTruthy();
+    expect(screen.getByText('admin.navLink')).toBeTruthy();
   });
 
   it('logout clears queries, removes returnTo, and navigates home', async () => {

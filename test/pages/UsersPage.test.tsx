@@ -88,7 +88,7 @@ vi.mock('@chakra-ui/react', () => ({
   Text: ({ children }: { children?: ReactNode }) => <p>{children}</p>,
 }));
 
-vi.mock('../../src/components/admin/UsersSkeleton.tsx', () => ({
+vi.mock('../../src/components/admin/users/UsersSkeleton.tsx', () => ({
   UsersSkeleton: () => <div>users-skeleton</div>,
 }));
 
@@ -98,7 +98,7 @@ vi.mock('../../src/components/common/ErrorAlert', () => ({
   ),
 }));
 
-vi.mock('../../src/components/admin/UsersTable.tsx', () => ({
+vi.mock('../../src/components/admin/users/UsersTable.tsx', () => ({
   UsersTable: ({
     users,
     filters,

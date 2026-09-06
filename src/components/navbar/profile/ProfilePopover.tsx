@@ -47,9 +47,9 @@ export function ProfilePopover({
     }
   };
 
-  const handleUsersClick = () => {
+  const handleAdminClick = () => {
     setOpen(false);
-    void navigate('/users');
+    void navigate('/admin');
   };
 
   const handleLegalClick = () => {
@@ -133,7 +133,7 @@ export function ProfilePopover({
     <ProfileMenuContent
       me={displayedMe}
       logoutPending={logoutPending}
-      onUsersClick={handleUsersClick}
+      onAdminClick={handleAdminClick}
       onLegalClick={handleLegalClick}
       onLogoutClick={handleLogoutClick}
     />
@@ -148,7 +148,7 @@ export function ProfilePopover({
           <Drawer.Positioner>
             <Drawer.Content borderTopRadius="3xl" bg="bg.card">
               <Drawer.CloseTrigger asChild>
-                <CloseButton size="sm" aria-label={t('common.close')} />
+                <CloseButton size="sm" />
               </Drawer.CloseTrigger>
               <Drawer.Header>
                 <Drawer.Title asChild>{profileHeader}</Drawer.Title>

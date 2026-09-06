@@ -19,6 +19,13 @@ export function postJson<TResponse>(
   return fetchJson<TResponse>(url, withJsonBody(init, body));
 }
 
+export async function deleteRequest(
+  url: string,
+  init?: Omit<RequestInit, 'body' | 'method'>,
+): Promise<void> {
+  await fetchAuthorized(url, { ...init, method: 'DELETE' });
+}
+
 async function fetchJson<T>(
   url: string,
   init?: RequestInit,

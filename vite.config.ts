@@ -29,7 +29,11 @@ export default defineConfig(({ mode }) => {
             target: DEV_BACKEND_ORIGIN,
             changeOrigin: true,
           },
-          '/admin': {
+          '/admin/users': {
+            target: DEV_BACKEND_ORIGIN,
+            changeOrigin: true,
+          },
+          '/admin/rooms': {
             target: DEV_BACKEND_ORIGIN,
             changeOrigin: true,
           },

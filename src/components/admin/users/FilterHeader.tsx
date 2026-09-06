@@ -1,7 +1,7 @@
 import { Input, VStack } from '@chakra-ui/react';
 import type { KeyboardEvent } from 'react';
-import type { UsersFilterField } from '../../admin/usersFilters';
-import type { UsersSort, UsersSortField } from '../../admin/usersSorts';
+import type { UsersFilterField } from '../../../admin/usersFilters';
+import type { UsersSort, UsersSortField } from '../../../admin/usersSorts';
 import { SortHeaderButton } from './SortHeaderButton';
 import { USERS_HEADER_FILTER_SLOT_HEIGHT } from './usersTable.constants';
 

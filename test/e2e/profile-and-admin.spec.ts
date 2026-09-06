@@ -13,6 +13,21 @@ function adminUser(id: string, fullName: string, email: string, createdOn: strin
 }
 
 test.describe('profile and admin flows', () => {
+  test('opens the admin hub from the renamed profile action', async ({ page }) => {
+    await mockAuthenticatedSession(page, { roles: ['ADMIN'] });
+
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Profile' }).click();
+    await expect(page.getByRole('button', { name: 'Admin' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Admin' }).click();
+
+    await expect(page).toHaveURL(/\/admin$/);
+    await expect(page.getByRole('heading', { name: 'Admin' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Rooms' })).toBeVisible();
+  });
+
   test('redirects non-admin users to the home page', async ({ page }) => {
     await mockAuthenticatedSession(page, { roles: ['USER'] });
 

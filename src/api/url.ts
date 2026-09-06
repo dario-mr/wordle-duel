@@ -12,10 +12,16 @@ export function apiV1Url(path: string): string {
 
 export function withQuery(url: string, entries: Iterable<readonly [string, QueryValue]>): string {
   const nextUrl = new URL(url, window.location.origin);
+  const seenKeys = new Set<string>();
 
   for (const [key, value] of entries) {
     if (value !== undefined && value !== null) {
-      nextUrl.searchParams.set(key, String(value));
+      if (seenKeys.has(key)) {
+        nextUrl.searchParams.append(key, String(value));
+      } else {
+        nextUrl.searchParams.set(key, String(value));
+        seenKeys.add(key);
+      }
     }
   }
 

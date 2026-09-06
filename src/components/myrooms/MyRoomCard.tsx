@@ -3,6 +3,7 @@ import { Trophy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { PlayerDto, RoomDto } from '../../api/types';
 import { roomStatusTextKey } from '../../utils/roomStatusText';
+import { roomStatusColorByStatus } from '../../utils/roomStatusVisuals';
 import { Card } from '../common/Card';
 import { RoomLanguageFlag } from './RoomLanguageFlag';
 
@@ -40,6 +41,13 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
   ];
 
   const roomStatusLabel = t(roomStatusTextKey[room.status]);
+  const roomStatusColor = roomStatusColorByStatus[room.status];
+  const statusLabel =
+    room.status === 'MATCH_FINISHED'
+      ? t('room.round.matchComplete').toUpperCase()
+      : room.status === 'IN_PROGRESS'
+        ? t('room.status.inProgress')
+        : roomStatusLabel;
 
   const roundNumber = room.currentRound?.roundNumber;
   const roundNumberText = roundNumber != null ? String(roundNumber) : DASH;
@@ -95,19 +103,9 @@ export function MyRoomCard({ room, myPlayerId, onOpen }: MyRoomCardProps) {
         <Card boxShadow="none" borderRadius="2xl" bg="bg.panel" py={2.5}>
           <Stack gap={3} w="full">
             <Stack gap={1} align="center">
-              {room.status === 'WAITING_FOR_PLAYERS' ? (
-                <Text color="fg.muted" fontSize="xs" fontWeight="bold" whiteSpace="nowrap">
-                  {roomStatusLabel}
-                </Text>
-              ) : room.status === 'MATCH_FINISHED' ? (
-                <Text color="fg.success" fontSize="xs" fontWeight="bold" whiteSpace="nowrap">
-                  {t('room.round.matchComplete').toUpperCase()}
-                </Text>
-              ) : (
-                <Text color="yellow.400" fontSize="xs" fontWeight="bold" whiteSpace="nowrap">
-                  {t('room.status.inProgress')}
-                </Text>
-              )}
+              <Text color={roomStatusColor} fontSize="xs" fontWeight="bold" whiteSpace="nowrap">
+                {statusLabel}
+              </Text>
               {matchScoreRow}
               {room.status !== 'WAITING_FOR_PLAYERS' ? (
                 <Text fontSize="sm" opacity="0.7">
