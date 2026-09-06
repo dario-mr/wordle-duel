@@ -167,6 +167,7 @@ export default {
       navLink: 'Users',
       empty: 'No users found',
       errorTitle: 'Error loading users',
+      resizeColumn: 'Resize {{column}} column',
       columns: {
         fullName: 'Full Name',
         displayName: 'Display Name',

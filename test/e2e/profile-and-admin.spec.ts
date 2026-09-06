@@ -96,10 +96,11 @@ test.describe('profile and admin flows', () => {
     await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
     await expect(page.getByRole('cell', { name: 'User 1', exact: true })).toBeVisible();
 
-    await page.getByLabel('Full Name').fill(' Alice ');
+    const fullNameFilter = page.getByRole('textbox', { name: 'Full Name' });
+    await fullNameFilter.fill(' Alice ');
     expect(adminRequests).toHaveLength(1);
 
-    await page.getByLabel('Full Name').press('Enter');
+    await fullNameFilter.press('Enter');
     await expect(page.getByText('Alice Alpha')).toBeVisible();
 
     await page.mouse.wheel(0, 100000);

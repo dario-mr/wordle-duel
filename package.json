@@ -1,7 +1,7 @@
 {
   "name": "wordle-duel",
   "private": true,
-  "version": "0.34.1",
+  "version": "0.34.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,6 +24,7 @@
     "@emotion/react": "^11.14.0",
     "@stomp/stompjs": "^7.2.1",
     "@tanstack/react-query": "^5.90.16",
+    "@tanstack/react-table": "^9.2.4",
     "i18next": "^24.2.3",
     "lucide-react": "^1.39.0",
     "react": "^19.2.0",

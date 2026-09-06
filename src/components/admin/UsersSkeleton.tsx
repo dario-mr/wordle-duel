@@ -41,7 +41,7 @@ export function UsersSkeleton() {
       <Box borderWidth="1px" borderRadius="xl" overflow="hidden">
         <Table.Root tableLayout="fixed">
           <Table.Header>
-            <Table.Row bg="bg.subtle">
+            <Table.Row bg="bg.mutedCard">
               <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.avatar} p={0}>
                 <VStack align="stretch" gap={USERS_HEADER_GAP}>
                   <Box height={USERS_HEADER_LABEL_SLOT_HEIGHT} />

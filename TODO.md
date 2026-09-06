@@ -1,1 +1,0 @@
-- paging for get rooms endpoint?

@@ -169,6 +169,7 @@ export default {
       navLink: 'Utenti',
       empty: 'Nessun utente trovato',
       errorTitle: 'Errore nel caricamento degli utenti',
+      resizeColumn: 'Ridimensiona la colonna {{column}}',
       columns: {
         fullName: 'Nome completo',
         displayName: 'Nome visualizzato',
