@@ -8,13 +8,10 @@ export default {
     me: 'Me',
   },
   common: {
-    language: 'Language',
     theme: 'Theme',
     light: 'Light',
     dark: 'Dark',
-    loadingRoom: 'Loading room...',
     join: 'Join',
-    submit: 'Submit',
     copied: 'Copied',
     copyLink: 'Copy link',
     share: 'Share',
@@ -108,26 +105,22 @@ export default {
       youLostThisRound: 'You lost this round',
     },
     guess: {
-      placeholder: 'ABCDE',
       rejectedTitle: 'Guess rejected',
       enter: 'Enter',
     },
     playerStats: {
       opponent: 'Opponent',
-      matchScore: 'Score:',
       wins: 'Scoreboard',
       dash: '—',
       winner: 'WINNER',
     },
     chat: {
-      title: 'Chat',
       open: 'Open chat',
       unread: '{{count}} unread messages',
       loading: 'Loading messages...',
       empty: 'No messages yet',
       sendRejectedTitle: 'Message not sent',
       waitForOpponentReply: 'Wait for your opponent to reply before sending another message.',
-      you: 'You',
       opponent: 'Opponent',
       presets: {
         GOOD_LUCK: 'Good luck!',
@@ -146,7 +139,6 @@ export default {
   },
   profile: {
     title: 'Profile',
-    loadingPlayerId: '...',
     uiLanguage: 'Language',
     legal: 'Legal & Policies',
     loginWithGoogle: 'Sign in with Google',
@@ -158,7 +150,6 @@ export default {
   },
   login: {
     title: 'Login required',
-    loginWithGoogle: 'Sign in with Google',
     disclaimer: 'By continuing, you agree to our <0>legal terms and policies</0>.',
   },
   notFound: {
@@ -182,12 +173,6 @@ export default {
         displayName: 'Display Name',
         email: 'Email',
         joined: 'Joined',
-      },
-      pagination: {
-        previous: 'Previous',
-        next: 'Next',
-        pageSize: 'Per page',
-        pageOf: 'Page {{page}} of {{total}}',
       },
     },
   },
