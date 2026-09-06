@@ -110,7 +110,7 @@ export default {
     },
     playerStats: {
       opponent: 'Opponent',
-      wins: 'Scoreboard',
+      wins: 'Wins',
       dash: '—',
       winner: 'WINNER',
     },
