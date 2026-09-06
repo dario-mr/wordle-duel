@@ -97,7 +97,6 @@ export default {
       matchComplete: 'Completata',
       playAgain: 'Gioca ancora',
       playAgainFailed: 'Impossibile iniziare una nuova partita',
-      backToHome: 'Torna alla home',
       solution: 'Soluzione:',
       waitingForOpponent: "In attesa dell'avversario...",
       nextRound: 'Prossimo round',

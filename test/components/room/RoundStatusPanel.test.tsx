@@ -71,7 +71,6 @@ function panelProps(roomDto = room()) {
     isRematchPending: false,
     isRematchWaiting: false,
     rematchError: null,
-    onBackToHome: vi.fn(),
   };
 }
 
@@ -103,6 +102,7 @@ describe('RoundStatusPanel', () => {
 
     expect(screen.queryByText('room.round.youWonThisRound')).toBeNull();
     expect(screen.getByRole('button', { name: 'room.round.playAgain' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'room.round.backToHome' })).toBeNull();
   });
 
   it('keeps the lost round solution visible after the match finishes', () => {

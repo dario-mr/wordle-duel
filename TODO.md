@@ -1,2 +1,1 @@
 - paging for get rooms endpoint?
-- bg letters in room or not?

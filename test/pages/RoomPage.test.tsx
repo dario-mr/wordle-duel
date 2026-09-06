@@ -30,7 +30,6 @@ interface SendMessageCallbacks {
 
 const mocks = vi.hoisted(() => ({
   roomId: 'room-1' as string | undefined,
-  navigate: vi.fn(),
   getCurrentUser: vi.fn(),
   roomQueryResult: {
     data: undefined,
@@ -77,7 +76,6 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('react-router-dom', () => ({
   useParams: () => ({ roomId: mocks.roomId }),
-  useNavigate: () => mocks.navigate,
 }));
 
 vi.mock('../../src/auth/useCurrentUser', () => ({
@@ -191,25 +189,12 @@ vi.mock('../../src/components/room/board/PlayerBoard', () => ({
 }));
 
 vi.mock('../../src/components/room/round/RoundStatusPanel', () => ({
-  RoundStatusPanel: ({
-    room,
-    onRematch,
-    onBackToHome,
-  }: {
-    room: RoomDto;
-    onRematch: () => void;
-    onBackToHome: () => void;
-  }) => (
+  RoundStatusPanel: ({ room, onRematch }: { room: RoomDto; onRematch: () => void }) => (
     <div>
       <div>{`round-status:${room.currentRound ? 'active' : 'waiting'}`}</div>
       {room.status === 'MATCH_FINISHED' && (
         <button type="button" onClick={onRematch}>
           room.round.playAgain
-        </button>
-      )}
-      {room.status === 'MATCH_FINISHED' && (
-        <button type="button" onClick={onBackToHome}>
-          room.round.backToHome
         </button>
       )}
     </div>
@@ -304,7 +289,6 @@ function createRoom(args?: {
 describe('RoomPage', () => {
   beforeEach(() => {
     mocks.roomId = 'room-1';
-    mocks.navigate.mockReset();
     mocks.getCurrentUser.mockReset();
     mocks.getCurrentUser.mockReturnValue({ id: 'me-1', roles: ['USER'] });
     mocks.roomQueryResult = {
@@ -513,7 +497,6 @@ describe('RoomPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'room.round.playAgain' }));
 
     expect(mocks.rematchMutation.mutate).toHaveBeenCalledWith();
-    expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
   it('does not register a rematch redirect callback', () => {
@@ -524,15 +507,5 @@ describe('RoomPage', () => {
     const options = mocks.useRoomTopic.mock.calls[0]?.[1] as
       { onRematchStarted?: unknown } | undefined;
     expect(options).not.toHaveProperty('onRematchStarted');
-  });
-
-  it('returns to home from a completed match', () => {
-    mocks.roomQueryResult.data = createRoom({ status: 'MATCH_FINISHED', currentRound: null });
-
-    render(<RoomPage />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'room.round.backToHome' }));
-
-    expect(mocks.navigate).toHaveBeenCalledWith('/');
   });
 });

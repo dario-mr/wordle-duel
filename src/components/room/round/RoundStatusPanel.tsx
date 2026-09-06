@@ -14,7 +14,6 @@ export function RoundStatusPanel(props: {
   isRematchPending: boolean;
   isRematchWaiting: boolean;
   rematchError: unknown;
-  onBackToHome: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -59,18 +58,6 @@ export function RoundStatusPanel(props: {
             onClick={props.onRematch}
           >
             {t(props.isRematchWaiting ? 'room.round.waitingForOpponent' : 'room.round.playAgain')}
-          </PrimaryButton>
-
-          <PrimaryButton
-            variant="outline"
-            bg="transparent"
-            color="fg.primary"
-            h="46px"
-            _hover={{ bg: 'transparent', textDecoration: 'underline' }}
-            _active={{ bg: 'transparent' }}
-            onClick={props.onBackToHome}
-          >
-            {t('room.round.backToHome')}
           </PrimaryButton>
 
           {props.rematchError != null && (

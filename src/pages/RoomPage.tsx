@@ -1,7 +1,7 @@
 import { Stack } from '@chakra-ui/react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { getErrorMessage } from '../api/errors';
 import { type GuessLetterStatus, WdsApiError } from '../api/types';
 import { useCurrentUser } from '../auth/useCurrentUser';
@@ -29,7 +29,6 @@ import { RoomSkeleton } from '../components/room/RoomSkeleton.tsx';
 
 export function RoomPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { roomId } = useParams();
   const meUser = useCurrentUser();
 
@@ -253,9 +252,6 @@ export function RoomPage() {
           isRematchPending={rematchMutation.isPending}
           isRematchWaiting={rematchMutation.isSuccess && !rematchMutation.data.started}
           rematchError={rematchMutation.error}
-          onBackToHome={() => {
-            void navigate('/');
-          }}
         />
       )}
 

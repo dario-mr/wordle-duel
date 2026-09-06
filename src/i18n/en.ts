@@ -96,7 +96,6 @@ export default {
       matchComplete: 'Complete',
       playAgain: 'Play again',
       playAgainFailed: 'Could not start another game',
-      backToHome: 'Back to home',
       solution: 'Solution:',
       waitingForOpponent: 'Waiting for opponent...',
       nextRound: 'Next round',
