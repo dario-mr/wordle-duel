@@ -2,11 +2,11 @@ import { Heading, Stack, Text } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { CreateRoomForm } from '../components/home/CreateRoomForm';
-import { type HomeTab, HomeTabs } from '../components/home/HomeTabs';
-import { JoinRoomForm } from '../components/home/JoinRoomForm';
+import { CreateRoomForm } from '../features/rooms/create/CreateRoomForm';
+import { type HomeTab, HomeTabs } from './HomeTabs';
+import { JoinRoomForm } from '../features/rooms/join/JoinRoomForm';
 import { STORAGE_KEYS } from '../state/storageKeys';
-import { sanitizeReturnTo } from '../utils/sanitizeReturnTo';
+import { sanitizeReturnTo } from '../features/auth/sanitizeReturnTo';
 
 export function HomePage() {
   const { t } = useTranslation();

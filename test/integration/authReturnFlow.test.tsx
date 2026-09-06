@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HomePage } from '../../src/pages/HomePage';
-import { LoginPage } from '../../src/pages/LoginPage';
+import { LoginPage } from '../../src/features/auth/LoginPage';
 import { STORAGE_KEYS } from '../../src/state/storageKeys';
 import { resetAuthModuleMocks } from '../testUtils/auth';
 import { renderWithMemoryRouter, Route } from '../testUtils/router';
@@ -13,11 +13,11 @@ const mocks = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
 }));
 
-vi.mock('../../src/api/auth', () => ({
+vi.mock('../../src/features/auth/oauth', () => ({
   beginGoogleLogin: mocks.beginGoogleLogin,
 }));
 
-vi.mock('../../src/auth/useCurrentUser', () => ({
+vi.mock('../../src/features/auth/useCurrentUser', () => ({
   useCurrentUser: () => mocks.getCurrentUser() as { id: string } | null | undefined,
 }));
 
@@ -51,11 +51,11 @@ vi.mock('@chakra-ui/react', () => ({
   Text: ({ children }: { children?: ReactNode }) => <p>{children}</p>,
 }));
 
-vi.mock('../../src/components/home/HomeTabs', () => ({
+vi.mock('../../src/pages/HomeTabs', () => ({
   HomeTabs: () => null,
 }));
 
-vi.mock('../../src/components/common/BrandButton', () => ({
+vi.mock('../../src/features/auth/GoogleLoginButton', () => ({
   GoogleLoginButton: ({ onClick }: { onClick: () => void }) => (
     <button
       type="button"
@@ -68,11 +68,11 @@ vi.mock('../../src/components/common/BrandButton', () => ({
   ),
 }));
 
-vi.mock('../../src/components/home/CreateRoomForm', () => ({
+vi.mock('../../src/features/rooms/create/CreateRoomForm', () => ({
   CreateRoomForm: () => <div>create-room-form</div>,
 }));
 
-vi.mock('../../src/components/home/JoinRoomForm', () => ({
+vi.mock('../../src/features/rooms/join/JoinRoomForm', () => ({
   JoinRoomForm: () => <div>join-room-form</div>,
 }));
 

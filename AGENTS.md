@@ -3,11 +3,11 @@
 ## Project Structure & Module Organization
 
 - App source lives in `src/`.
-- `src/pages/` contains route-level screens (`HomePage.tsx`, `RoomPage.tsx`).
-- `src/components/` contains reusable UI grouped by domain (`home/`, `room/`, `navbar/`, `common/`).
-- `src/api/` holds backend clients, DTOs, and error handling.
-- `src/auth/`, `src/ws/`, `src/query/`, and `src/state/` handle auth, WebSocket, server state, and
-  local state.
+- `src/app/` contains application wiring, routing, theme, query client, and the application shell.
+- `src/features/` contains feature-owned UI, hooks, queries, APIs, and types grouped by domain.
+- `src/shared/` contains dependency-light API infrastructure, configuration, hooks, and UI primitives.
+- `src/pages/` contains small standalone route screens that do not belong to a larger feature.
+- `src/state/` contains global UI preferences.
 - `src/i18n/` contains locale resources (`en.ts`, `it.ts`).
 
 ## Build, Test, and Development Commands
@@ -29,13 +29,13 @@
 
 ## Testing Guidelines
 
-- There is currently no dedicated automated test framework configured in `package.json`.
+- Vitest unit and component tests mirror the source tree under `test/`.
+- Cross-feature integration tests live in `test/integration/`; Playwright tests live in `test/e2e/`.
 - Minimum validation for every change:
 - `npm run lint`
 - `npm run build`
 - For UI/flow changes, manually verify affected pages in `npm run dev`.
-- If you add tests, colocate them near the feature (for example `src/components/.../*.test.tsx`) and
-  document any new command.
+- If you add tests, mirror the source path under `test/` and document any new command.
 
 ## Commit & Pull Request Guidelines
 
@@ -45,12 +45,12 @@
 
 ## Architecture Overview
 
-- Routing is defined in `src/router/index.tsx`; top-level pages live in `src/pages/`.
-- REST requests are centralized in `src/api/` (`apiFetch.ts`, resource modules, typed contracts in
-  `types.ts`).
+- Routing is defined in `src/app/router.tsx`; feature pages live with their owning feature.
+- Shared REST transport is centralized in `src/shared/api/`; endpoint modules and contracts live
+  with their owning feature.
 - Authentication uses the server-backed session established by Google OAuth; REST and WebSocket
   requests use the session cookie, while unsafe REST requests retain CSRF protection.
-- Server state is managed with React Query in `src/query/`.
-- Real-time updates use STOMP WebSocket in `src/ws/useRoomTopic.ts` with the browser session cookie
-  and room-query invalidation on topic events.
+- Server state is managed with feature-local React Query modules.
+- Real-time room updates use STOMP WebSocket in `src/features/rooms/game/useRoomTopic.ts` with the
+  browser session cookie and room-query invalidation on topic events.
 - UI preferences use Zustand in `src/state/`; translations are in `src/i18n/`.

@@ -2,9 +2,9 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { RoomDto } from '../../src/api/types';
-import { RoomPage } from '../../src/pages/RoomPage';
-import { roomQueryKey } from '../../src/query/roomQueries';
+import type { RoomDto } from '../../src/features/rooms/types';
+import { RoomPage } from '../../src/features/rooms/game/RoomPage';
+import { roomQueryKey } from '../../src/features/rooms/queries';
 import { resetAuthModuleMocks } from '../testUtils/auth';
 import { createTestQueryClient } from '../testUtils/queryClient';
 import { withMemoryRouter, Route } from '../testUtils/router';
@@ -21,12 +21,12 @@ const mocks = vi.hoisted(() => ({
   showToast: vi.fn(),
 }));
 
-vi.mock('../../src/auth/useCurrentUser', () => ({
+vi.mock('../../src/features/auth/useCurrentUser', () => ({
   useCurrentUser: () =>
     mocks.getCurrentUser() as { id: string; roles: string[] } | null | undefined,
 }));
 
-vi.mock('../../src/api/rooms', () => ({
+vi.mock('../../src/features/rooms/api', () => ({
   createRoom: vi.fn(),
   getRoom: mocks.getRoom,
   joinRoom: vi.fn(),
@@ -39,15 +39,15 @@ vi.mock('../../src/api/rooms', () => ({
   submitGuess: mocks.submitGuess,
 }));
 
-vi.mock('../../src/ws/useRoomTopic', () => ({
+vi.mock('../../src/features/rooms/game/useRoomTopic', () => ({
   useRoomTopic: mocks.useRoomTopic,
 }));
 
-vi.mock('../../src/hooks/useSingleToast', () => ({
+vi.mock('../../src/shared/hooks/useSingleToast', () => ({
   useSingleToast: () => ({ show: mocks.showToast }),
 }));
 
-vi.mock('../../src/api/errors', () => ({
+vi.mock('../../src/shared/api/errors', () => ({
   getErrorMessage: (error: unknown) =>
     error instanceof Error ? error.message : 'Unknown room error',
 }));
@@ -58,25 +58,25 @@ vi.mock('@chakra-ui/react', () => ({
   Stack: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock('../../src/components/common/ErrorAlert', () => ({
+vi.mock('../../src/shared/ui/ErrorAlert', () => ({
   ErrorAlert: ({ title, message }: { title: string; message: string }) => (
     <div>{`${title}:${message}`}</div>
   ),
 }));
 
-vi.mock('../../src/components/room/RoomSkeleton.tsx', () => ({
+vi.mock('../../src/features/rooms/game/RoomSkeleton', () => ({
   RoomSkeleton: () => <div>room-skeleton</div>,
 }));
 
-vi.mock('../../src/components/room/RoomJoinGate', () => ({
+vi.mock('../../src/features/rooms/game/RoomJoinGate', () => ({
   RoomJoinGate: ({ roomId }: { roomId?: string }) => <div>{`join-gate:${roomId ?? ''}`}</div>,
 }));
 
-vi.mock('../../src/components/room/RoomSharePanel', () => ({
+vi.mock('../../src/features/rooms/game/RoomSharePanel', () => ({
   RoomSharePanel: ({ roomId }: { roomId?: string }) => <div>{`share-panel:${roomId ?? ''}`}</div>,
 }));
 
-vi.mock('../../src/components/room/RoomChatDrawer', () => ({
+vi.mock('../../src/features/rooms/game/RoomChatDrawer', () => ({
   RoomChatDrawer: ({
     unreadCount,
     onOpenChange,
@@ -95,7 +95,7 @@ vi.mock('../../src/components/room/RoomChatDrawer', () => ({
   ),
 }));
 
-vi.mock('../../src/components/room/round/RoundPanel.tsx', () => ({
+vi.mock('../../src/features/rooms/game/round/RoundPanel', () => ({
   RoundPanel: ({ chat }: { chat?: ReactNode }) => (
     <div>
       round-panel
@@ -104,13 +104,13 @@ vi.mock('../../src/components/room/round/RoundPanel.tsx', () => ({
   ),
 }));
 
-vi.mock('../../src/components/room/board/PlayerBoard', () => ({
+vi.mock('../../src/features/rooms/game/board/PlayerBoard', () => ({
   PlayerBoard: ({ currentGuess, room }: { currentGuess?: string; room: RoomDto }) => (
     <div data-testid="player-board">{`${String(room.currentRound?.roundNumber)}:${currentGuess ?? ''}`}</div>
   ),
 }));
 
-vi.mock('../../src/components/room/round/RoundStatusPanel', () => ({
+vi.mock('../../src/features/rooms/game/round/RoundStatusPanel', () => ({
   RoundStatusPanel: ({ room, onNextRound }: { room: RoomDto; onNextRound: () => void }) =>
     room.currentRound?.playerStatus === 'PLAYING' ? null : (
       <button type="button" onClick={onNextRound}>
@@ -119,7 +119,7 @@ vi.mock('../../src/components/room/round/RoundStatusPanel', () => ({
     ),
 }));
 
-vi.mock('../../src/components/room/keyboard/GuessKeyboard', () => ({
+vi.mock('../../src/features/rooms/game/keyboard/GuessKeyboard', () => ({
   GuessKeyboard: ({
     value,
     onChange,

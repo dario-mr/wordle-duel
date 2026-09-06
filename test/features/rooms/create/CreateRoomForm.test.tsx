@@ -1,0 +1,148 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { CreateRoomForm } from '../../../../src/features/rooms/create/CreateRoomForm';
+
+const mocks = vi.hoisted(() => ({
+  mutate: vi.fn(),
+}));
+
+vi.mock('../../../../src/features/rooms/queries', () => ({
+  useCreateRoomMutation: () => ({
+    isPending: false,
+    error: null,
+    mutate: mocks.mutate,
+  }),
+}));
+
+vi.mock('../../../../src/shared/api/errors', () => ({
+  getErrorMessage: () => 'Create failed',
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
+vi.mock('@chakra-ui/react', () => ({
+  Heading: ({ children }: { children?: ReactNode }) => <h2>{children}</h2>,
+  NativeSelect: {
+    Root: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+    Field: ({
+      children,
+      value,
+      onChange,
+      id,
+    }: {
+      children?: ReactNode;
+      value?: string;
+      onChange?: (event: { target: { value: string } }) => void;
+      id?: string;
+    }) => (
+      <select
+        id={id}
+        aria-label="language"
+        value={value}
+        onChange={(e) => {
+          onChange?.({ target: { value: e.currentTarget.value } });
+        }}
+      >
+        {children}
+      </select>
+    ),
+  },
+  Stack: ({
+    children,
+    as,
+    onSubmit,
+  }: {
+    children?: ReactNode;
+    as?: 'form';
+    onSubmit?: (event: { preventDefault: () => void }) => void;
+  }) => {
+    if (as === 'form') {
+      return (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit?.({ preventDefault: () => undefined });
+          }}
+        >
+          {children}
+        </form>
+      );
+    }
+
+    return <div>{children}</div>;
+  },
+  Text: ({ children }: { children?: ReactNode }) => <span>{children}</span>,
+}));
+
+vi.mock('../../../../src/shared/ui/BrandButton', () => ({
+  PrimaryButton: ({ children }: { children?: ReactNode }) => (
+    <button type="submit">{children}</button>
+  ),
+}));
+
+vi.mock('../../../../src/shared/ui/Card', () => ({
+  Card: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+}));
+
+vi.mock('../../../../src/shared/ui/ErrorAlert', () => ({
+  ErrorAlert: ({ title, message }: { title: string; message: string }) => (
+    <div>{`${title}:${message}`}</div>
+  ),
+}));
+
+describe('CreateRoomForm', () => {
+  beforeEach(() => {
+    mocks.mutate.mockReset();
+  });
+
+  it('submits the create room mutation and forwards success', () => {
+    const onCreated = vi.fn();
+    mocks.mutate.mockImplementation(
+      (
+        vars: { language: 'IT'; rounds: 5 | 10 | 'ENDLESS' },
+        options?: { onSuccess?: (room: { id: string }) => void },
+      ) => {
+        expect(vars).toEqual({ language: 'IT', rounds: 5 });
+        options?.onSuccess?.({ id: 'room-1' });
+      },
+    );
+
+    render(<CreateRoomForm onCreated={onCreated} />);
+    const form = screen.getByRole('button').closest('form');
+    expect(form).not.toBeNull();
+    if (!form) {
+      throw new Error('Expected create room form');
+    }
+
+    fireEvent.submit(form);
+
+    expect(onCreated).toHaveBeenCalledWith('room-1');
+  });
+
+  it('submits a numeric finite round count selected from the native select', () => {
+    const onCreated = vi.fn();
+    mocks.mutate.mockImplementation(
+      (
+        vars: { language: 'IT'; rounds: 5 | 10 | 'ENDLESS' },
+        options?: { onSuccess?: (room: { id: string }) => void },
+      ) => {
+        expect(vars.rounds).toBe(10);
+        options?.onSuccess?.({ id: 'room-1' });
+      },
+    );
+
+    render(<CreateRoomForm onCreated={onCreated} />);
+    const roundsSelect = screen.getAllByRole('combobox')[1];
+    fireEvent.change(roundsSelect, { target: { value: '10' } });
+    const form = screen.getByRole('button').closest('form');
+    if (!form) {
+      throw new Error('Expected create room form');
+    }
+    fireEvent.submit(form);
+
+    expect(onCreated).toHaveBeenCalledWith('room-1');
+  });
+});

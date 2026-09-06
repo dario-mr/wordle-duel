@@ -1,0 +1,68 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mocks = vi.hoisted(() => ({
+  getJson: vi.fn(),
+  postJson: vi.fn(),
+  apiV1Url: vi.fn((path: string) => `https://api.test${path}`),
+}));
+
+vi.mock('../../../src/shared/api/wdsClient', () => ({
+  getJson: mocks.getJson,
+  postJson: mocks.postJson,
+}));
+
+vi.mock('../../../src/shared/api/url', () => ({
+  apiV1Url: mocks.apiV1Url,
+}));
+
+describe('api/rooms', () => {
+  beforeEach(() => {
+    mocks.getJson.mockReset();
+    mocks.postJson.mockReset();
+    mocks.apiV1Url.mockClear();
+  });
+
+  it('creates and lists rooms via the base rooms endpoint', async () => {
+    const api = await import('../../../src/features/rooms/api');
+    void api.createRoom({ language: 'IT', rounds: 5 });
+    const init: RequestInit = { signal: new AbortController().signal };
+    void api.listMyRooms(init);
+
+    expect(mocks.postJson).toHaveBeenCalledWith('https://api.test/rooms', {
+      language: 'IT',
+      rounds: 5,
+    });
+    expect(mocks.getJson).toHaveBeenCalledWith('https://api.test/rooms', init);
+  });
+
+  it('encodes room ids for room-specific endpoints', async () => {
+    const api = await import('../../../src/features/rooms/api');
+    void api.joinRoom('room/1');
+    void api.getRoom('room/1');
+    void api.submitGuess({ roomId: 'room/1', body: { word: 'APPLE' } });
+    void api.startNextRound('room/1');
+    void api.requestRematch('room/1');
+    void api.listRoomMessages('room/1');
+    void api.markRoomMessagesRead('room/1');
+    void api.sendRoomMessage({ roomId: 'room/1', body: { preset: 'GOOD_LUCK' } });
+
+    expect(mocks.postJson).toHaveBeenNthCalledWith(1, 'https://api.test/rooms/room%2F1/join');
+    expect(mocks.getJson).toHaveBeenCalledWith('https://api.test/rooms/room%2F1', undefined);
+    expect(mocks.postJson).toHaveBeenNthCalledWith(2, 'https://api.test/rooms/room%2F1/guess', {
+      word: 'APPLE',
+    });
+    expect(mocks.postJson).toHaveBeenNthCalledWith(3, 'https://api.test/rooms/room%2F1/next');
+    expect(mocks.postJson).toHaveBeenNthCalledWith(4, 'https://api.test/rooms/room%2F1/rematch');
+    expect(mocks.getJson).toHaveBeenCalledWith(
+      'https://api.test/rooms/room%2F1/messages',
+      undefined,
+    );
+    expect(mocks.postJson).toHaveBeenNthCalledWith(
+      5,
+      'https://api.test/rooms/room%2F1/messages/read',
+    );
+    expect(mocks.postJson).toHaveBeenNthCalledWith(6, 'https://api.test/rooms/room%2F1/messages', {
+      preset: 'GOOD_LUCK',
+    });
+  });
+});

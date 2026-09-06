@@ -1,0 +1,76 @@
+import { render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { describe, expect, it, vi } from 'vitest';
+import type { RoomDto } from '../../../../src/features/rooms/types';
+import { MyRoomCard } from '../../../../src/features/rooms/my-rooms/MyRoomCard';
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
+vi.mock('@chakra-ui/react', () => ({
+  Box: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+  HStack: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+  Stack: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+  Text: ({ children }: { children?: ReactNode }) => <p>{children}</p>,
+}));
+
+vi.mock('../../../../src/shared/ui/Card', () => ({
+  Card: ({ children }: { children?: ReactNode }) => <article>{children}</article>,
+}));
+
+vi.mock('../../../../src/features/rooms/shared/Pill', () => ({
+  Pill: ({ children }: { children?: ReactNode }) => <span>{children}</span>,
+}));
+
+vi.mock('../../../../src/features/rooms/shared/RoomLanguageFlag', () => ({
+  RoomLanguageFlag: () => <span>flag</span>,
+}));
+
+function room(status: RoomDto['status']): RoomDto {
+  return {
+    id: 'room-1',
+    language: 'IT',
+    rounds: 5,
+    status,
+    players: [
+      { id: 'me', wins: 10, matchScore: 2, displayName: 'Me' },
+      { id: 'opponent', wins: 8, matchScore: 1, displayName: 'Opponent' },
+    ],
+    currentRound: null,
+  };
+}
+
+describe('MyRoomCard', () => {
+  it('shows live match scores, round, and cumulative wins for an active match', () => {
+    render(<MyRoomCard room={room('IN_PROGRESS')} myPlayerId="me" onOpen={vi.fn()} />);
+
+    expect(screen.getByText('room.status.inProgress')).toBeTruthy();
+    expect(screen.getByText('room.playerStats.wins')).toBeTruthy();
+    expect(screen.getByText('room.round.titleWithRounds')).toBeTruthy();
+    expect(screen.getByText('2')).toBeTruthy();
+    expect(screen.getByText('1')).toBeTruthy();
+    expect(screen.getByText('10')).toBeTruthy();
+    expect(screen.getByText('8')).toBeTruthy();
+  });
+
+  it('shows completion, final match scores, and cumulative wins after the match finishes', () => {
+    render(<MyRoomCard room={room('MATCH_FINISHED')} myPlayerId="me" onOpen={vi.fn()} />);
+
+    expect(screen.getByText(/room\.round\.matchComplete/i)).toBeTruthy();
+    expect(screen.getByText('room.round.titleWithRounds')).toBeTruthy();
+    expect(screen.getByText('room.playerStats.wins')).toBeTruthy();
+    expect(screen.getByText('2')).toBeTruthy();
+    expect(screen.getByText('1')).toBeTruthy();
+    expect(screen.getByText('10')).toBeTruthy();
+    expect(screen.getByText('8')).toBeTruthy();
+  });
+
+  it('shows waiting placeholders and zero leaderboard scores before an opponent joins', () => {
+    render(<MyRoomCard room={room('WAITING_FOR_PLAYERS')} myPlayerId="me" onOpen={vi.fn()} />);
+
+    expect(screen.getByText('room.status.waitingForPlayers')).toBeTruthy();
+    expect(screen.getByText('room.playerStats.wins')).toBeTruthy();
+    expect(screen.getAllByText('0')).toHaveLength(2);
+  });
+});

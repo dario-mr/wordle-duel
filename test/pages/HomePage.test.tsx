@@ -22,7 +22,7 @@ vi.mock('@chakra-ui/react', () => ({
   Text: ({ children }: { children?: ReactNode }) => <p>{children}</p>,
 }));
 
-vi.mock('../../src/components/home/HomeTabs', () => ({
+vi.mock('../../src/pages/HomeTabs', () => ({
   HomeTabs: ({ onTabChange }: { onTabChange: (tab: 'create' | 'join') => void }) => (
     <>
       <button
@@ -47,7 +47,7 @@ vi.mock('../../src/components/home/HomeTabs', () => ({
   ),
 }));
 
-vi.mock('../../src/components/home/CreateRoomForm', () => ({
+vi.mock('../../src/features/rooms/create/CreateRoomForm', () => ({
   CreateRoomForm: ({ onCreated }: { onCreated: (roomId: string) => void }) => (
     <button
       type="button"
@@ -60,7 +60,7 @@ vi.mock('../../src/components/home/CreateRoomForm', () => ({
   ),
 }));
 
-vi.mock('../../src/components/home/JoinRoomForm', () => ({
+vi.mock('../../src/features/rooms/join/JoinRoomForm', () => ({
   JoinRoomForm: ({ onJoined }: { onJoined: (roomId: string) => void }) => (
     <button
       type="button"

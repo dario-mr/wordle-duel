@@ -1,5 +1,5 @@
 import { Code, Heading, Link, Separator, Stack, Text } from '@chakra-ui/react';
-import { LEGAL } from '../config/publicEnv';
+import { LEGAL } from '../shared/config/publicEnv';
 
 export function LegalPage() {
   return (

@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   getPreferredUiLocale: vi.fn(() => 'en'),
 }));
 
-vi.mock('../../src/i18n', () => ({
+vi.mock('../../src/i18n/index', () => ({
   normalizeUiLocale: mocks.normalizeUiLocale,
   getPreferredUiLocale: mocks.getPreferredUiLocale,
 }));
