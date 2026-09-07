@@ -80,7 +80,7 @@ describe('RoundStatusPanel', () => {
     render(<RoundStatusPanel {...props} />);
 
     expect(screen.getByText('room.round.youLostThisRound')).toBeTruthy();
-    expect(screen.getByText('room.round.solution')).toBeTruthy();
+    expect(screen.getByText(/room\.round\.solution:/)).toBeTruthy();
     expect(screen.getByText('APPLE')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'room.round.nextRound' }));
     expect(props.onNextRound).toHaveBeenCalledOnce();

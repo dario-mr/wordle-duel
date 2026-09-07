@@ -6,18 +6,19 @@ import {
   Drawer,
   HStack,
   Portal,
-  SimpleGrid,
   Stack,
+  Table,
   Text,
 } from '@chakra-ui/react';
-import { Trash2 } from 'lucide-react';
+import { Check, Trash2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getErrorMessage } from '../../../shared/api/errors';
-import type { AdminRoomDto } from './types';
-import { useDeleteAdminRoomMutation } from './queries';
 import { ErrorAlert } from '../../../shared/ui/ErrorAlert';
 import { RoomLanguageFlag } from '../../rooms/shared/RoomLanguageFlag';
 import { RoundTitle } from '../../rooms/shared/RoundTitle';
+import type { RoundPlayerStatus } from '../../rooms/types';
+import { useDeleteAdminRoomMutation } from './queries';
+import type { AdminRoomDto, AdminRoomPlayerDto, AdminRoomRoundDto } from './types';
 
 export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: () => void }) {
   const { t } = useTranslation();
@@ -43,8 +44,13 @@ export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: (
             </Drawer.CloseTrigger>
             {room ? (
               <>
-                <Drawer.Header px={5} py={4} borderBottomWidth="1px" borderColor="border.divider">
-                  <Stack gap={3} minW={0} pr={8}>
+                <Drawer.Header
+                  px={{ base: 4, md: 6 }}
+                  py={4}
+                  borderBottomWidth="1px"
+                  borderColor="border.divider"
+                >
+                  <Stack gap={2} minW={0} pr={8}>
                     <HStack gap={3} flexWrap="wrap">
                       <Drawer.Title fontSize="xl" flex="none">
                         {t('admin.rooms.drawer.title')}
@@ -52,159 +58,62 @@ export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: (
                       <RoundTitle roomStatus={room.status} statusOnly />
                     </HStack>
                     <Text
+                      minW={0}
                       fontFamily="mono"
-                      fontSize="sm"
-                      color="fg"
-                      opacity={0.6}
+                      fontSize="xs"
+                      color="fg.muted"
                       overflowWrap="anywhere"
+                      title={room.id}
                     >
                       {room.id}
                     </Text>
-                  </Stack>
-                </Drawer.Header>
-                <Drawer.Body px={5} py={6}>
-                  <Stack gap={4}>
-                    <Box
-                      display="grid"
-                      gridTemplateColumns="minmax(0, 1fr) auto minmax(0, 1fr)"
-                      alignItems="center"
-                      w="full"
-                    >
-                      <Text color="fg" fontWeight="medium" textAlign="center">
+                    <HStack gap={2} flexWrap="wrap" color="fg" fontSize="sm">
+                      <HStack gap={1}>
+                        <RoomLanguageFlag language={room.language} fontSize="sm" />
+                        <Text>{t(`roomLanguage.${room.language.toLowerCase()}`)}</Text>
+                      </HStack>
+                      <MetadataSeparator />
+                      <Text>
                         {t(`admin.rooms.rounds.${String(room.configuredRounds)}`)}{' '}
                         {t('admin.rooms.columns.rounds')}
                       </Text>
-                      <Box
-                        aria-hidden="true"
-                        h="1.25rem"
-                        borderLeftWidth="1px"
-                        borderColor="border.muted"
-                      />
-                      <HStack gap={1} justify="center">
-                        <RoomLanguageFlag language={room.language} fontSize="lg" />
-                        <Text color="fg" fontWeight="medium">
-                          {t(`roomLanguage.${room.language.toLowerCase()}`)}
-                        </Text>
-                      </HStack>
-                    </Box>
-                    <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
-                      <RoomDetailsRow
-                        label={t('admin.rooms.drawer.createdAt')}
-                        value={formatDate(room.createdAt)}
-                      />
-                      <RoomDetailsRow
-                        label={t('admin.rooms.drawer.lastUpdatedAt')}
-                        value={formatDate(room.lastUpdatedAt)}
-                      />
-                    </SimpleGrid>
-                    <Stack gap={4} mt={4}>
+                      <MetadataSeparator />
+                      <Text>
+                        {t('admin.rooms.drawer.createdAt')} {formatDate(room.createdAt)}
+                      </Text>
+                      <MetadataSeparator />
+                      <Text>
+                        {t('admin.rooms.drawer.lastUpdatedAt')} {formatDate(room.lastUpdatedAt)}
+                      </Text>
+                    </HStack>
+                  </Stack>
+                </Drawer.Header>
+                <Drawer.Body px={{ base: 4, md: 6 }} py={5}>
+                  <Stack gap={6}>
+                    <Stack gap={3}>
                       <Text fontSize="lg" fontWeight="bold">
                         {t('admin.rooms.drawer.players')}
                       </Text>
                       {room.players.length === 0 ? (
-                        <Text color="fg">{t('admin.rooms.drawer.noPlayers')}</Text>
+                        <Text color="fg.muted">{t('admin.rooms.drawer.noPlayers')}</Text>
                       ) : (
-                        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
-                          {room.players.map((player) => (
-                            <Box
-                              key={player.id}
-                              p={4}
-                              bg="bg.panel"
-                              borderWidth="1px"
-                              borderColor="border.divider"
-                              borderRadius="2xl"
-                            >
-                              <Text fontWeight="semibold" fontSize="md">
-                                {player.displayName ?? player.id}
-                              </Text>
-                              {player.displayName ? (
-                                <Text
-                                  mt={1}
-                                  fontFamily="mono"
-                                  fontSize="sm"
-                                  color="fg"
-                                  opacity={0.6}
-                                  overflowWrap="anywhere"
-                                >
-                                  {player.id}
-                                </Text>
-                              ) : null}
-                              <Text mt={3} fontSize="sm" color="fg" fontWeight="medium">
-                                {t('admin.rooms.drawer.playerScore', {
-                                  wins: player.wins,
-                                  score: player.matchScore ?? '—',
-                                })}
-                              </Text>
-                              <Text mt={1} fontSize="sm" color="fg" opacity={0.7}>
-                                {t('admin.rooms.drawer.currentRound', {
-                                  roundNumber:
-                                    player.currentRoundNumber ?? t('room.playerStats.dash'),
-                                })}
-                              </Text>
-                            </Box>
-                          ))}
-                        </SimpleGrid>
+                        <PlayerMatchup players={room.players} />
                       )}
                     </Stack>
-                    <Stack gap={4} mt={4}>
+                    <Stack gap={3}>
                       <Text fontSize="lg" fontWeight="bold">
                         {t('admin.rooms.drawer.rounds')}
                       </Text>
-                      {room.rounds.length === 0 ? (
-                        <Text color="fg">{t('admin.rooms.drawer.noRounds')}</Text>
-                      ) : (
-                        room.rounds.map((round) => (
-                          <Box
-                            key={round.roundNumber}
-                            p={4}
-                            bg="bg.panel"
-                            borderWidth="1px"
-                            borderColor="border.divider"
-                            borderRadius="2xl"
-                          >
-                            <HStack justifyContent="space-between" alignItems="flex-start" gap={3}>
-                              <Text fontWeight="semibold">
-                                {t('room.round.title', { roundNumber: round.roundNumber })}
-                              </Text>
-                              <Text fontSize="sm" color="fg" opacity={0.7}>
-                                {t(`admin.rooms.drawer.roundStatus.${round.roundStatus}`)}
-                              </Text>
-                            </HStack>
-                            <Text mt={3} fontSize="sm">
-                              {t('room.round.solution')}{' '}
-                              <Text as="span" fontFamily="mono" fontWeight="semibold">
-                                {round.solution}
-                              </Text>
-                            </Text>
-                            <Stack gap={1} mt={3}>
-                              {room.players.map((player) => {
-                                const status = round.playerStatus[player.id];
-
-                                return (
-                                  <HStack key={player.id} justifyContent="space-between" gap={3}>
-                                    <Text fontSize="sm" truncate>
-                                      {player.displayName ?? player.id}
-                                    </Text>
-                                    <Text fontSize="sm" color="fg" opacity={0.7}>
-                                      {status
-                                        ? t(`admin.rooms.drawer.playerStatus.${status}`)
-                                        : t('room.playerStats.dash')}
-                                    </Text>
-                                  </HStack>
-                                );
-                              })}
-                            </Stack>
-                          </Box>
-                        ))
-                      )}
+                      <RoundList room={room} />
                     </Stack>
                   </Stack>
                 </Drawer.Body>
                 <Drawer.Footer
-                  px={5}
-                  py={4}
+                  px={{ base: 4, md: 6 }}
+                  py={3}
                   borderTopWidth="1px"
                   borderColor="border.divider"
+                  alignItems={{ base: 'stretch', sm: 'center' }}
                   justifyContent="flex-start"
                 >
                   <DeleteRoomDialog room={room} onDeleted={props.onClose} />
@@ -215,6 +124,271 @@ export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: (
         </Drawer.Positioner>
       </Portal>
     </Drawer.Root>
+  );
+}
+
+function MetadataSeparator() {
+  return (
+    <Text aria-hidden="true" color="fg.subtle">
+      ·
+    </Text>
+  );
+}
+
+function PlayerMatchup({ players }: { players: AdminRoomPlayerDto[] }) {
+  const { t } = useTranslation();
+  const leftPlayer = players.at(0);
+  const rightPlayer = players.at(1);
+  const dash = t('room.playerStats.dash');
+
+  return (
+    <Box bg="bg.panel" borderRadius="xl" px={{ base: 4, md: 5 }} py={4}>
+      <Box
+        display="grid"
+        gridTemplateColumns="minmax(0, 1fr) auto minmax(0, 1fr)"
+        gap={{ base: 2, md: 4 }}
+        alignItems="start"
+      >
+        <PlayerIdentity player={leftPlayer} alignment="left" dash={dash} />
+        <Box aria-hidden="true" h="100%" borderLeftWidth="1px" borderColor="border.muted" />
+        <PlayerIdentity player={rightPlayer} alignment="right" dash={dash} />
+      </Box>
+      <Box
+        display="grid"
+        gridTemplateColumns="minmax(0, 1fr) auto minmax(0, 1fr)"
+        gap={{ base: 2, md: 4 }}
+        alignItems="start"
+        mt={4}
+        pt={3}
+        borderTopWidth="1px"
+        borderColor="border.divider"
+      >
+        <PlayerScore player={leftPlayer} alignment="left" dash={dash} />
+        <HStack gap={{ base: 1, md: 2 }} align="center" minH="3.5rem">
+          <Text fontSize="sm" color="fg" fontWeight="medium" textAlign="right" whiteSpace="nowrap">
+            {leftPlayer ? t('admin.rooms.wins', { count: leftPlayer.wins }) : dash}
+          </Text>
+          <Text aria-hidden="true" color="fg.subtle">
+            —
+          </Text>
+          <Text fontSize="sm" color="fg" fontWeight="medium" whiteSpace="nowrap">
+            {rightPlayer ? t('admin.rooms.wins', { count: rightPlayer.wins }) : dash}
+          </Text>
+        </HStack>
+        <PlayerScore player={rightPlayer} alignment="right" dash={dash} />
+      </Box>
+    </Box>
+  );
+}
+
+function PlayerIdentity(props: {
+  player: AdminRoomPlayerDto | undefined;
+  alignment: 'left' | 'right';
+  dash: string;
+}) {
+  const name = props.player?.displayName ?? props.player?.id ?? props.dash;
+
+  return (
+    <Stack gap={1} minW={0} align={props.alignment === 'right' ? 'end' : 'start'}>
+      <Text
+        maxW="full"
+        fontWeight="semibold"
+        textAlign={props.alignment}
+        overflowWrap="anywhere"
+        title={props.player?.displayName ?? props.player?.id}
+      >
+        {name}
+      </Text>
+      {props.player?.displayName ? (
+        <Text
+          maxW="full"
+          fontFamily="mono"
+          fontSize="xs"
+          color="fg.muted"
+          textAlign={props.alignment}
+          overflowWrap="anywhere"
+          title={props.player.id}
+        >
+          {props.player.id}
+        </Text>
+      ) : null}
+    </Stack>
+  );
+}
+
+function PlayerScore(props: {
+  player: AdminRoomPlayerDto | undefined;
+  alignment: 'left' | 'right';
+  dash: string;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <Stack gap={0} align={props.alignment === 'right' ? 'end' : 'start'}>
+      <Text fontSize="2xs" color="fg.muted" textTransform="uppercase" letterSpacing="wide">
+        {t('admin.rooms.drawer.score')}
+      </Text>
+      <Text fontSize="lg" fontWeight="bold">
+        {props.player?.matchScore ?? props.dash}
+      </Text>
+      <Text fontSize="xs" color="fg" opacity={0.75} fontWeight="medium" textAlign={props.alignment}>
+        {t('admin.rooms.drawer.currentRound', {
+          roundNumber: props.player?.currentRoundNumber ?? props.dash,
+        })}
+      </Text>
+    </Stack>
+  );
+}
+
+function RoundList({ room }: { room: AdminRoomDto }) {
+  const { t } = useTranslation();
+  const dash = t('room.playerStats.dash');
+  const leftPlayer = room.players.at(0);
+  const rightPlayer = room.players.at(1);
+  const roundNumbers = getRoundNumbers(room);
+  const roundsByNumber = new Map(room.rounds.map((round) => [round.roundNumber, round]));
+
+  if (roundNumbers.length === 0) {
+    return <Text color="fg.muted">{t('admin.rooms.drawer.noRounds')}</Text>;
+  }
+
+  const playerName = (player: AdminRoomPlayerDto | undefined) =>
+    player ? (player.displayName ?? player.id) : dash;
+
+  return (
+    <Box overflowX="auto" overflowY="hidden" bg="bg.panel" borderRadius="xl">
+      <Table.Root
+        size="sm"
+        width="full"
+        minW={{ base: '34rem' }}
+        tableLayout="fixed"
+        css={{ '& tbody tr:last-child td': { borderBottomWidth: 0 } }}
+      >
+        <Table.Header>
+          <Table.Row borderBottomWidth="1px" borderColor="border.muted">
+            <RoundHeader label="#" width="3rem" />
+            <RoundHeader label={t('room.round.solution')} width="7rem" />
+            <RoundHeader label={playerName(leftPlayer)} />
+            <RoundHeader label={playerName(rightPlayer)} />
+            <RoundHeader label={t('admin.rooms.columns.status')} width="6rem" />
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {roundNumbers.map((roundNumber, index) => {
+            const round = roundsByNumber.get(roundNumber);
+
+            return (
+              <Table.Row
+                key={roundNumber}
+                borderBottomWidth={index === roundNumbers.length - 1 ? 0 : '1px'}
+                borderColor="border.divider"
+                _hover={{ bg: 'bg.mutedCard' }}
+              >
+                <Table.Cell fontFamily="mono" color="fg.muted" verticalAlign="middle">
+                  {roundNumber}
+                </Table.Cell>
+                <Table.Cell verticalAlign="middle">
+                  <Text fontFamily="mono" fontWeight="semibold" letterSpacing="wide">
+                    {round?.solution ?? dash}
+                  </Text>
+                </Table.Cell>
+                <Table.Cell verticalAlign="middle">
+                  <PlayerStatusValue status={round?.playerStatus[leftPlayer?.id ?? '']} />
+                </Table.Cell>
+                <Table.Cell verticalAlign="middle">
+                  <PlayerStatusValue status={round?.playerStatus[rightPlayer?.id ?? '']} />
+                </Table.Cell>
+                <Table.Cell verticalAlign="middle">
+                  <RoundStatusValue status={round?.roundStatus} />
+                </Table.Cell>
+              </Table.Row>
+            );
+          })}
+        </Table.Body>
+      </Table.Root>
+    </Box>
+  );
+}
+
+function RoundHeader({ label, width }: { label: string; width?: string }) {
+  return (
+    <Table.ColumnHeader
+      width={width}
+      px={3}
+      py={2}
+      color="fg"
+      opacity={0.8}
+      fontSize="xs"
+      fontWeight="semibold"
+      textTransform="uppercase"
+      letterSpacing="wide"
+      overflowWrap="anywhere"
+      title={label}
+    >
+      {label}
+    </Table.ColumnHeader>
+  );
+}
+
+function RoundStatusValue({ status }: { status: AdminRoomRoundDto['roundStatus'] | undefined }) {
+  const { t } = useTranslation();
+
+  return status ? (
+    <StateValue
+      label={t(`admin.rooms.drawer.roundStatus.${status}`)}
+      kind={status === 'PLAYING' ? 'playing' : 'muted'}
+    />
+  ) : (
+    <Text fontSize="sm" color="fg.subtle">
+      {t('room.playerStats.dash')}
+    </Text>
+  );
+}
+
+function PlayerStatusValue({ status }: { status?: RoundPlayerStatus }) {
+  const { t } = useTranslation();
+
+  if (!status) {
+    return (
+      <Text fontSize="sm" color="fg.subtle">
+        {t('room.playerStats.dash')}
+      </Text>
+    );
+  }
+
+  return (
+    <StateValue
+      label={t(`admin.rooms.drawer.playerStatus.${status}`)}
+      kind={status === 'WON' ? 'success' : status === 'PLAYING' ? 'playing' : 'negative'}
+    />
+  );
+}
+
+function StateValue({
+  label,
+  kind,
+}: {
+  label: string;
+  kind: 'success' | 'playing' | 'negative' | 'muted';
+}) {
+  const color =
+    kind === 'success'
+      ? 'fg.success'
+      : kind === 'playing'
+        ? 'yellow.400'
+        : kind === 'negative'
+          ? 'fg.subtle'
+          : 'fg.muted';
+
+  return (
+    <HStack gap={1} color={color} whiteSpace="nowrap">
+      {kind === 'success' ? <Check size={13} aria-hidden="true" /> : null}
+      {kind === 'negative' ? <X size={13} aria-hidden="true" /> : null}
+      {kind === 'playing' ? (
+        <Box aria-hidden="true" boxSize="6px" borderRadius="full" bg={color} />
+      ) : null}
+      <Text fontSize="sm">{label}</Text>
+    </HStack>
   );
 }
 
@@ -241,7 +415,7 @@ function DeleteRoomDialog(props: { room: AdminRoomDto; onDeleted: () => void }) 
       }}
     >
       <Dialog.Trigger asChild>
-        <Button variant="outline" colorPalette="red" borderRadius="xl">
+        <Button size="sm" variant="outline" colorPalette="red" borderRadius="md" flexShrink={0}>
           <Trash2 size={16} aria-hidden="true" />
           {t('admin.rooms.drawer.delete')}
         </Button>
@@ -253,7 +427,7 @@ function DeleteRoomDialog(props: { room: AdminRoomDto; onDeleted: () => void }) 
             bg="bg.card"
             borderWidth="1px"
             borderColor="border.divider"
-            borderRadius="2xl"
+            borderRadius="lg"
             boxShadow="2xl"
             mx={4}
           >
@@ -277,25 +451,20 @@ function DeleteRoomDialog(props: { room: AdminRoomDto; onDeleted: () => void }) 
                 <Dialog.Title fontSize="lg">{t('admin.rooms.drawer.deleteTitle')}</Dialog.Title>
               </HStack>
             </Dialog.Header>
-            <Dialog.Body pt={0}>
-              <Dialog.Description color="fg">
-                {t('admin.rooms.drawer.deleteDescription')}
-              </Dialog.Description>
-              {deleteRoomMutation.error ? (
-                <Box mt={4}>
-                  <ErrorAlert
-                    title={t('admin.rooms.drawer.deleteFailedTitle')}
-                    message={getErrorMessage(deleteRoomMutation.error)}
-                  />
-                </Box>
-              ) : null}
-            </Dialog.Body>
+            {deleteRoomMutation.error ? (
+              <Dialog.Body pt={0}>
+                <ErrorAlert
+                  title={t('admin.rooms.drawer.deleteFailedTitle')}
+                  message={getErrorMessage(deleteRoomMutation.error)}
+                />
+              </Dialog.Body>
+            ) : null}
             <Dialog.Footer gap={3} pt={4}>
               <Dialog.ActionTrigger asChild>
                 <Button
                   variant="outline"
                   bg="bg.keyboard"
-                  borderRadius="xl"
+                  borderRadius="md"
                   disabled={deleteRoomMutation.isPending}
                 >
                   {t('admin.rooms.drawer.deleteCancel')}
@@ -303,7 +472,7 @@ function DeleteRoomDialog(props: { room: AdminRoomDto; onDeleted: () => void }) 
               </Dialog.ActionTrigger>
               <Button
                 colorPalette="red"
-                borderRadius="xl"
+                borderRadius="md"
                 loading={deleteRoomMutation.isPending}
                 onClick={handleDelete}
               >
@@ -317,18 +486,15 @@ function DeleteRoomDialog(props: { room: AdminRoomDto; onDeleted: () => void }) 
   );
 }
 
-function RoomDetailsRow({ label, value }: { label: string; value: string }) {
-  return (
-    <Stack gap={2} p={4} borderRadius="2xl" bg="bg.panel">
-      <Text fontSize="sm" color="fg" opacity={0.7} fontWeight="semibold">
-        {label}
-      </Text>
-      <Text fontWeight="medium">{value}</Text>
-    </Stack>
-  );
+function getRoundNumbers(room: AdminRoomDto): number[] {
+  if (room.configuredRounds === 'ENDLESS') {
+    return room.rounds.map((round) => round.roundNumber).sort((left, right) => left - right);
+  }
+
+  return Array.from({ length: room.configuredRounds }, (_, index) => index + 1);
 }
 
 function formatDate(value: string): string {
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
 }

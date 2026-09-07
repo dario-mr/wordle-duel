@@ -38,7 +38,7 @@ export function RoundStatusPanel(props: {
         <Text textAlign="center">{t('room.round.youLostThisRound')}</Text>
         {currentRound.solution ? (
           <Text fontSize="sm">
-            {t('room.round.solution')} <Code>{currentRound.solution}</Code>
+            {t('room.round.solution')}: <Code>{currentRound.solution}</Code>
           </Text>
         ) : null}
       </Stack>
