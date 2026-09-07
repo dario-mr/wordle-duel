@@ -220,6 +220,18 @@ export default {
         players: 'Giocatori',
         noPlayers: 'Nessun giocatore',
         playerScore: '{{wins}} vittorie · punteggio {{score}}',
+        currentRound: 'Round attuale: {{roundNumber}}',
+        rounds: 'Round',
+        noRounds: 'Nessun round',
+        roundStatus: {
+          PLAYING: 'In corso',
+          ENDED: 'Terminato',
+        },
+        playerStatus: {
+          PLAYING: 'In corso',
+          WON: 'Vinto',
+          LOST: 'Perso',
+        },
       },
     },
   },

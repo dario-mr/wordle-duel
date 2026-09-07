@@ -218,6 +218,18 @@ export default {
         players: 'Players',
         noPlayers: 'No players',
         playerScore: '{{wins}} wins · score {{score}}',
+        currentRound: 'Current round: {{roundNumber}}',
+        rounds: 'Rounds',
+        noRounds: 'No rounds',
+        roundStatus: {
+          PLAYING: 'Playing',
+          ENDED: 'Ended',
+        },
+        playerStatus: {
+          PLAYING: 'Playing',
+          WON: 'Won',
+          LOST: 'Lost',
+        },
       },
     },
   },

@@ -132,7 +132,8 @@ export function RoomsTable(props: {
           size: 120,
           minSize: 110,
         }),
-        columnHelper.accessor('rounds', {
+        columnHelper.accessor('configuredRounds', {
+          id: 'rounds',
           header: () => (
             <SelectFilterHeader
               label={t('admin.rooms.columns.rounds')}

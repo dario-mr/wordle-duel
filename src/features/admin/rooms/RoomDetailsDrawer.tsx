@@ -37,13 +37,13 @@ export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: (
       <Portal>
         <Drawer.Backdrop />
         <Drawer.Positioner>
-          <Drawer.Content bg="bg.card" w={{ base: 'full', md: '40rem' }} maxW="100vw">
+          <Drawer.Content bg="bg.card" w={{ base: 'full', md: '50rem' }} maxW="100vw">
             <Drawer.CloseTrigger asChild>
               <CloseButton size="sm" />
             </Drawer.CloseTrigger>
             {room ? (
               <>
-                <Drawer.Header px={5} py={6} borderBottomWidth="1px" borderColor="border.divider">
+                <Drawer.Header px={5} py={4} borderBottomWidth="1px" borderColor="border.divider">
                   <Stack gap={3} minW={0} pr={8}>
                     <HStack gap={3} flexWrap="wrap">
                       <Drawer.Title fontSize="xl" flex="none">
@@ -71,7 +71,7 @@ export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: (
                       w="full"
                     >
                       <Text color="fg" fontWeight="medium" textAlign="center">
-                        {t(`admin.rooms.rounds.${String(room.rounds)}`)}{' '}
+                        {t(`admin.rooms.rounds.${String(room.configuredRounds)}`)}{' '}
                         {t('admin.rooms.columns.rounds')}
                       </Text>
                       <Box
@@ -104,36 +104,96 @@ export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: (
                       {room.players.length === 0 ? (
                         <Text color="fg">{t('admin.rooms.drawer.noPlayers')}</Text>
                       ) : (
-                        room.players.map((player) => (
+                        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+                          {room.players.map((player) => (
+                            <Box
+                              key={player.id}
+                              p={4}
+                              bg="bg.panel"
+                              borderWidth="1px"
+                              borderColor="border.divider"
+                              borderRadius="2xl"
+                            >
+                              <Text fontWeight="semibold" fontSize="md">
+                                {player.displayName ?? player.id}
+                              </Text>
+                              {player.displayName ? (
+                                <Text
+                                  mt={1}
+                                  fontFamily="mono"
+                                  fontSize="sm"
+                                  color="fg"
+                                  opacity={0.6}
+                                  overflowWrap="anywhere"
+                                >
+                                  {player.id}
+                                </Text>
+                              ) : null}
+                              <Text mt={3} fontSize="sm" color="fg" fontWeight="medium">
+                                {t('admin.rooms.drawer.playerScore', {
+                                  wins: player.wins,
+                                  score: player.matchScore ?? '—',
+                                })}
+                              </Text>
+                              <Text mt={1} fontSize="sm" color="fg" opacity={0.7}>
+                                {t('admin.rooms.drawer.currentRound', {
+                                  roundNumber:
+                                    player.currentRoundNumber ?? t('room.playerStats.dash'),
+                                })}
+                              </Text>
+                            </Box>
+                          ))}
+                        </SimpleGrid>
+                      )}
+                    </Stack>
+                    <Stack gap={4} mt={4}>
+                      <Text fontSize="lg" fontWeight="bold">
+                        {t('admin.rooms.drawer.rounds')}
+                      </Text>
+                      {room.rounds.length === 0 ? (
+                        <Text color="fg">{t('admin.rooms.drawer.noRounds')}</Text>
+                      ) : (
+                        room.rounds.map((round) => (
                           <Box
-                            key={player.id}
+                            key={round.roundNumber}
                             p={4}
                             bg="bg.panel"
                             borderWidth="1px"
                             borderColor="border.divider"
                             borderRadius="2xl"
                           >
-                            <Text fontWeight="semibold" fontSize="md">
-                              {player.displayName ?? player.id}
-                            </Text>
-                            {player.displayName ? (
-                              <Text
-                                mt={1}
-                                fontFamily="mono"
-                                fontSize="sm"
-                                color="fg"
-                                opacity={0.6}
-                                overflowWrap="anywhere"
-                              >
-                                {player.id}
+                            <HStack justifyContent="space-between" alignItems="flex-start" gap={3}>
+                              <Text fontWeight="semibold">
+                                {t('room.round.title', { roundNumber: round.roundNumber })}
                               </Text>
-                            ) : null}
-                            <Text mt={3} fontSize="sm" color="fg" fontWeight="medium">
-                              {t('admin.rooms.drawer.playerScore', {
-                                wins: player.wins,
-                                score: player.matchScore ?? '—',
-                              })}
+                              <Text fontSize="sm" color="fg" opacity={0.7}>
+                                {t(`admin.rooms.drawer.roundStatus.${round.roundStatus}`)}
+                              </Text>
+                            </HStack>
+                            <Text mt={3} fontSize="sm">
+                              {t('room.round.solution')}{' '}
+                              <Text as="span" fontFamily="mono" fontWeight="semibold">
+                                {round.solution}
+                              </Text>
                             </Text>
+                            <Stack gap={1} mt={3}>
+                              {room.players.map((player) => {
+                                const status = round.playerStatus[player.id];
+
+                                return (
+                                  <HStack key={player.id} justifyContent="space-between" gap={3}>
+                                    <Text fontSize="sm" truncate>
+                                      {player.displayName ?? player.id}
+                                    </Text>
+                                    <Text fontSize="sm" color="fg" opacity={0.7}>
+                                      {status
+                                        ? t(`admin.rooms.drawer.playerStatus.${status}`)
+                                        : t('room.playerStats.dash')}
+                                    </Text>
+                                  </HStack>
+                                );
+                              })}
+                            </Stack>
                           </Box>
                         ))
                       )}
