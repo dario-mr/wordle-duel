@@ -163,8 +163,8 @@ export default {
     it: 'Italiano',
   },
   admin: {
-    title: 'Amministrazione',
-    navLink: 'Amministrazione',
+    title: 'Admin',
+    navLink: 'Admin',
     users: {
       title: 'Utenti',
       cardDescription: 'Visualizza gli utenti registrati.',
