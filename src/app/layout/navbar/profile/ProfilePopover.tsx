@@ -47,11 +47,6 @@ export function ProfilePopover({
     }
   };
 
-  const handleAdminClick = () => {
-    setOpen(false);
-    void navigate('/admin');
-  };
-
   const handleLegalClick = () => {
     setOpen(false);
     void navigate('/legal');
@@ -133,7 +128,6 @@ export function ProfilePopover({
     <ProfileMenuContent
       me={displayedMe}
       logoutPending={logoutPending}
-      onAdminClick={handleAdminClick}
       onLegalClick={handleLegalClick}
       onLogoutClick={handleLogoutClick}
     />

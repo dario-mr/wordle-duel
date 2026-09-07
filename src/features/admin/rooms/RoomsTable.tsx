@@ -12,7 +12,7 @@ import { roomStatusTextKey } from '../../rooms/shared/roomStatusText';
 import { ColumnResizeHandle } from '../shared/table/ColumnResizeHandle';
 import { adminTableFeatures } from '../shared/table/features';
 import { SortHeaderButton } from '../shared/table/SortHeaderButton';
-import { RoomStatusBadge } from './RoomStatusBadge';
+import { RoundTitle } from '../../rooms/shared/RoundTitle';
 
 const columnHelper = createColumnHelper<typeof adminTableFeatures, AdminRoomDto>();
 
@@ -58,7 +58,7 @@ export function RoomsTable(props: {
               }}
             />
           ),
-          cell: (info) => <RoomStatusBadge status={info.getValue()} />,
+          cell: (info) => <RoundTitle roomStatus={info.getValue()} statusOnly />,
           size: 160,
           minSize: 150,
         }),
@@ -201,7 +201,7 @@ export function RoomsTable(props: {
               }}
             />
           ),
-          cell: (info) => <RelativeTime value={info.getValue()} />,
+          cell: (info) => new Date(info.getValue()).toLocaleDateString(),
           size: 150,
           minSize: 140,
         }),
@@ -220,7 +220,7 @@ export function RoomsTable(props: {
               }}
             />
           ),
-          cell: (info) => <RelativeTime value={info.getValue()} />,
+          cell: (info) => new Date(info.getValue()).toLocaleDateString(),
           size: 150,
           minSize: 140,
         }),
@@ -453,25 +453,5 @@ function SelectFilterHeader(props: {
         </NativeSelect.Field>
       </NativeSelect.Root>
     </SortableHeaderStack>
-  );
-}
-
-function RelativeTime({ value }: { value: string }) {
-  const [now] = useState(() => Date.now());
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return <Text title={value}>{value}</Text>;
-  }
-
-  const seconds = Math.round((date.getTime() - now) / 1000);
-  const absolute = date.toLocaleString();
-  const relative = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
-  const amount = Math.abs(seconds) < 60 ? seconds : Math.round(seconds / 60);
-  const unit: Intl.RelativeTimeFormatUnit = Math.abs(seconds) < 60 ? 'second' : 'minute';
-
-  return (
-    <time dateTime={value} title={absolute}>
-      {relative.format(amount, unit)}
-    </time>
   );
 }

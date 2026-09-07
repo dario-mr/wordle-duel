@@ -1,0 +1,1 @@
+- admin: show more info in room detail?

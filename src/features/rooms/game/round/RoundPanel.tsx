@@ -2,7 +2,7 @@ import { Stack } from '@chakra-ui/react';
 import type { PlayerDto, RoomDto } from '../../types';
 import type { ReactNode } from 'react';
 import { PlayerStatsBar } from './PlayerStatsBar';
-import { RoundTitle } from './RoundTitle';
+import { RoundTitle } from '../../shared/RoundTitle';
 
 export function RoundPanel(props: {
   player: PlayerDto;

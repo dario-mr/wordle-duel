@@ -8,9 +8,10 @@ import {
   Link as ChakraLink,
   Text,
 } from '@chakra-ui/react';
-import { House, type LucideIcon, UserRound, Users } from 'lucide-react';
+import { House, type LucideIcon, ShieldCheck, UserRound, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { useCurrentUser } from '../../../features/auth/useCurrentUser';
 import { ProfilePopover } from './profile/ProfilePopover';
 
 const NAV_ICON_SIZE = 20;
@@ -18,10 +19,14 @@ const NAV_ICON_SIZE = 20;
 export function Navbar() {
   const { t } = useTranslation();
   const location = useLocation();
+  const me = useCurrentUser();
 
   const navItems = [
     { to: '/', label: t('nav.home'), icon: House },
     { to: '/my-rooms', label: t('nav.rooms'), icon: Users },
+    ...(me?.roles.includes('ADMIN')
+      ? [{ to: '/admin', label: t('admin.navLink'), icon: ShieldCheck }]
+      : []),
   ];
 
   return (

@@ -5,7 +5,6 @@ import {
   Dialog,
   Drawer,
   HStack,
-  IconButton,
   Portal,
   SimpleGrid,
   Stack,
@@ -18,7 +17,7 @@ import type { AdminRoomDto } from './types';
 import { useDeleteAdminRoomMutation } from './queries';
 import { ErrorAlert } from '../../../shared/ui/ErrorAlert';
 import { RoomLanguageFlag } from '../../rooms/shared/RoomLanguageFlag';
-import { RoomStatusBadge } from './RoomStatusBadge';
+import { RoundTitle } from '../../rooms/shared/RoundTitle';
 
 export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: () => void }) {
   const { t } = useTranslation();
@@ -44,18 +43,13 @@ export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: (
             </Drawer.CloseTrigger>
             {room ? (
               <>
-                <Drawer.Header
-                  px={{ base: 5, md: 8 }}
-                  py={6}
-                  borderBottomWidth="1px"
-                  borderColor="border.divider"
-                >
+                <Drawer.Header px={5} py={6} borderBottomWidth="1px" borderColor="border.divider">
                   <Stack gap={3} minW={0} pr={8}>
                     <HStack gap={3} flexWrap="wrap">
                       <Drawer.Title fontSize="xl" flex="none">
                         {t('admin.rooms.drawer.title')}
                       </Drawer.Title>
-                      <RoomStatusBadge status={room.status} />
+                      <RoundTitle roomStatus={room.status} statusOnly />
                     </HStack>
                     <Text
                       fontFamily="mono"
@@ -67,28 +61,30 @@ export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: (
                       {room.id}
                     </Text>
                   </Stack>
-                  <DeleteRoomDialog room={room} onDeleted={props.onClose} />
                 </Drawer.Header>
                 <Drawer.Body px={5} py={6}>
                   <Stack gap={4}>
                     <Box
-                      p={4}
-                      borderRadius="2xl"
-                      bg="bg.panel"
-                      borderWidth="1px"
-                      borderColor="border.divider"
+                      display="grid"
+                      gridTemplateColumns="minmax(0, 1fr) auto minmax(0, 1fr)"
+                      alignItems="center"
+                      w="full"
                     >
-                      <HStack gap={2} flexWrap="wrap">
+                      <Text color="fg" fontWeight="medium" textAlign="center">
+                        {t(`admin.rooms.rounds.${String(room.rounds)}`)}{' '}
+                        {t('admin.rooms.columns.rounds')}
+                      </Text>
+                      <Box
+                        aria-hidden="true"
+                        h="1.25rem"
+                        borderLeftWidth="1px"
+                        borderColor="border.muted"
+                      />
+                      <HStack gap={1} justify="center">
+                        <RoomLanguageFlag language={room.language} fontSize="lg" />
                         <Text color="fg" fontWeight="medium">
-                          {t(`admin.rooms.rounds.${String(room.rounds)}`)}{' '}
-                          {t('admin.rooms.columns.rounds')} ·
+                          {t(`roomLanguage.${room.language.toLowerCase()}`)}
                         </Text>
-                        <HStack gap={1}>
-                          <RoomLanguageFlag language={room.language} fontSize="lg" />
-                          <Text color="fg" fontWeight="medium">
-                            {t(`roomLanguage.${room.language.toLowerCase()}`)}
-                          </Text>
-                        </HStack>
                       </HStack>
                     </Box>
                     <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
@@ -144,6 +140,15 @@ export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: (
                     </Stack>
                   </Stack>
                 </Drawer.Body>
+                <Drawer.Footer
+                  px={5}
+                  py={4}
+                  borderTopWidth="1px"
+                  borderColor="border.divider"
+                  justifyContent="flex-start"
+                >
+                  <DeleteRoomDialog room={room} onDeleted={props.onClose} />
+                </Drawer.Footer>
               </>
             ) : null}
           </Drawer.Content>
@@ -176,19 +181,10 @@ function DeleteRoomDialog(props: { room: AdminRoomDto; onDeleted: () => void }) 
       }}
     >
       <Dialog.Trigger asChild>
-        <IconButton
-          aria-label={t('admin.rooms.drawer.delete')}
-          title={t('admin.rooms.drawer.delete')}
-          variant="ghost"
-          size="sm"
-          color="fg.error"
-          position="absolute"
-          top="3"
-          insetEnd="12"
-          _hover={{ bg: 'bg.error' }}
-        >
-          <Trash2 aria-hidden="true" />
-        </IconButton>
+        <Button variant="outline" colorPalette="red" borderRadius="xl">
+          <Trash2 size={16} aria-hidden="true" />
+          {t('admin.rooms.drawer.delete')}
+        </Button>
       </Dialog.Trigger>
       <Portal>
         <Dialog.Backdrop />

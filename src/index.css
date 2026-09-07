@@ -35,6 +35,14 @@ body {
   -webkit-touch-callout: none;
 }
 
+/* enable text selection on desktop only */
+@media (min-width: 48rem) {
+  body {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+}
+
 .background-letters {
   position: absolute;
   z-index: -1;

@@ -1,13 +1,5 @@
 import { Box, Button, Flex, Separator, Stack, Text } from '@chakra-ui/react';
-import {
-  ChevronRight,
-  FileText,
-  Globe,
-  LogOut,
-  type LucideIcon,
-  Moon,
-  UserSearch,
-} from 'lucide-react';
+import { ChevronRight, FileText, Globe, LogOut, type LucideIcon, Moon } from 'lucide-react';
 import type { ChangeEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UserMeDto } from '../../../../features/auth/types';
@@ -25,7 +17,6 @@ const PROFILE_ICON_STROKE_WIDTH = 1.6;
 interface ProfileMenuContentProps {
   me: UserMeDto | null | undefined;
   logoutPending: boolean;
-  onAdminClick: () => void;
   onLegalClick: () => void;
   onLogoutClick: () => void;
 }
@@ -33,7 +24,6 @@ interface ProfileMenuContentProps {
 export function ProfileMenuContent({
   me,
   logoutPending,
-  onAdminClick,
   onLegalClick,
   onLogoutClick,
 }: ProfileMenuContentProps) {
@@ -70,9 +60,6 @@ export function ProfileMenuContent({
 
       <Separator borderColor="border.divider" />
       <Stack gap={0} py={1} w="full">
-        {isLoggedIn && me?.roles.includes('ADMIN') && (
-          <ProfileActionRow icon={UserSearch} label={t('admin.navLink')} onClick={onAdminClick} />
-        )}
         <ProfileActionRow icon={FileText} label={t('profile.legal')} onClick={onLegalClick} />
       </Stack>
 

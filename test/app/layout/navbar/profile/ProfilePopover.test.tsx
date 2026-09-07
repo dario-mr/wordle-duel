@@ -187,13 +187,6 @@ describe('ProfilePopover', () => {
     expect(screen.queryByText('profile.myRooms')).toBeNull();
   });
 
-  it('shows admin navigation', () => {
-    mocks.getCurrentUser.mockReturnValue({ id: 'user-1', roles: ['ADMIN'] });
-    render(<ProfilePopover />);
-
-    expect(screen.getByText('admin.navLink')).toBeTruthy();
-  });
-
   it('logout clears queries, removes returnTo, and navigates home', async () => {
     mocks.getCurrentUser.mockReturnValue({ id: 'user-1', roles: ['USER'] });
     sessionStorage.setItem('wd.auth.returnTo', '/rooms/abc');
