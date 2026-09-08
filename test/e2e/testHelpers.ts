@@ -1,4 +1,6 @@
-import type { Page, Route } from '@playwright/test';
+export { liveRoom, winningGuess } from '../testUtils/rooms';
+import type { RoomDto } from '../../src/features/rooms/types';
+import { expect, type Page, type Route } from '@playwright/test';
 
 export async function fulfillJson(route: Route, body: unknown, status = 200) {
   await route.fulfill({
@@ -67,4 +69,30 @@ export function roomDto(roomId: string, args?: { playerId?: string; displayName?
     ],
     currentRound: null,
   };
+}
+
+export async function openRoom(page: Page, initial: RoomDto, afterGuess?: RoomDto) {
+  await mockAuthenticatedSession(page);
+  let room = initial;
+  const url = `**/api/v1/rooms/${initial.id}`;
+  await page.route(url, (route) => fulfillJson(route, room));
+  await page.route(`${url}/messages`, (route) =>
+    fulfillJson(route, { messages: [], unreadCount: 0 }),
+  );
+  await page.route(`${url}/messages/read`, (route) =>
+    fulfillJson(route, { messages: [], unreadCount: 0 }),
+  );
+  if (afterGuess) {
+    await page.route(`${url}/guess`, (route) => {
+      expect(route.request().postDataJSON()).toEqual({
+        word: afterGuess.currentRound?.guesses.at(-1)?.word,
+      });
+      room = afterGuess;
+      return fulfillJson(route, { room });
+    });
+  }
+  await page.goto(`/rooms/${initial.id}`);
+  if (initial.currentRound?.playerStatus === 'PLAYING') {
+    await expect(page.getByRole('button', { name: 'Enter' })).toBeDisabled();
+  }
 }

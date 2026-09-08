@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { ChangeEvent, ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfilePopover } from '../../../../../src/app/layout/navbar/profile/ProfilePopover';
 
@@ -12,10 +12,6 @@ const mocks = vi.hoisted(() => ({
   beginGoogleLogin: vi.fn(),
   logout: vi.fn().mockResolvedValue(undefined),
   getCurrentUser: vi.fn(),
-  setLocale: vi.fn(),
-  setTheme: vi.fn(),
-  locale: 'en',
-  theme: 'light',
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -56,108 +52,47 @@ vi.mock('../../../../../src/shared/hooks/useSingleToast', () => ({
   useSingleToast: () => ({ show: mocks.showToast }),
 }));
 
-vi.mock('../../../../../src/state/localeStore', () => ({
-  useLocaleStore: (
-    selector: (state: { locale: string; setLocale: (locale: string) => void }) => unknown,
-  ) => selector({ locale: mocks.locale, setLocale: mocks.setLocale }),
-}));
-
-vi.mock('../../../../../src/state/themeStore', () => ({
-  useThemeStore: (
-    selector: (state: { theme: string; setTheme: (theme: string) => void }) => unknown,
-  ) => selector({ theme: mocks.theme, setTheme: mocks.setTheme }),
-}));
-
-vi.mock('@chakra-ui/react', () => ({
-  Avatar: {
-    Root: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-    Image: () => null,
-    Fallback: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-  },
-  Box: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-  Button: ({ children, onClick }: { children?: ReactNode; onClick?: () => void }) => (
-    <button type="button" onClick={onClick}>
-      {children}
-    </button>
-  ),
-  Flex: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-  Grid: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-  Popover: {
-    Root: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-    Trigger: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-    Positioner: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-    Content: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-    CloseTrigger: () => null,
-    Header: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-    Title: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-    Body: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-  },
-  Separator: () => null,
-  Stack: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-  Text: ({ children }: { children?: ReactNode }) => <span>{children}</span>,
-}));
+vi.mock('@chakra-ui/react', () => {
+  const Container = ({ children }: { children?: ReactNode }) => <div>{children}</div>;
+  return {
+    Avatar: { Root: Container, Image: () => null, Fallback: Container },
+    Flex: Container,
+    Stack: Container,
+    Text: Container,
+    Popover: {
+      Root: Container,
+      Trigger: Container,
+      Positioner: Container,
+      Content: Container,
+      CloseTrigger: () => null,
+      Header: Container,
+      Title: Container,
+      Body: Container,
+    },
+  };
+});
 
 vi.mock('../../../../../src/app/layout/navbar/profile/AuthActions', () => ({
-  AuthActions: ({
+  AuthActions: ({ onLogin }: { onLogin: () => void }) => <button onClick={onLogin}>login</button>,
+}));
+
+vi.mock('../../../../../src/app/layout/navbar/profile/ProfileMenuContent', () => ({
+  ProfileMenuContent: ({
     me,
-    onLogin,
-    onLogout,
-  }: {
-    me: { roles?: string[] } | null;
-    onLogin: () => void;
-    onLogout: () => void;
-  }) => (
-    <div>
-      <button type="button" onClick={onLogin}>
-        login
+    onLogoutClick,
+    logoutPending,
+  }: ComponentProps<
+    typeof import('../../../../../src/app/layout/navbar/profile/ProfileMenuContent').ProfileMenuContent
+  >) =>
+    me ? (
+      <button disabled={logoutPending} onClick={onLogoutClick}>
+        profile.logout
       </button>
-      {me ? (
-        <button type="button" onClick={onLogout}>
-          logout
-        </button>
-      ) : null}
-    </div>
-  ),
-}));
-
-vi.mock('../../../../../src/app/layout/navbar/profile/LanguageSelect', () => ({
-  LanguageSelect: ({ onChange }: { onChange: (e: ChangeEvent<HTMLSelectElement>) => void }) => (
-    <select
-      aria-label="language"
-      onChange={(e) => {
-        onChange(e as ChangeEvent<HTMLSelectElement>);
-      }}
-    >
-      <option value="en">en</option>
-      <option value="it">it</option>
-    </select>
-  ),
-}));
-
-vi.mock('../../../../../src/app/layout/navbar/profile/ThemeSelect', () => ({
-  ThemeSelect: ({ onChange }: { onChange: (e: ChangeEvent<HTMLSelectElement>) => void }) => (
-    <select
-      aria-label="theme"
-      onChange={(e) => {
-        onChange(e as ChangeEvent<HTMLSelectElement>);
-      }}
-    >
-      <option value="light">light</option>
-      <option value="dark">dark</option>
-    </select>
-  ),
+    ) : null,
 }));
 
 vi.mock('../../../../../src/app/layout/navbar/profile/ProfileTriggerButton', () => ({
   ProfileTriggerButton: () => <button type="button">profile</button>,
-}));
-
-vi.mock('../../../../../src/shared/ui/BrandButton', () => ({
-  PrimaryButton: ({ children, onClick }: { children?: ReactNode; onClick?: () => void }) => (
-    <button type="button" onClick={onClick}>
-      {children}
-    </button>
-  ),
 }));
 
 describe('ProfilePopover', () => {
@@ -172,8 +107,6 @@ describe('ProfilePopover', () => {
     mocks.logout.mockReset();
     mocks.logout.mockResolvedValue(undefined);
     mocks.getCurrentUser.mockReset();
-    mocks.setLocale.mockReset();
-    mocks.setTheme.mockReset();
     sessionStorage.clear();
   });
 
@@ -184,7 +117,7 @@ describe('ProfilePopover', () => {
     fireEvent.click(screen.getByRole('button', { name: 'login' }));
 
     expect(mocks.beginGoogleLogin).toHaveBeenCalled();
-    expect(screen.queryByText('profile.myRooms')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'profile.logout' })).toBeNull();
   });
 
   it('logout clears queries, removes returnTo, and navigates home', async () => {

@@ -1,15 +1,15 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { useRoomTopic } from '../../../../src/features/rooms/game/useRoomTopic';
+
 const mocks = vi.hoisted(() => {
   let lastConfig: Record<string, unknown> | undefined;
   let subscribeHandler: ((message: { body: string }) => void) | undefined;
 
   const invalidateQueries = vi.fn();
   const deactivate = vi.fn().mockResolvedValue(undefined);
-  const activate = vi.fn(function (this: { onConnect?: () => void }) {
-    return undefined;
-  });
+  const activate = vi.fn();
 
   class MockClient {
     connectHeaders: Record<string, string> = {};
@@ -34,6 +34,10 @@ const mocks = vi.hoisted(() => {
   }
 
   return {
+    reset: () => {
+      lastConfig = undefined;
+      subscribeHandler = undefined;
+    },
     MockClient,
     getLastConfig: () => lastConfig,
     getSubscribeHandler: () => subscribeHandler,
@@ -72,6 +76,7 @@ vi.mock('../../../../src/features/rooms/queries', () => ({
 
 describe('useRoomTopic', () => {
   beforeEach(() => {
+    mocks.reset();
     mocks.invalidateQueries.mockReset();
     mocks.deactivate.mockReset();
     mocks.activate.mockReset();
@@ -80,8 +85,7 @@ describe('useRoomTopic', () => {
     mocks.roomQueryKey.mockClear();
   });
 
-  it('does nothing when roomId is missing', async () => {
-    const { useRoomTopic } = await import('../../../../src/features/rooms/game/useRoomTopic');
+  it('does nothing when roomId is missing', () => {
     renderHook(() => {
       useRoomTopic(undefined);
     });
@@ -90,7 +94,6 @@ describe('useRoomTopic', () => {
   });
 
   it('activates the stomp client and deactivates on unmount', async () => {
-    const { useRoomTopic } = await import('../../../../src/features/rooms/game/useRoomTopic');
     const { unmount } = renderHook(() => {
       useRoomTopic('room-1');
     });
@@ -104,9 +107,7 @@ describe('useRoomTopic', () => {
     });
   });
 
-  it('does not configure a STOMP authorization header', async () => {
-    const { useRoomTopic } = await import('../../../../src/features/rooms/game/useRoomTopic');
-
+  it('does not configure a STOMP authorization header', () => {
     renderHook(() => {
       useRoomTopic('room-1');
     });
@@ -118,31 +119,29 @@ describe('useRoomTopic', () => {
     ).toEqual({});
   });
 
-  it('refetches the room and room list on match lifecycle events', async () => {
-    const { useRoomTopic } = await import('../../../../src/features/rooms/game/useRoomTopic');
+  it.each([
+    ['SCORES_UPDATED', [['room', 'room-1']]],
+    ['MATCH_FINISHED', [['room', 'room-1'], ['myRooms']]],
+    ['MATCH_RESTARTED', [['room', 'room-1'], ['myRooms'], ['roomMessages', 'room-1']]],
+  ])('invalidates the expected queries for %s', (type, queryKeys) => {
     renderHook(() => {
       useRoomTopic('room-1');
     });
-
-    const config = mocks.getLastConfig() as { onConnect?: () => void };
-    config.onConnect?.();
-    mocks.getSubscribeHandler()?.({ body: '{"type":"SCORES_UPDATED"}' });
-    mocks.getSubscribeHandler()?.({ body: '{"type":"MATCH_FINISHED"}' });
-    mocks.getSubscribeHandler()?.({ body: '{"type":"MATCH_RESTARTED"}' });
-    mocks.getSubscribeHandler()?.({ body: 'not-json' });
-
-    await waitFor(() => {
-      expect(mocks.invalidateQueries).toHaveBeenCalledTimes(7);
-      expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['room', 'room-1'] });
-      expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['myRooms'] });
-      expect(mocks.invalidateQueries).toHaveBeenCalledWith({
-        queryKey: ['roomMessages', 'room-1'],
-      });
-    });
+    (mocks.getLastConfig() as { onConnect: () => void }).onConnect();
+    mocks.getSubscribeHandler()?.({ body: JSON.stringify({ type }) });
+    expect(mocks.invalidateQueries.mock.calls).toEqual(queryKeys.map((queryKey) => [{ queryKey }]));
   });
 
-  it('does not validate or redirect from a rematch payload', async () => {
-    const { useRoomTopic } = await import('../../../../src/features/rooms/game/useRoomTopic');
+  it('refreshes the room when a message cannot be parsed', () => {
+    renderHook(() => {
+      useRoomTopic('room-1');
+    });
+    (mocks.getLastConfig() as { onConnect: () => void }).onConnect();
+    mocks.getSubscribeHandler()?.({ body: 'not-json' });
+    expect(mocks.invalidateQueries.mock.calls).toEqual([[{ queryKey: ['room', 'room-1'] }]]);
+  });
+
+  it('refreshes the subscribed room even when a rematch payload names another room', async () => {
     renderHook(() => {
       useRoomTopic('room-1');
     });
@@ -164,7 +163,6 @@ describe('useRoomTopic', () => {
   });
 
   it('refetches messages without refetching the room for a chat event', async () => {
-    const { useRoomTopic } = await import('../../../../src/features/rooms/game/useRoomTopic');
     const onRoomMessageSent = vi.fn();
     renderHook(() => {
       useRoomTopic('room-1', { onRoomMessageSent });
