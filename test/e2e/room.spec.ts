@@ -5,8 +5,9 @@ import {
   mockUnauthenticatedSession,
   roomDto,
 } from './testHelpers';
+import type { RoomDto } from '../../src/features/rooms/types';
 
-function liveRoom(roomId: string) {
+function liveRoom(roomId: string): RoomDto {
   return {
     id: roomId,
     language: 'IT',
@@ -140,3 +141,224 @@ test.describe('room page flow', () => {
     await expect(enterButton).toBeDisabled();
   });
 });
+
+for (const outcome of ['won', 'lost'] as const) {
+  test(`animates a ${outcome} match on load and respects reduced motion`, async ({ page }) => {
+    await mockAuthenticatedSession(page);
+    const initial = liveRoom('match-end');
+    const initialRound = initial.currentRound;
+    if (!initialRound) {
+      throw new Error('Expected liveRoom to include a current round');
+    }
+    const complete: RoomDto = {
+      ...initial,
+      status: 'MATCH_FINISHED',
+      players: initial.players.map((player, index) => ({
+        ...player,
+        matchScore: (outcome === 'won' ? index === 0 : index === 1) ? 3 : 2,
+      })),
+      currentRound: {
+        ...initialRound,
+        playerStatus: outcome === 'won' ? 'WON' : 'LOST',
+        roundStatus: 'ENDED',
+        solution: 'APPLE',
+        guesses: [
+          {
+            word: 'APPLE',
+            attemptNumber: 1,
+            letters: Array.from('APPLE', (letter) => ({ letter, status: 'CORRECT' })),
+          },
+        ],
+      },
+    };
+    let room = initial;
+    await page.route('**/api/v1/rooms/match-end', (route) => fulfillJson(route, room));
+    await page.route('**/api/v1/rooms/match-end/messages', (route) =>
+      fulfillJson(route, { messages: [], unreadCount: 0 }),
+    );
+    await page.route('**/api/v1/rooms/match-end/messages/read', (route) =>
+      fulfillJson(route, { messages: [], unreadCount: 0 }),
+    );
+    await page.route('**/api/v1/rooms/match-end/guess', (route) => {
+      room = complete;
+      return fulfillJson(route, { room });
+    });
+
+    await page.goto('/rooms/match-end');
+    await expect(page.getByRole('button', { name: 'Enter' })).toBeDisabled();
+    await page.keyboard.type('apple');
+    await page.keyboard.press('Enter');
+    const root = page.locator('[data-match-end]');
+    await expect(root).toHaveAttribute('data-match-end', outcome);
+    const sequence = await root.evaluate((element) => {
+      const targets = [
+        '.match-status-dot',
+        '[data-winning-score]',
+        '.match-result',
+        '.guess-flip',
+        '.match-play-again',
+        ...(element.getAttribute('data-match-end') === 'won'
+          ? ['.winning-row > .guess-tile']
+          : ['.match-solution', '.solution-letter']),
+      ];
+      return targets.map((selector) => {
+        const target = element.querySelector(selector);
+        if (!target) {
+          throw new Error(`Missing animation target: ${selector}`);
+        }
+        const style = getComputedStyle(target);
+        return {
+          selector,
+          name: style.animationName,
+          delay: style.animationDelay,
+          duration: style.animationDuration,
+          lastDelay: getComputedStyle(
+            Array.from(element.querySelectorAll(selector)).at(-1) ?? target,
+          ).animationDelay,
+        };
+      });
+    });
+    expect(sequence.every((entry) => entry.name !== 'none')).toBe(true);
+    const timing = (selector: string) => {
+      const entry = sequence.find((item) => item.selector === selector);
+      if (!entry) {
+        throw new Error(`Missing timing: ${selector}`);
+      }
+      return {
+        start: parseFloat(entry.delay),
+        end: parseFloat(entry.lastDelay) + parseFloat(entry.duration),
+      };
+    };
+
+    if (outcome === 'won') {
+      expect(timing('.winning-row > .guess-tile').start).toBeGreaterThanOrEqual(
+        timing('.guess-flip').end,
+      );
+      expect(timing('.match-result').start).toBeGreaterThanOrEqual(
+        timing('.winning-row > .guess-tile').end,
+      );
+    } else {
+      expect(
+        await root
+          .locator('.match-board')
+          .evaluate((element) => getComputedStyle(element).animationName),
+      ).toBe('none');
+    }
+    expect(timing('.match-result').start).toBeGreaterThanOrEqual(
+      timing('[data-winning-score]').end,
+    );
+    if (outcome === 'lost') {
+      expect(timing('.match-solution').start).toBeGreaterThanOrEqual(timing('.match-result').end);
+      expect(timing('.solution-letter').start).toBeGreaterThanOrEqual(
+        timing('.match-solution').end,
+      );
+      expect(timing('.match-play-again').start).toBeGreaterThanOrEqual(
+        timing('.solution-letter').end,
+      );
+    } else {
+      expect(timing('.match-play-again').start).toBeGreaterThanOrEqual(timing('.match-result').end);
+    }
+    await expect
+      .poll(() =>
+        root.evaluate(
+          (element) =>
+            element
+              .getAnimations({ subtree: true })
+              .filter(
+                (animation) =>
+                  animation instanceof CSSAnimation && animation.playState === 'running',
+              ).length,
+        ),
+      )
+      .toBe(0);
+    // Opening chat causes a normal rerender; completed animations must stay finished.
+    await page.getByRole('button', { name: 'Open chat' }).click();
+    expect(
+      await root.evaluate(
+        (element) =>
+          element
+            .getAnimations({ subtree: true })
+            .filter(
+              (animation) => animation instanceof CSSAnimation && animation.playState === 'running',
+            ).length,
+      ),
+    ).toBe(0);
+
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Play again' })).toBeVisible();
+    await expect(root).toHaveCount(0);
+
+    room = initial;
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Enter' })).toBeDisabled();
+    await page.keyboard.type('apple');
+    await page.keyboard.press('Enter');
+    await expect(root).toHaveAttribute('data-match-end', outcome);
+    expect(await root.evaluate((element) => element.getAnimations({ subtree: true }).length)).toBe(
+      0,
+    );
+    const revealedFace = await root
+      .locator('.guess-flip')
+      .first()
+      .evaluate((element) => {
+        const transform = new DOMMatrix(getComputedStyle(element).transform);
+        return { y: transform.m22, z: transform.m33 };
+      });
+    expect(revealedFace).toEqual({ y: -1, z: -1 });
+    await expect(page.getByRole('button', { name: 'Play again' })).toBeVisible();
+  });
+}
+
+for (const outcome of ['WON', 'LOST'] as const) {
+  test(`animates only the bottom panel when a round is ${outcome}`, async ({ page }) => {
+    await mockAuthenticatedSession(page);
+    let room = liveRoom('round-end');
+    const round = room.currentRound;
+    if (!round) {
+      throw new Error('Expected a current round');
+    }
+    await page.route('**/api/v1/rooms/round-end', (route) => fulfillJson(route, room));
+    await page.route('**/api/v1/rooms/round-end/messages', (route) =>
+      fulfillJson(route, { messages: [], unreadCount: 0 }),
+    );
+    await page.route('**/api/v1/rooms/round-end/guess', (route) => {
+      room = { ...room, currentRound: { ...round, playerStatus: outcome, solution: 'APPLE' } };
+      return fulfillJson(route, { room });
+    });
+    await page.goto('/rooms/round-end');
+    await expect(page.getByRole('button', { name: 'Enter' })).toBeDisabled();
+    await page.keyboard.type('apple');
+    await page.keyboard.press('Enter');
+    const root = page.locator('[data-round-end]');
+    await expect(root).toHaveAttribute('data-round-end', outcome.toLowerCase());
+    for (const selector of [
+      '.match-result',
+      '.round-action',
+      ...(outcome === 'LOST' ? ['.match-solution', '.solution-letter'] : []),
+    ]) {
+      expect(
+        await root
+          .locator(selector)
+          .first()
+          .evaluate((element) => getComputedStyle(element).animationName),
+      ).not.toBe('none');
+    }
+    for (const selector of ['.match-board', '.match-status-dot', '.guess-tile']) {
+      expect(
+        await root
+          .locator(selector)
+          .first()
+          .evaluate((element) => getComputedStyle(element).animationName),
+      ).toBe('none');
+    }
+    await expect(page.getByRole('button', { name: 'Next round' })).toBeVisible();
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    expect(await root.evaluate((element) => element.getAnimations({ subtree: true }).length)).toBe(
+      0,
+    );
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Next round' })).toBeVisible();
+    await expect(root).toHaveCount(0);
+  });
+}

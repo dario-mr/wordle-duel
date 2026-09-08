@@ -9,8 +9,8 @@ export interface Cell {
   status?: GuessLetterStatus;
 }
 
-const REVEAL_DURATION_MS = 500;
-const REVEAL_STAGGER_MS = 325;
+const REVEAL_DURATION_MS = 300;
+const REVEAL_STAGGER_MS = 120;
 
 const TYPING_POP_DURATION_MS = 120;
 
@@ -84,13 +84,18 @@ export function GuessRow({
   const shouldAnimateReveal = Boolean(animateReveal && cells?.length === WORD_LENGTH);
 
   return (
-    <HStack gap={1} justify="center">
+    <HStack
+      className={letters.every((letter) => letter.status === 'CORRECT') ? 'winning-row' : undefined}
+      gap={1}
+      justify="center"
+    >
       {letters.map((l, idx) => (
         <LetterCell
           key={idx}
           letter={l.letter}
           status={l.status}
           animateReveal={shouldAnimateReveal}
+          tileIndex={idx}
           revealDelayMs={idx * REVEAL_STAGGER_MS}
           revealDurationMs={REVEAL_DURATION_MS}
         />
@@ -103,12 +108,14 @@ function LetterCell({
   letter,
   status,
   animateReveal,
+  tileIndex,
   revealDelayMs,
   revealDurationMs,
 }: {
   letter: string;
   status?: GuessLetterStatus;
   animateReveal: boolean;
+  tileIndex: number;
   revealDelayMs: number;
   revealDurationMs: number;
 }) {
@@ -122,15 +129,21 @@ function LetterCell({
 
   const shouldAnimateRevealCell = Boolean(animateReveal && status);
   const revealAnimation = shouldAnimateRevealCell
-    ? `${cellFlip} ${String(revealDurationMs)}ms ease-out forwards`
+    ? `${cellFlip} ${String(revealDurationMs)}ms ease-out both`
     : undefined;
   const revealAnimationDelay = shouldAnimateRevealCell ? `${String(revealDelayMs)}ms` : undefined;
 
-  // If there is a status, but we're not animating, show the "back" face.
+  // The base state is final; animation fill shows the front face during the reveal delay.
   const finalTransform = status ? 'rotateX(180deg)' : 'rotateX(0deg)';
 
   return (
-    <Box boxSize={TILE_SIZE} position="relative" perspective="600px">
+    <Box
+      className="guess-tile"
+      style={{ '--tile-index': tileIndex } as React.CSSProperties}
+      boxSize={TILE_SIZE}
+      position="relative"
+      perspective="600px"
+    >
       <Box
         key={status ? 'revealed' : letter}
         {...tileProps}
@@ -141,10 +154,11 @@ function LetterCell({
           width="full"
           height="full"
           position="relative"
+          className="guess-flip"
           transformStyle="preserve-3d"
           transformOrigin="center"
           willChange={shouldAnimateRevealCell ? 'transform' : undefined}
-          transform={shouldAnimateRevealCell ? undefined : finalTransform}
+          transform={finalTransform}
           animation={revealAnimation}
           animationDelay={revealAnimationDelay}
         >

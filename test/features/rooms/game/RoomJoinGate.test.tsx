@@ -24,6 +24,7 @@ const baseRoom = {
   language: 'IT' as const,
   rounds: 5 as const,
   status: 'WAITING_FOR_PLAYERS' as const,
+  rematchRequested: false,
   players: [{ id: 'p1', wins: 0, matchScore: null, displayName: 'Alice' }],
   currentRound: null,
 };

@@ -28,6 +28,7 @@ import { RoundPanel } from './round/RoundPanel';
 import { useSingleToast } from '../../../shared/hooks/useSingleToast';
 import { ERROR_TOAST_DURATION_MS } from '../../../shared/ui/constants';
 import { RoomSkeleton } from './RoomSkeleton';
+import { roundAnimations } from './roundAnimations.ts';
 
 export function RoomPage() {
   const { t } = useTranslation();
@@ -48,6 +49,37 @@ export function RoomPage() {
   const [guessState, setGuessState] = useState<{ roundNumber?: number; value: string }>({
     value: '',
   });
+  const [completion, setCompletion] = useState({
+    roomId,
+    status: room?.status,
+    roundNumber: room?.currentRound?.roundNumber,
+    playerStatus: room?.currentRound?.playerStatus,
+    animate: false,
+    animateRound: false,
+  });
+  if (
+    completion.roomId !== roomId ||
+    completion.status !== room?.status ||
+    completion.roundNumber !== room?.currentRound?.roundNumber ||
+    completion.playerStatus !== room?.currentRound?.playerStatus
+  ) {
+    setCompletion({
+      roomId,
+      status: room?.status,
+      roundNumber: room?.currentRound?.roundNumber,
+      playerStatus: room?.currentRound?.playerStatus,
+      animate:
+        completion.roomId === roomId &&
+        completion.status === 'IN_PROGRESS' &&
+        room?.status === 'MATCH_FINISHED',
+      animateRound:
+        completion.roomId === roomId &&
+        completion.roundNumber === room?.currentRound?.roundNumber &&
+        completion.playerStatus === 'PLAYING' &&
+        room?.status === 'IN_PROGRESS' &&
+        (room.currentRound?.playerStatus === 'WON' || room.currentRound?.playerStatus === 'LOST'),
+    });
+  }
   const [chatOpen, setChatOpen] = useState(false);
   const chatOpenRef = useRef(false);
 
@@ -215,7 +247,18 @@ export function RoomPage() {
   }
 
   return (
-    <Stack gap={5} w="full" maxW="44rem" mx="auto" pb={4}>
+    <Stack
+      gap={5}
+      w="full"
+      maxW="44rem"
+      mx="auto"
+      pb={4}
+      data-match-end={completion.animate ? (isMatchWinner ? 'won' : 'lost') : undefined}
+      data-round-end={
+        completion.animateRound ? (myRoundStatus === 'WON' ? 'won' : 'lost') : undefined
+      }
+      css={roundAnimations}
+    >
       <RoundPanel
         player={me}
         opponent={opponent}

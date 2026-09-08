@@ -1,4 +1,5 @@
 import { Code, Stack, Text } from '@chakra-ui/react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { RoomDto } from '../../types';
 import { getErrorMessage } from '../../../../shared/api/errors';
@@ -40,18 +41,29 @@ export function RoundStatusPanel(props: {
   const result =
     resultStatus === 'WON' ? (
       <Stack gap={1} mb={3} align="center">
-        <Text textAlign="center">
+        <Text className="match-result" textAlign="center">
           {t(isMatchFinished ? 'room.round.youWonMatch' : 'room.round.youWonThisRound')}
         </Text>
       </Stack>
     ) : resultStatus === 'LOST' ? (
       <Stack gap={1} mb={3} align="center">
-        <Text textAlign="center">
+        <Text className="match-result" textAlign="center">
           {t(isMatchFinished ? 'room.round.youLostMatch' : 'room.round.youLostThisRound')}
         </Text>
         {currentRound?.solution ? (
-          <Text fontSize="sm">
-            {t('room.round.solution')}: <Code>{currentRound.solution}</Code>
+          <Text className="match-solution" fontSize="sm">
+            {t('room.round.solution')}:{' '}
+            <Code fontSize="sm">
+              {Array.from(currentRound.solution).map((letter, index) => (
+                <span
+                  key={index}
+                  className="solution-letter"
+                  style={{ display: 'inline-block', '--letter-index': index } as CSSProperties}
+                >
+                  {letter}
+                </span>
+              ))}
+            </Code>
           </Text>
         ) : null}
       </Stack>
@@ -63,6 +75,7 @@ export function RoundStatusPanel(props: {
         {result}
         <Stack gap={2} w="full" maxW="32rem">
           <PrimaryButton
+            className="match-play-again"
             w="full"
             h="46px"
             size="lg"
@@ -96,10 +109,13 @@ export function RoundStatusPanel(props: {
     <Stack gap={2} align="center">
       {result}
       {isFinalRound ? (
-        <Text textAlign="center">{t('room.round.waitingForOpponent')}</Text>
+        <Text className="round-action" textAlign="center">
+          {t('room.round.waitingForOpponent')}
+        </Text>
       ) : (
         <>
           <PrimaryButton
+            className="round-action"
             loading={props.isNextRoundPending}
             disabled={props.isNextRoundPending}
             onClick={props.onNextRound}

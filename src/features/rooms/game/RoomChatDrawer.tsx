@@ -69,7 +69,7 @@ export function RoomChatDrawer({
       if (messageListRef.current) {
         messageListRef.current.scrollTo({
           top: messageListRef.current.scrollHeight,
-          behavior: shouldAnimate ? 'smooth' : 'auto',
+          behavior: shouldAnimate ? 'auto' : 'instant',
         });
       }
     });
@@ -140,7 +140,7 @@ export function RoomChatDrawer({
             <Drawer.Header py={3}>
               <Drawer.Title>{opponentName}</Drawer.Title>
             </Drawer.Header>
-            <Drawer.Body ref={messageListRef} overflowY="auto" scrollBehavior="auto">
+            <Drawer.Body ref={messageListRef} overflowY="auto" scrollBehavior="smooth">
               {isLoading ? (
                 <Text color="fg.muted">{t('room.chat.loading')}</Text>
               ) : messages.length === 0 ? (

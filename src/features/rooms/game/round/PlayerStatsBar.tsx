@@ -40,7 +40,13 @@ export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto;
           {meName}
         </Text>
         {meIsWinner && (
-          <Text color="fg.warning" fontSize="sm" fontWeight="bold" whiteSpace="nowrap">
+          <Text
+            className="match-winner"
+            color="fg.warning"
+            fontSize="sm"
+            fontWeight="bold"
+            whiteSpace="nowrap"
+          >
             <Box as="span" aria-hidden="true">
               🏆
             </Box>{' '}
@@ -58,13 +64,25 @@ export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto;
         borderColor="border.divider"
         whiteSpace="nowrap"
       >
-        <Text fontSize="3xl" lineHeight="1" fontWeight="bold" color={meScoreColor}>
+        <Text
+          data-winning-score={meIsWinner ? 'me' : undefined}
+          fontSize="3xl"
+          lineHeight="1"
+          fontWeight="bold"
+          color={meScoreColor}
+        >
           {meScore}
         </Text>
         <Text fontSize="2xl" lineHeight="1" color="fg.subtle">
           {DASH}
         </Text>
-        <Text fontSize="3xl" lineHeight="1" fontWeight="bold" color={opponentScoreColor}>
+        <Text
+          data-winning-score={opponentIsWinner ? 'opponent' : undefined}
+          fontSize="3xl"
+          lineHeight="1"
+          fontWeight="bold"
+          color={opponentScoreColor}
+        >
           {opponentScore}
         </Text>
       </HStack>
@@ -74,7 +92,13 @@ export function PlayerStatsBar(props: { player: PlayerDto; opponent?: PlayerDto;
           {opponentName}
         </Text>
         {opponentIsWinner && (
-          <Text color="fg.warning" fontSize="sm" fontWeight="bold" whiteSpace="nowrap">
+          <Text
+            className="match-winner"
+            color="fg.warning"
+            fontSize="sm"
+            fontWeight="bold"
+            whiteSpace="nowrap"
+          >
             <Box as="span" aria-hidden="true">
               🏆
             </Box>{' '}

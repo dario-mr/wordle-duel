@@ -84,7 +84,7 @@ describe('RoundStatusPanel', () => {
 
     expect(screen.getByText('room.round.youLostThisRound')).toBeTruthy();
     expect(screen.getByText(/room\.round\.solution:/)).toBeTruthy();
-    expect(screen.getByText('APPLE')).toBeTruthy();
+    expect(screen.getByRole('code').textContent).toBe('APPLE');
     fireEvent.click(screen.getByRole('button', { name: 'room.round.nextRound' }));
     expect(props.onNextRound).toHaveBeenCalledOnce();
   });
@@ -148,6 +148,6 @@ describe('RoundStatusPanel', () => {
 
     expect(screen.getByText('room.round.youLostMatch')).toBeTruthy();
     expect(screen.queryByText('room.round.youLostThisRound')).toBeNull();
-    expect(screen.getByText('APPLE')).toBeTruthy();
+    expect(screen.getByRole('code').textContent).toBe('APPLE');
   });
 });

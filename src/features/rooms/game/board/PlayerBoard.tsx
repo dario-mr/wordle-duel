@@ -37,7 +37,7 @@ export function PlayerBoard(props: { room: RoomDto; currentGuess?: string }) {
   });
 
   return (
-    <Stack gap={3} align="center">
+    <Stack className="match-board" gap={3} align="center">
       <Stack gap={1} align="center">
         {rows.map((row) => (
           <GuessRow
