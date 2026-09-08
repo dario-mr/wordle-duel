@@ -142,7 +142,7 @@ test.describe('room page flow', () => {
   });
 });
 
-for (const outcome of ['won', 'lost'] as const) {
+for (const outcome of ['won', 'lost', 'draw'] as const) {
   test(`animates a ${outcome} match on load and respects reduced motion`, async ({ page }) => {
     await mockAuthenticatedSession(page);
     const initial = liveRoom('match-end');
@@ -155,11 +155,12 @@ for (const outcome of ['won', 'lost'] as const) {
       status: 'MATCH_FINISHED',
       players: initial.players.map((player, index) => ({
         ...player,
-        matchScore: (outcome === 'won' ? index === 0 : index === 1) ? 3 : 2,
+        matchScore:
+          outcome === 'draw' ? 29 : (outcome === 'won' ? index === 0 : index === 1) ? 3 : 2,
       })),
       currentRound: {
         ...initialRound,
-        playerStatus: outcome === 'won' ? 'WON' : 'LOST',
+        playerStatus: outcome === 'lost' ? 'LOST' : 'WON',
         roundStatus: 'ENDED',
         solution: 'APPLE',
         guesses: [
@@ -192,14 +193,15 @@ for (const outcome of ['won', 'lost'] as const) {
     await expect(root).toHaveAttribute('data-match-end', outcome);
     const sequence = await root.evaluate((element) => {
       const targets = [
-        '.match-status-dot',
-        '[data-winning-score]',
+        ...(element.getAttribute('data-match-end') === 'draw' ? [] : ['[data-winning-score]']),
         '.match-result',
         '.guess-flip',
         '.match-play-again',
         ...(element.getAttribute('data-match-end') === 'won'
           ? ['.winning-row > .guess-tile']
-          : ['.match-solution', '.solution-letter']),
+          : element.getAttribute('data-match-end') === 'lost'
+            ? ['.match-solution', '.solution-letter']
+            : []),
       ];
       return targets.map((selector) => {
         const target = element.querySelector(selector);
@@ -237,16 +239,16 @@ for (const outcome of ['won', 'lost'] as const) {
       expect(timing('.match-result').start).toBeGreaterThanOrEqual(
         timing('.winning-row > .guess-tile').end,
       );
-    } else {
-      expect(
-        await root
-          .locator('.match-board')
-          .evaluate((element) => getComputedStyle(element).animationName),
-      ).toBe('none');
     }
-    expect(timing('.match-result').start).toBeGreaterThanOrEqual(
-      timing('[data-winning-score]').end,
-    );
+    if (outcome !== 'draw') {
+      expect(timing('.match-result').start).toBeGreaterThanOrEqual(
+        timing('[data-winning-score]').end,
+      );
+    } else {
+      await expect(page.getByText('The match is a draw')).toBeVisible();
+      await expect(page.getByText('You lost this match')).toHaveCount(0);
+      await expect(root.locator('[data-winning-score], .match-winner')).toHaveCount(0);
+    }
     if (outcome === 'lost') {
       expect(timing('.match-solution').start).toBeGreaterThanOrEqual(timing('.match-result').end);
       expect(timing('.solution-letter').start).toBeGreaterThanOrEqual(
@@ -344,14 +346,12 @@ for (const outcome of ['WON', 'LOST'] as const) {
           .evaluate((element) => getComputedStyle(element).animationName),
       ).not.toBe('none');
     }
-    for (const selector of ['.match-board', '.match-status-dot', '.guess-tile']) {
-      expect(
-        await root
-          .locator(selector)
-          .first()
-          .evaluate((element) => getComputedStyle(element).animationName),
-      ).toBe('none');
-    }
+    expect(
+      await root
+        .locator('.guess-tile')
+        .first()
+        .evaluate((element) => getComputedStyle(element).animationName),
+    ).toBe('none');
     await expect(page.getByRole('button', { name: 'Next round' })).toBeVisible();
     await page.emulateMedia({ reducedMotion: 'reduce' });
     expect(await root.evaluate((element) => element.getAnimations({ subtree: true }).length)).toBe(

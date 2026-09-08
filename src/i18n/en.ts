@@ -102,6 +102,7 @@ export default {
       youWonThisRound: 'You won this round',
       youLostThisRound: 'You lost this round',
       youWonMatch: '🏆 You won the match',
+      matchDraw: 'The match is a draw',
       youLostMatch: 'You lost this match',
     },
     guess: {

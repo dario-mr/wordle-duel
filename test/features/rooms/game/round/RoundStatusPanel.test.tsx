@@ -63,10 +63,10 @@ function room(args?: {
   };
 }
 
-function panelProps(roomDto = room(), isMatchWinner: boolean | null = null) {
+function panelProps(roomDto = room(), matchResult: 'WON' | 'LOST' | 'DRAW' | null = null) {
   return {
     room: roomDto,
-    isMatchWinner,
+    matchResult,
     onNextRound: vi.fn(),
     isNextRoundPending: false,
     nextRoundError: null,
@@ -101,7 +101,7 @@ describe('RoundStatusPanel', () => {
       <RoundStatusPanel
         {...panelProps(
           room({ status: 'MATCH_FINISHED', roundNumber: 5, playerStatus: 'WON' }),
-          false,
+          'LOST',
         )}
       />,
     );
@@ -117,7 +117,7 @@ describe('RoundStatusPanel', () => {
       <RoundStatusPanel
         {...panelProps(
           room({ status: 'MATCH_FINISHED', roundNumber: 5, playerStatus: 'LOST' }),
-          true,
+          'WON',
         )}
       />,
     );
@@ -141,7 +141,7 @@ describe('RoundStatusPanel', () => {
       <RoundStatusPanel
         {...panelProps(
           room({ status: 'MATCH_FINISHED', roundNumber: 5, playerStatus: 'WON' }),
-          false,
+          'LOST',
         )}
       />,
     );

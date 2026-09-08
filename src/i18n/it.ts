@@ -103,6 +103,7 @@ export default {
       youWonThisRound: 'Hai vinto questo round',
       youLostThisRound: 'Hai perso questo round',
       youWonMatch: '🏆 Hai vinto la partita',
+      matchDraw: 'La partita è finita in pareggio',
       youLostMatch: 'Hai perso questa partita',
     },
     guess: {

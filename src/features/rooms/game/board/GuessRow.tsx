@@ -9,8 +9,8 @@ export interface Cell {
   status?: GuessLetterStatus;
 }
 
-const REVEAL_DURATION_MS = 300;
-const REVEAL_STAGGER_MS = 120;
+const REVEAL_DURATION_MS = 350;
+const REVEAL_STAGGER_MS = 150;
 
 const TYPING_POP_DURATION_MS = 120;
 

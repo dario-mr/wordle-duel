@@ -102,9 +102,13 @@ export function RoomPage() {
 
   const me = room?.players.find((p) => p.id === myPlayerId);
   const opponent = room?.players.find((p) => p.id !== myPlayerId);
-  const isMatchWinner =
+  const matchResult =
     room?.status === 'MATCH_FINISHED' && me?.matchScore != null && opponent?.matchScore != null
-      ? me.matchScore > opponent.matchScore
+      ? me.matchScore === opponent.matchScore
+        ? 'DRAW'
+        : me.matchScore > opponent.matchScore
+          ? 'WON'
+          : 'LOST'
       : null;
   const isChatReady = Boolean(
     me && room?.status !== 'WAITING_FOR_PLAYERS' && room?.players.length === 2,
@@ -253,7 +257,7 @@ export function RoomPage() {
       maxW="44rem"
       mx="auto"
       pb={4}
-      data-match-end={completion.animate ? (isMatchWinner ? 'won' : 'lost') : undefined}
+      data-match-end={completion.animate ? matchResult?.toLowerCase() : undefined}
       data-round-end={
         completion.animateRound ? (myRoundStatus === 'WON' ? 'won' : 'lost') : undefined
       }
@@ -292,7 +296,7 @@ export function RoomPage() {
       {showRoundStatusPanel && (
         <RoundStatusPanel
           room={room}
-          isMatchWinner={isMatchWinner}
+          matchResult={matchResult}
           onNextRound={() => {
             nextRoundMutation.mutate();
           }}

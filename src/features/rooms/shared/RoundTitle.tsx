@@ -65,14 +65,7 @@ export function RoundTitle({
       px={4}
       py={1.5}
     >
-      <Box
-        className="match-status-dot"
-        aria-hidden="true"
-        boxSize="8px"
-        borderRadius="full"
-        bg={statusColor}
-        flexShrink={0}
-      />
+      <Box aria-hidden="true" boxSize="8px" borderRadius="full" bg={statusColor} flexShrink={0} />
       <Text fontSize={{ base: '2xs', md: 'xs' }} fontWeight="semibold" letterSpacing="wide">
         {statusLabel}
       </Text>

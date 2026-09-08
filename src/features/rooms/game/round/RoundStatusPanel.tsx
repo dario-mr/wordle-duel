@@ -8,7 +8,7 @@ import { PrimaryButton } from '../../../../shared/ui/BrandButton';
 
 export function RoundStatusPanel(props: {
   room: RoomDto;
-  isMatchWinner: boolean | null;
+  matchResult: 'WON' | 'LOST' | 'DRAW' | null;
   onNextRound: () => void;
   isNextRoundPending: boolean;
   nextRoundError: unknown;
@@ -31,15 +31,15 @@ export function RoundStatusPanel(props: {
     props.room.rounds !== 'ENDLESS' &&
     currentRound.roundNumber === props.room.rounds;
   const isMatchFinished = props.room.status === 'MATCH_FINISHED';
-  const resultStatus = isMatchFinished
-    ? props.isMatchWinner === true
-      ? 'WON'
-      : props.isMatchWinner === false
-        ? 'LOST'
-        : null
-    : currentRound?.playerStatus;
+  const resultStatus = isMatchFinished ? props.matchResult : currentRound?.playerStatus;
   const result =
-    resultStatus === 'WON' ? (
+    resultStatus === 'DRAW' ? (
+      <Stack gap={1} mb={3} align="center">
+        <Text className="match-result" textAlign="center">
+          {t('room.round.matchDraw')}
+        </Text>
+      </Stack>
+    ) : resultStatus === 'WON' ? (
       <Stack gap={1} mb={3} align="center">
         <Text className="match-result" textAlign="center">
           {t(isMatchFinished ? 'room.round.youWonMatch' : 'room.round.youWonThisRound')}

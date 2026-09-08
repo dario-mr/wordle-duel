@@ -45,10 +45,6 @@ export const roundAnimations: SystemStyleObject = {
       animationDuration: `${String(flipDuration)}ms`,
       animationDelay: `calc(var(--tile-index) * ${String(flipStagger)}ms)`,
     },
-    '& .match-status-dot': {
-      '--match-scale': '1.4',
-      animation: `${emphasize} ${String(emphasisDuration)}ms ease-out`,
-    },
     '& [data-winning-score]': {
       '--match-scale': '1.1',
       animation: `${emphasize} ${String(emphasisDuration)}ms ease-out ${String(scoreStart)}ms`,
