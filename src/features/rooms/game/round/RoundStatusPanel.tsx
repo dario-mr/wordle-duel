@@ -28,14 +28,19 @@ export function RoundStatusPanel(props: {
     currentRound != null &&
     props.room.rounds !== 'ENDLESS' &&
     currentRound.roundNumber === props.room.rounds;
+  const isMatchFinished = props.room.status === 'MATCH_FINISHED';
   const result =
     currentRound?.playerStatus === 'WON' ? (
       <Stack gap={1} mb={3} align="center">
-        <Text textAlign="center">{t('room.round.youWonThisRound')}</Text>
+        <Text textAlign="center">
+          {t(isMatchFinished ? 'room.round.youWonMatch' : 'room.round.youWonThisRound')}
+        </Text>
       </Stack>
     ) : currentRound?.playerStatus === 'LOST' ? (
       <Stack gap={1} mb={3} align="center">
-        <Text textAlign="center">{t('room.round.youLostThisRound')}</Text>
+        <Text textAlign="center">
+          {t(isMatchFinished ? 'room.round.youLostMatch' : 'room.round.youLostThisRound')}
+        </Text>
         {currentRound.solution ? (
           <Text fontSize="sm">
             {t('room.round.solution')}: <Code>{currentRound.solution}</Code>
@@ -47,7 +52,7 @@ export function RoundStatusPanel(props: {
   if (props.room.status === 'MATCH_FINISHED') {
     return (
       <Stack gap={2} align="center" pt={2}>
-        {currentRound?.playerStatus === 'LOST' ? result : null}
+        {hasFinishedRound ? result : null}
         <Stack gap={2} w="full" maxW="32rem">
           <PrimaryButton
             w="full"

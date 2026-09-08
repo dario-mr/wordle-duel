@@ -101,6 +101,8 @@ export default {
       nextRoundRejected: 'Could not start the next round',
       youWonThisRound: 'You won this round',
       youLostThisRound: 'You lost this round',
+      youWonMatch: '🏆 You won the match',
+      youLostMatch: 'You lost this match',
     },
     guess: {
       rejectedTitle: 'Guess rejected',

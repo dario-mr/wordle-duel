@@ -95,13 +95,14 @@ describe('RoundStatusPanel', () => {
     expect(screen.queryByRole('button', { name: 'room.round.nextRound' })).toBeNull();
   });
 
-  it('hides the round result after the match finishes', () => {
+  it('shows the match result after the match finishes', () => {
     render(
       <RoundStatusPanel
         {...panelProps(room({ status: 'MATCH_FINISHED', roundNumber: 5, playerStatus: 'WON' }))}
       />,
     );
 
+    expect(screen.getByText('room.round.youWonMatch')).toBeTruthy();
     expect(screen.queryByText('room.round.youWonThisRound')).toBeNull();
     expect(screen.getByRole('button', { name: 'room.round.playAgain' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'room.round.backToHome' })).toBeNull();
@@ -124,7 +125,8 @@ describe('RoundStatusPanel', () => {
       />,
     );
 
-    expect(screen.getByText('room.round.youLostThisRound')).toBeTruthy();
+    expect(screen.getByText('room.round.youLostMatch')).toBeTruthy();
+    expect(screen.queryByText('room.round.youLostThisRound')).toBeNull();
     expect(screen.getByText('APPLE')).toBeTruthy();
   });
 });

@@ -102,6 +102,8 @@ export default {
       nextRoundRejected: 'Impossibile iniziare il prossimo round',
       youWonThisRound: 'Hai vinto questo round',
       youLostThisRound: 'Hai perso questo round',
+      youWonMatch: '🏆 Hai vinto la partita',
+      youLostMatch: 'Hai perso questa partita',
     },
     guess: {
       rejectedTitle: 'Tentativo rifiutato',
