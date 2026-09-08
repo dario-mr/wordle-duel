@@ -12,6 +12,7 @@ function liveRoom(roomId: string) {
     language: 'IT',
     rounds: 5,
     status: 'IN_PROGRESS',
+    rematchRequested: false,
     players: [
       { id: 'user-1', wins: 0, matchScore: 0, displayName: 'Alice Example' },
       { id: 'user-2', wins: 0, matchScore: 0, displayName: 'Bob Example' },

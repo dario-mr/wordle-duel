@@ -43,12 +43,14 @@ function room(args?: {
   status?: 'IN_PROGRESS' | 'MATCH_FINISHED';
   roundNumber?: number;
   playerStatus?: 'WON' | 'LOST';
+  rematchRequested?: boolean;
 }) {
   return {
     id: 'room-1',
     language: 'IT' as const,
     rounds: 5 as const,
     status: args?.status ?? 'IN_PROGRESS',
+    rematchRequested: args?.rematchRequested ?? false,
     players: [],
     currentRound: {
       roundNumber: args?.roundNumber ?? 2,
@@ -69,7 +71,7 @@ function panelProps(roomDto = room()) {
     nextRoundError: null,
     onRematch: vi.fn(),
     isRematchPending: false,
-    isRematchWaiting: false,
+    isRematchWaiting: roomDto.rematchRequested,
     rematchError: null,
   };
 }
@@ -103,6 +105,16 @@ describe('RoundStatusPanel', () => {
     expect(screen.queryByText('room.round.youWonThisRound')).toBeNull();
     expect(screen.getByRole('button', { name: 'room.round.playAgain' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'room.round.backToHome' })).toBeNull();
+  });
+
+  it('shows the persisted waiting state and blocks another rematch request', () => {
+    const props = panelProps(room({ status: 'MATCH_FINISHED', rematchRequested: true }));
+    render(<RoundStatusPanel {...props} />);
+
+    const button = screen.getByRole('button', { name: 'room.round.waitingForOpponent' });
+    expect(button.hasAttribute('disabled')).toBe(true);
+    fireEvent.click(button);
+    expect(props.onRematch).not.toHaveBeenCalled();
   });
 
   it('keeps the lost round solution visible after the match finishes', () => {

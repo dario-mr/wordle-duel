@@ -54,6 +54,7 @@ function createRoomDto(id: string): RoomDto {
     language: 'IT',
     rounds: 5,
     status: 'WAITING_FOR_PLAYERS',
+    rematchRequested: false,
     players: [],
     currentRound: null,
   };
@@ -179,7 +180,9 @@ describe('roomQueries', () => {
   describe('useRematchMutation', () => {
     it('keeps the current room while waiting for the opponent', async () => {
       const { queryClient, wrapper } = createQueryClientWrapper();
+      const room = createRoomDto('room-1');
       const response = { started: false };
+      queryClient.setQueryData(roomQueryKey('room-1'), room);
       mocks.requestRematch.mockResolvedValue(response);
 
       const { result } = renderHook(() => useRematchMutation({ roomId: 'room-1' }), { wrapper });
@@ -189,7 +192,10 @@ describe('roomQueries', () => {
       });
 
       expect(mocks.requestRematch).toHaveBeenCalledWith('room-1');
-      expect(queryClient.getQueryData(roomQueryKey('room-1'))).toBeUndefined();
+      expect(queryClient.getQueryData(roomQueryKey('room-1'))).toEqual({
+        ...room,
+        rematchRequested: true,
+      });
       await waitFor(() => {
         expect(result.current.data).toEqual(response);
       });

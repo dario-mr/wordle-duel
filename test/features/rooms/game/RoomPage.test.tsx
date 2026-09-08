@@ -188,12 +188,20 @@ vi.mock('../../../../src/features/rooms/game/board/PlayerBoard', () => ({
 }));
 
 vi.mock('../../../../src/features/rooms/game/round/RoundStatusPanel', () => ({
-  RoundStatusPanel: ({ room, onRematch }: { room: RoomDto; onRematch: () => void }) => (
+  RoundStatusPanel: ({
+    room,
+    onRematch,
+    isRematchWaiting,
+  }: {
+    room: RoomDto;
+    onRematch: () => void;
+    isRematchWaiting: boolean;
+  }) => (
     <div>
       <div>{`round-status:${room.currentRound ? 'active' : 'waiting'}`}</div>
       {room.status === 'MATCH_FINISHED' && (
         <button type="button" onClick={onRematch}>
-          room.round.playAgain
+          {isRematchWaiting ? 'room.round.waitingForOpponent' : 'room.round.playAgain'}
         </button>
       )}
     </div>
@@ -240,6 +248,7 @@ function createRoom(args?: {
   meId?: string;
   includeMe?: boolean;
   currentRound?: RoomDto['currentRound'];
+  rematchRequested?: boolean;
 }): RoomDto {
   const meId = args?.meId ?? 'me-1';
   const includeMe = args?.includeMe ?? true;
@@ -258,6 +267,7 @@ function createRoom(args?: {
     language: 'IT',
     rounds: 5,
     status: args?.status ?? 'IN_PROGRESS',
+    rematchRequested: args?.rematchRequested ?? false,
     players,
     currentRound:
       args?.status === 'WAITING_FOR_PLAYERS'
@@ -496,6 +506,19 @@ describe('RoomPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'room.round.playAgain' }));
 
     expect(mocks.rematchMutation.mutate).toHaveBeenCalledWith();
+  });
+
+  it('shows persisted rematch waiting state after a room refresh', () => {
+    mocks.roomQueryResult.data = createRoom({
+      status: 'MATCH_FINISHED',
+      currentRound: null,
+      rematchRequested: true,
+    });
+
+    render(<RoomPage />);
+
+    expect(screen.getByRole('button', { name: 'room.round.waitingForOpponent' })).toBeTruthy();
+    expect(mocks.rematchMutation.data).toBeUndefined();
   });
 
   it('does not register a rematch redirect callback', () => {

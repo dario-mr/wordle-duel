@@ -157,6 +157,7 @@ function createRoom(roomId: string): RoomDto {
     language: 'IT',
     rounds: 5,
     status: 'IN_PROGRESS',
+    rematchRequested: false,
     players: [
       { id: 'me-1', wins: 10, matchScore: 2, displayName: 'Me' },
       { id: 'opponent-1', wins: 9, matchScore: 1, displayName: 'Opponent' },

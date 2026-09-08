@@ -137,6 +137,10 @@ export function useRematchMutation(args: { roomId: string }) {
           queryClient.invalidateQueries({ queryKey: ['myRooms'] }),
           queryClient.invalidateQueries({ queryKey: roomMessagesQueryKey(args.roomId) }),
         ]);
+      } else {
+        queryClient.setQueryData<RoomDto>(roomQueryKey(args.roomId), (room) =>
+          room ? { ...room, rematchRequested: true } : room,
+        );
       }
     },
   });

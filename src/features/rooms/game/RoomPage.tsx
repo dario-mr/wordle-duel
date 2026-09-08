@@ -252,7 +252,7 @@ export function RoomPage() {
           nextRoundError={nextRoundMutation.error}
           onRematch={handleRematch}
           isRematchPending={rematchMutation.isPending}
-          isRematchWaiting={rematchMutation.isSuccess && !rematchMutation.data.started}
+          isRematchWaiting={room.rematchRequested}
           rematchError={rematchMutation.error}
         />
       )}

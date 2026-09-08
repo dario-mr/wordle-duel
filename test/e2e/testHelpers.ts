@@ -56,6 +56,7 @@ export function roomDto(roomId: string, args?: { playerId?: string; displayName?
     language: 'IT',
     rounds: 5,
     status: 'WAITING_FOR_PLAYERS',
+    rematchRequested: false,
     players: [
       {
         id: args?.playerId ?? 'user-1',

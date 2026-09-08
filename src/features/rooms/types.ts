@@ -42,6 +42,7 @@ export interface RoomDto {
   language: Language;
   rounds: RoomRounds;
   status: RoomStatus;
+  rematchRequested: boolean;
   players: PlayerDto[];
   currentRound: RoundDto | null;
 }

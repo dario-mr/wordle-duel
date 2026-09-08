@@ -33,6 +33,7 @@ function room(status: RoomDto['status']): RoomDto {
     language: 'IT',
     rounds: 5,
     status,
+    rematchRequested: false,
     players: [
       { id: 'me', wins: 10, matchScore: 2, displayName: 'Me' },
       { id: 'opponent', wins: 8, matchScore: 1, displayName: 'Opponent' },

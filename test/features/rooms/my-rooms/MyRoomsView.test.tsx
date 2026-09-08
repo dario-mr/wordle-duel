@@ -41,6 +41,7 @@ function room(id: string, status: RoomDto['status']): RoomDto {
     language: 'IT',
     rounds: 5,
     status,
+    rematchRequested: false,
     players: [],
     currentRound: null,
   };
