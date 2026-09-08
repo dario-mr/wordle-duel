@@ -5,12 +5,13 @@ import {
   Dialog,
   Drawer,
   HStack,
+  IconButton,
   Portal,
   Stack,
   Table,
   Text,
 } from '@chakra-ui/react';
-import { Check, Trash2, X } from 'lucide-react';
+import { Check, Copy, Trash2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getErrorMessage } from '../../../shared/api/errors';
 import { ErrorAlert } from '../../../shared/ui/ErrorAlert';
@@ -51,27 +52,15 @@ export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: (
                   borderColor="border.divider"
                 >
                   <Stack gap={2} minW={0} pr={8}>
-                    <HStack gap={3} flexWrap="wrap">
+                    <HStack gap={2} flexWrap="wrap">
                       <Drawer.Title fontSize="xl" flex="none">
                         {t('admin.rooms.drawer.title')}
                       </Drawer.Title>
-                      <RoundTitle roomStatus={room.status} statusOnly />
+                      <CopyIdButton value={room.id} label={t('admin.rooms.drawer.copyRoomId')} />
                     </HStack>
-                    <Text
-                      minW={0}
-                      fontFamily="mono"
-                      fontSize="xs"
-                      color="fg.muted"
-                      overflowWrap="anywhere"
-                      title={room.id}
-                    >
-                      {room.id}
-                    </Text>
                     <HStack gap={2} flexWrap="wrap" color="fg" fontSize="sm">
-                      <HStack gap={1}>
-                        <RoomLanguageFlag language={room.language} fontSize="sm" />
-                        <Text>{t(`roomLanguage.${room.language.toLowerCase()}`)}</Text>
-                      </HStack>
+                      <RoundTitle roomStatus={room.status} statusOnly />
+                      <RoomLanguageFlag language={room.language} fontSize="sm" />
                       <MetadataSeparator />
                       <Text>
                         {t(`admin.rooms.rounds.${String(room.configuredRounds)}`)}{' '}
@@ -163,19 +152,19 @@ function PlayerMatchup({ players }: { players: AdminRoomPlayerDto[] }) {
         borderTopWidth="1px"
         borderColor="border.divider"
       >
-        <PlayerScore player={leftPlayer} alignment="left" dash={dash} />
+        <PlayerRoundStats player={leftPlayer} alignment="left" dash={dash} />
         <HStack gap={{ base: 1, md: 2 }} align="center" minH="3.5rem">
-          <Text fontSize="sm" color="fg" fontWeight="medium" textAlign="right" whiteSpace="nowrap">
-            {leftPlayer ? t('admin.rooms.wins', { count: leftPlayer.wins }) : dash}
+          <Text fontSize="lg" fontWeight="bold" color="fg" whiteSpace="nowrap">
+            {leftPlayer?.matchScore ?? dash}
           </Text>
-          <Text aria-hidden="true" color="fg.subtle">
+          <Text aria-hidden="true" color="fg.subtle" fontSize="lg">
             —
           </Text>
-          <Text fontSize="sm" color="fg" fontWeight="medium" whiteSpace="nowrap">
-            {rightPlayer ? t('admin.rooms.wins', { count: rightPlayer.wins }) : dash}
+          <Text fontSize="lg" fontWeight="bold" color="fg" whiteSpace="nowrap">
+            {rightPlayer?.matchScore ?? dash}
           </Text>
         </HStack>
-        <PlayerScore player={rightPlayer} alignment="right" dash={dash} />
+        <PlayerRoundStats player={rightPlayer} alignment="right" dash={dash} />
       </Box>
     </Box>
   );
@@ -186,37 +175,30 @@ function PlayerIdentity(props: {
   alignment: 'left' | 'right';
   dash: string;
 }) {
-  const name = props.player?.displayName ?? props.player?.id ?? props.dash;
+  const { t } = useTranslation();
+  const name = props.player?.displayName ?? props.dash;
 
   return (
     <Stack gap={1} minW={0} align={props.alignment === 'right' ? 'end' : 'start'}>
-      <Text
-        maxW="full"
-        fontWeight="semibold"
-        textAlign={props.alignment}
-        overflowWrap="anywhere"
-        title={props.player?.displayName ?? props.player?.id}
-      >
-        {name}
-      </Text>
-      {props.player?.displayName ? (
+      <HStack gap={1} maxW="full" justify={props.alignment === 'right' ? 'end' : 'start'}>
         <Text
-          maxW="full"
-          fontFamily="mono"
-          fontSize="xs"
-          color="fg.muted"
+          minW={0}
+          fontWeight="semibold"
           textAlign={props.alignment}
           overflowWrap="anywhere"
-          title={props.player.id}
+          title={props.player?.displayName ?? undefined}
         >
-          {props.player.id}
+          {name}
         </Text>
-      ) : null}
+        {props.player ? (
+          <CopyIdButton value={props.player.id} label={t('admin.rooms.drawer.copyPlayerId')} />
+        ) : null}
+      </HStack>
     </Stack>
   );
 }
 
-function PlayerScore(props: {
+function PlayerRoundStats(props: {
   player: AdminRoomPlayerDto | undefined;
   alignment: 'left' | 'right';
   dash: string;
@@ -224,17 +206,21 @@ function PlayerScore(props: {
   const { t } = useTranslation();
 
   return (
-    <Stack gap={0} align={props.alignment === 'right' ? 'end' : 'start'}>
-      <Text fontSize="2xs" color="fg.muted" textTransform="uppercase" letterSpacing="wide">
-        {t('admin.rooms.drawer.score')}
-      </Text>
-      <Text fontSize="lg" fontWeight="bold">
-        {props.player?.matchScore ?? props.dash}
-      </Text>
-      <Text fontSize="xs" color="fg" opacity={0.75} fontWeight="medium" textAlign={props.alignment}>
+    <Stack
+      gap={0}
+      minH="3.5rem"
+      justify="space-between"
+      align={props.alignment === 'right' ? 'end' : 'start'}
+    >
+      <Text fontSize="sm" color="fg" opacity={0.75} fontWeight="medium" textAlign={props.alignment}>
         {t('admin.rooms.drawer.currentRound', {
           roundNumber: props.player?.currentRoundNumber ?? props.dash,
         })}
+      </Text>
+      <Text fontSize="sm" color="fg" opacity={0.75} fontWeight="medium" textAlign={props.alignment}>
+        {props.player
+          ? t('admin.rooms.drawer.playerWins', { count: props.player.wins })
+          : props.dash}
       </Text>
     </Stack>
   );
@@ -252,8 +238,7 @@ function RoundList({ room }: { room: AdminRoomDto }) {
     return <Text color="fg.muted">{t('admin.rooms.drawer.noRounds')}</Text>;
   }
 
-  const playerName = (player: AdminRoomPlayerDto | undefined) =>
-    player ? (player.displayName ?? player.id) : dash;
+  const playerName = (player: AdminRoomPlayerDto | undefined) => player?.displayName ?? dash;
 
   return (
     <Box overflowX="auto" overflowY="hidden" bg="bg.panel" borderRadius="xl">
@@ -318,7 +303,7 @@ function RoundHeader({ label, width }: { label: string; width?: string }) {
       py={2}
       color="fg"
       opacity={0.8}
-      fontSize="xs"
+      fontSize="sm"
       fontWeight="semibold"
       textTransform="uppercase"
       letterSpacing="wide"
@@ -497,4 +482,18 @@ function getRoundNumbers(room: AdminRoomDto): number[] {
 function formatDate(value: string): string {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+}
+
+function CopyIdButton({ value, label }: { value: string; label: string }) {
+  return (
+    <IconButton
+      aria-label={label}
+      title={label}
+      variant="ghost"
+      size="xs"
+      onClick={() => void navigator.clipboard.writeText(value)}
+    >
+      <Copy aria-hidden="true" />
+    </IconButton>
+  );
 }

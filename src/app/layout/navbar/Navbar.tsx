@@ -8,7 +8,7 @@ import {
   Link as ChakraLink,
   Text,
 } from '@chakra-ui/react';
-import { House, type LucideIcon, ShieldCheck, UserRound, Users } from 'lucide-react';
+import { House, type LucideIcon, ShieldCheck, Swords, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { useCurrentUser } from '../../../features/auth/useCurrentUser';
@@ -23,7 +23,7 @@ export function Navbar() {
 
   const navItems = [
     { to: '/', label: t('nav.home'), icon: House },
-    { to: '/my-rooms', label: t('nav.rooms'), icon: Users },
+    { to: '/my-rooms', label: t('nav.rooms'), icon: Swords },
     ...(me?.roles.includes('ADMIN')
       ? [{ to: '/admin', label: t('admin.navLink'), icon: ShieldCheck }]
       : []),
