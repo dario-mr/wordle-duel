@@ -63,9 +63,10 @@ function room(args?: {
   };
 }
 
-function panelProps(roomDto = room()) {
+function panelProps(roomDto = room(), isMatchWinner: boolean | null = null) {
   return {
     room: roomDto,
+    isMatchWinner,
     onNextRound: vi.fn(),
     isNextRoundPending: false,
     nextRoundError: null,
@@ -95,17 +96,34 @@ describe('RoundStatusPanel', () => {
     expect(screen.queryByRole('button', { name: 'room.round.nextRound' })).toBeNull();
   });
 
-  it('shows the match result after the match finishes', () => {
+  it('uses the match result instead of the current-round result after the match finishes', () => {
     render(
       <RoundStatusPanel
-        {...panelProps(room({ status: 'MATCH_FINISHED', roundNumber: 5, playerStatus: 'WON' }))}
+        {...panelProps(
+          room({ status: 'MATCH_FINISHED', roundNumber: 5, playerStatus: 'WON' }),
+          false,
+        )}
+      />,
+    );
+
+    expect(screen.getByText('room.round.youLostMatch')).toBeTruthy();
+    expect(screen.queryByText('room.round.youWonMatch')).toBeNull();
+    expect(screen.getByRole('button', { name: 'room.round.playAgain' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'room.round.backToHome' })).toBeNull();
+  });
+
+  it('shows the match winner result after the match finishes', () => {
+    render(
+      <RoundStatusPanel
+        {...panelProps(
+          room({ status: 'MATCH_FINISHED', roundNumber: 5, playerStatus: 'LOST' }),
+          true,
+        )}
       />,
     );
 
     expect(screen.getByText('room.round.youWonMatch')).toBeTruthy();
-    expect(screen.queryByText('room.round.youWonThisRound')).toBeNull();
-    expect(screen.getByRole('button', { name: 'room.round.playAgain' })).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'room.round.backToHome' })).toBeNull();
+    expect(screen.queryByText('room.round.youLostMatch')).toBeNull();
   });
 
   it('shows the persisted waiting state and blocks another rematch request', () => {
@@ -121,7 +139,10 @@ describe('RoundStatusPanel', () => {
   it('keeps the lost round solution visible after the match finishes', () => {
     render(
       <RoundStatusPanel
-        {...panelProps(room({ status: 'MATCH_FINISHED', roundNumber: 5, playerStatus: 'LOST' }))}
+        {...panelProps(
+          room({ status: 'MATCH_FINISHED', roundNumber: 5, playerStatus: 'WON' }),
+          false,
+        )}
       />,
     );
 

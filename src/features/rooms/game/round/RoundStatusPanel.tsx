@@ -7,6 +7,7 @@ import { PrimaryButton } from '../../../../shared/ui/BrandButton';
 
 export function RoundStatusPanel(props: {
   room: RoomDto;
+  isMatchWinner: boolean | null;
   onNextRound: () => void;
   isNextRoundPending: boolean;
   nextRoundError: unknown;
@@ -29,19 +30,26 @@ export function RoundStatusPanel(props: {
     props.room.rounds !== 'ENDLESS' &&
     currentRound.roundNumber === props.room.rounds;
   const isMatchFinished = props.room.status === 'MATCH_FINISHED';
+  const resultStatus = isMatchFinished
+    ? props.isMatchWinner === true
+      ? 'WON'
+      : props.isMatchWinner === false
+        ? 'LOST'
+        : null
+    : currentRound?.playerStatus;
   const result =
-    currentRound?.playerStatus === 'WON' ? (
+    resultStatus === 'WON' ? (
       <Stack gap={1} mb={3} align="center">
         <Text textAlign="center">
           {t(isMatchFinished ? 'room.round.youWonMatch' : 'room.round.youWonThisRound')}
         </Text>
       </Stack>
-    ) : currentRound?.playerStatus === 'LOST' ? (
+    ) : resultStatus === 'LOST' ? (
       <Stack gap={1} mb={3} align="center">
         <Text textAlign="center">
           {t(isMatchFinished ? 'room.round.youLostMatch' : 'room.round.youLostThisRound')}
         </Text>
-        {currentRound.solution ? (
+        {currentRound?.solution ? (
           <Text fontSize="sm">
             {t('room.round.solution')}: <Code>{currentRound.solution}</Code>
           </Text>
@@ -52,7 +60,7 @@ export function RoundStatusPanel(props: {
   if (props.room.status === 'MATCH_FINISHED') {
     return (
       <Stack gap={2} align="center" pt={2}>
-        {hasFinishedRound ? result : null}
+        {result}
         <Stack gap={2} w="full" maxW="32rem">
           <PrimaryButton
             w="full"
