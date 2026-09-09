@@ -2,6 +2,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ComponentProps, ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useNavigate } from 'react-router-dom';
 import type { RoomDto } from '../../src/features/rooms/types';
 import { RoomPage } from '../../src/features/rooms/game/RoomPage';
 import { roomQueryKey } from '../../src/features/rooms/queries';
@@ -198,6 +199,19 @@ function renderRoomPage(queryClient = createTestQueryClient(), path = '/rooms/ro
   );
 }
 
+function RoomPageWithSwitcher() {
+  const navigate = useNavigate();
+
+  return (
+    <>
+      <button type="button" onClick={() => void navigate('/rooms/room-2')}>
+        switch-room
+      </button>
+      <RoomPage />
+    </>
+  );
+}
+
 describe('room page flow', () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -236,6 +250,27 @@ describe('room page flow', () => {
     renderRoomPage();
     expect(await screen.findByText('join-gate:room-1')).toBeTruthy();
     expect(mocks.listRoomMessages).not.toHaveBeenCalled();
+  });
+
+  it('clears the draft when navigating to another room at the same round', async () => {
+    mocks.getRoom.mockImplementation((roomId: string) => Promise.resolve(liveRoom(roomId)));
+
+    render(
+      <QueryClientProvider client={createTestQueryClient()}>
+        {withMemoryRouter(<Route path="/rooms/:roomId?" element={<RoomPageWithSwitcher />} />, {
+          initialEntries: ['/rooms/room-1'],
+        })}
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: 'type-verde' }));
+    expect(screen.getByTestId('keyboard-value').textContent).toBe('VERDE');
+
+    fireEvent.click(screen.getByRole('button', { name: 'switch-room' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('keyboard-value').textContent).toBe('');
+    });
   });
 
   it('shows sharing and does not fetch chat while waiting for an opponent', async () => {

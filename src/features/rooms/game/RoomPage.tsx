@@ -47,9 +47,11 @@ export function RoomPage() {
   } = useRoomQuery(roomId, {
     enabled: authResolved,
   });
-  const [guessState, setGuessState] = useState<{ roundNumber?: number; value: string }>({
-    value: '',
-  });
+  const [guessState, setGuessState] = useState<{
+    roomId?: string;
+    roundNumber?: number;
+    value: string;
+  }>({ value: '' });
   const [completion, setCompletion] = useState({
     roomId,
     status: room?.status,
@@ -88,7 +90,9 @@ export function RoomPage() {
   const currentRoundNumber = currentRound?.roundNumber;
 
   const guess =
-    typeof currentRoundNumber === 'number' && guessState.roundNumber === currentRoundNumber
+    guessState.roomId === roomId &&
+    typeof currentRoundNumber === 'number' &&
+    guessState.roundNumber === currentRoundNumber
       ? guessState.value
       : '';
 
@@ -319,7 +323,7 @@ export function RoomPage() {
           value={guess}
           letterStatusByLetter={letterStatusByLetter}
           onChange={(nextValue) => {
-            setGuessState({ roundNumber: currentRoundNumber, value: nextValue });
+            setGuessState({ roomId, roundNumber: currentRoundNumber, value: nextValue });
           }}
           disabled={false}
           canSubmit={canSubmit}
@@ -332,7 +336,7 @@ export function RoomPage() {
               { word },
               {
                 onSuccess: () => {
-                  setGuessState({ roundNumber: currentRoundNumber, value: '' });
+                  setGuessState({ roomId, roundNumber: currentRoundNumber, value: '' });
                 },
                 onError: (err) => {
                   showErrorToast(getErrorMessage(err));
