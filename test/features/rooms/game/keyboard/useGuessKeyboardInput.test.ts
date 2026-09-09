@@ -155,6 +155,46 @@ describe('useGuessKeyboardInput', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
+  it('ignores handled events, native controls, and dialog contents', () => {
+    const onChange = vi.fn();
+    const onSubmit = vi.fn();
+    const { result } = renderHook(() =>
+      useGuessKeyboardInput({
+        value: 'AB',
+        disabled: false,
+        canSubmit: true,
+        isSubmitting: false,
+        onChange,
+        onSubmit,
+      }),
+    );
+    const button = document.createElement('button');
+    const link = document.createElement('a');
+    link.href = '#';
+    const select = document.createElement('select');
+    const dialog = document.createElement('div');
+    dialog.setAttribute('role', 'dialog');
+    const dialogSurface = document.createElement('div');
+    dialogSurface.tabIndex = 0;
+    dialog.append(dialogSurface);
+    document.body.append(button, link, select, dialog);
+
+    for (const target of [button, link, select, dialogSurface]) {
+      target.focus();
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'c' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    }
+
+    const handledEvent = new KeyboardEvent('keydown', { key: 'c', cancelable: true });
+    handledEvent.preventDefault();
+    window.dispatchEvent(handledEvent);
+
+    expect(result.current.isBlocked).toBe(false);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(handledEvent.defaultPrevented).toBe(true);
+  });
+
   it('ignores modified keys and letters beyond the max word length', () => {
     const onChange = vi.fn();
     const onSubmit = vi.fn();

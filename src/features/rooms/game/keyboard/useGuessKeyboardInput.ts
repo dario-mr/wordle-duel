@@ -55,7 +55,7 @@ export function useGuessKeyboardInput(params: {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (isBlockedRef.current) {
+      if (isBlockedRef.current || e.defaultPrevented) {
         return;
       }
 
@@ -68,7 +68,11 @@ export function useGuessKeyboardInput(params: {
         active &&
         (active.tagName === 'INPUT' ||
           active.tagName === 'TEXTAREA' ||
-          (active as HTMLElement).isContentEditable)
+          active.tagName === 'BUTTON' ||
+          active.tagName === 'A' ||
+          active.tagName === 'SELECT' ||
+          (active as HTMLElement).isContentEditable ||
+          active.closest('button, a, select, [role="dialog"], dialog'))
       ) {
         return;
       }
