@@ -225,7 +225,7 @@ describe('roomQueries', () => {
   });
 
   describe('useSendRoomMessageMutation', () => {
-    it('adds a sent message to the room message cache', async () => {
+    it('refreshes messages after send without duplicating a fetched message', async () => {
       const { queryClient, wrapper } = createQueryClientWrapper();
       const message = {
         id: 1,
@@ -233,43 +233,110 @@ describe('roomQueries', () => {
         preset: 'GOOD_LUCK' as const,
         createdAt: '2026-09-03T12:00:00Z',
       };
-      mocks.sendRoomMessage.mockResolvedValue(message);
+      const messages = { messages: [message], unreadCount: 0 };
+      mocks.listRoomMessages.mockResolvedValue(messages);
+      let resolveSend: (value: typeof message) => void = () => undefined;
+      mocks.sendRoomMessage.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveSend = resolve;
+          }),
+      );
 
-      const { result } = renderHook(() => useSendRoomMessageMutation({ roomId: 'room-1' }), {
-        wrapper,
+      const { result } = renderHook(
+        () => ({
+          messages: useRoomMessagesQuery('room-1'),
+          mutation: useSendRoomMessageMutation({ roomId: 'room-1' }),
+        }),
+        { wrapper },
+      );
+
+      await waitFor(() => {
+        expect(result.current.messages.data).toEqual(messages);
       });
 
-      await act(async () => {
-        await result.current.mutateAsync('GOOD_LUCK');
+      act(() => {
+        result.current.mutation.mutate('GOOD_LUCK');
       });
+
+      await waitFor(() => {
+        expect(result.current.mutation.isPending).toBe(true);
+      });
+      expect(queryClient.getQueryData(roomMessagesQueryKey('room-1'))).toEqual(messages);
+      resolveSend(message);
 
       expect(mocks.sendRoomMessage).toHaveBeenCalledWith({
         roomId: 'room-1',
         body: { preset: 'GOOD_LUCK' },
       });
-      expect(queryClient.getQueryData(['roomMessages', 'room-1'])).toEqual({
-        messages: [message],
-        unreadCount: 0,
+
+      await waitFor(() => {
+        expect(result.current.mutation.isPending).toBe(false);
+        expect(mocks.listRoomMessages).toHaveBeenCalledTimes(2);
       });
+      expect(queryClient.getQueryData(roomMessagesQueryKey('room-1'))).toEqual(messages);
     });
   });
 
   describe('useMarkRoomMessagesReadMutation', () => {
-    it('replaces the room message cache with the acknowledged response', async () => {
+    it('refreshes instead of overwriting newer messages with a late acknowledgement', async () => {
       const { queryClient, wrapper } = createQueryClientWrapper();
-      const data: RoomMessagesDto = { messages: [], unreadCount: 0 };
-      mocks.markRoomMessagesRead.mockResolvedValue(data);
+      const earlierMessage = {
+        id: 1,
+        senderPlayerId: 'player-2',
+        preset: 'WOW' as const,
+        createdAt: '2026-09-03T12:00:00Z',
+      };
+      const newerMessages: RoomMessagesDto = {
+        messages: [1, 2, 3].map((id) => ({
+          id,
+          senderPlayerId: 'player-1',
+          preset: 'GOOD_LUCK' as const,
+          createdAt: `2026-09-03T12:00:0${String(id)}Z`,
+        })),
+        unreadCount: 0,
+      };
+      const staleAcknowledgement: RoomMessagesDto = { messages: [earlierMessage], unreadCount: 0 };
+      mocks.listRoomMessages
+        .mockResolvedValueOnce({ messages: [earlierMessage], unreadCount: 1 })
+        .mockResolvedValue(newerMessages);
+      let resolveRead: (value: RoomMessagesDto) => void = () => undefined;
+      mocks.markRoomMessagesRead.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveRead = resolve;
+          }),
+      );
 
-      const { result } = renderHook(() => useMarkRoomMessagesReadMutation({ roomId: 'room-1' }), {
-        wrapper,
+      const { result } = renderHook(
+        () => ({
+          messages: useRoomMessagesQuery('room-1'),
+          mutation: useMarkRoomMessagesReadMutation({ roomId: 'room-1' }),
+        }),
+        { wrapper },
+      );
+
+      await waitFor(() => {
+        expect(result.current.messages.data?.messages).toEqual([earlierMessage]);
       });
 
-      await act(async () => {
-        await result.current.mutateAsync();
+      act(() => {
+        result.current.mutation.mutate();
       });
+
+      await waitFor(() => {
+        expect(result.current.mutation.isPending).toBe(true);
+      });
+      queryClient.setQueryData(roomMessagesQueryKey('room-1'), newerMessages);
+      resolveRead(staleAcknowledgement);
 
       expect(mocks.markRoomMessagesRead).toHaveBeenCalledWith('room-1');
-      expect(queryClient.getQueryData(['roomMessages', 'room-1'])).toEqual(data);
+
+      await waitFor(() => {
+        expect(result.current.mutation.isPending).toBe(false);
+        expect(mocks.listRoomMessages).toHaveBeenCalledTimes(2);
+      });
+      expect(queryClient.getQueryData(roomMessagesQueryKey('room-1'))).toEqual(newerMessages);
     });
   });
 });

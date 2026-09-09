@@ -432,7 +432,9 @@ describe('room page flow', () => {
 
   it('uses the persisted unread count and marks messages read when chat opens', async () => {
     mocks.getRoom.mockResolvedValue(liveRoom('room-1'));
-    mocks.listRoomMessages.mockResolvedValue({ messages: [], unreadCount: 2 });
+    mocks.listRoomMessages
+      .mockResolvedValueOnce({ messages: [], unreadCount: 2 })
+      .mockResolvedValue({ messages: [], unreadCount: 0 });
     mocks.markRoomMessagesRead.mockResolvedValue({ messages: [], unreadCount: 0 });
 
     renderRoomPage(createTestQueryClient());
