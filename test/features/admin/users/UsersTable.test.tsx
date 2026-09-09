@@ -105,6 +105,26 @@ const user: AdminUserDto = {
 };
 
 describe('UsersTable', () => {
+  it('keeps a focused filter input mounted when controlled filters change', () => {
+    const props = {
+      users: [user],
+      sort: null,
+      onSortChange: vi.fn(),
+      filters: { fullName: '', displayName: '', email: '' },
+      onFilterValueChange: vi.fn(),
+      onFilterApply: vi.fn(),
+    };
+    const { rerender } = render(<UsersTable {...props} />);
+    const input = screen.getByRole('textbox', { name: 'fullName' });
+
+    input.focus();
+    fireEvent.change(input, { target: { value: 'alice' } });
+    rerender(<UsersTable {...props} filters={{ ...props.filters, fullName: 'alice' }} />);
+
+    expect(screen.getByRole('textbox', { name: 'fullName' })).toBe(input);
+    expect(document.activeElement).toBe(input);
+  });
+
   it('resizes a column by dragging its divider and respects the minimum width', () => {
     render(
       <UsersTable

@@ -263,7 +263,9 @@ export function RoomsTable(props: {
               {headerGroup.headers.map((header) => (
                 <Table.ColumnHeader key={header.id} truncate p={0} position="relative">
                   {!header.isPlaceholder &&
-                    flexRender(header.column.columnDef.header, header.getContext())}
+                    (typeof header.column.columnDef.header === 'function'
+                      ? header.column.columnDef.header(header.getContext())
+                      : header.column.columnDef.header)}
                   {header.column.getCanResize() && (
                     <ColumnResizeHandle
                       header={header}
