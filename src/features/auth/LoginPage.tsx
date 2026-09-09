@@ -3,7 +3,8 @@ import { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { beginGoogleLogin } from './oauth';
-import { useCurrentUser } from './useCurrentUser';
+import { AuthErrorAlert } from './AuthErrorAlert';
+import { useMeQuery } from './queries';
 import { GoogleLoginButton } from './GoogleLoginButton';
 import { STORAGE_KEYS } from '../../state/storageKeys';
 import { sanitizeReturnTo } from './sanitizeReturnTo';
@@ -12,7 +13,7 @@ export function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const me = useCurrentUser();
+  const { data: me, error, refetch } = useMeQuery();
 
   const returnToParam = params.get('returnTo');
 
@@ -28,6 +29,10 @@ export function LoginPage() {
       sessionStorage.setItem(STORAGE_KEYS.authReturnTo, sanitizedReturnTo);
     }
   }, [returnToParam]);
+
+  if (error && me === undefined) {
+    return <AuthErrorAlert error={error} onRetry={() => void refetch()} />;
+  }
 
   if (me) {
     return null;

@@ -17,7 +17,8 @@ import {
 import { UNAUTHENTICATED_CODE, WdsApiError } from '../../../shared/api/apiError';
 import { getErrorMessage } from '../../../shared/api/errors';
 import type { AdminRoomDto } from './types';
-import { useCurrentUser } from '../../auth/useCurrentUser';
+import { AuthErrorAlert } from '../../auth/AuthErrorAlert';
+import { useMeQuery } from '../../auth/queries';
 import { ErrorAlert } from '../../../shared/ui/ErrorAlert';
 import { RoomDetailsDrawer } from './RoomDetailsDrawer';
 import { RoomsSkeleton } from './RoomsSkeleton';
@@ -27,7 +28,7 @@ import { useAdminRoomsQuery } from './queries';
 export function RoomsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const me = useCurrentUser();
+  const { data: me, error: authError, refetch: refetchAuth } = useMeQuery();
   const [filterDraft, setFilterDraft] = useState(EMPTY_ADMIN_ROOMS_FILTERS);
   const [filters, setFilters] = useState(EMPTY_ADMIN_ROOMS_FILTERS);
   const [sort, setSort] = useState<AdminRoomsSort>(null);
@@ -83,6 +84,10 @@ export function RoomsPage() {
   const handleSortChange = (field: AdminRoomsSortField) => {
     setSort((current) => toggleAdminRoomsSort(current, field));
   };
+
+  if (authError && me === undefined) {
+    return <AuthErrorAlert error={authError} onRetry={() => void refetchAuth()} />;
+  }
 
   if (!data && (isLoading || isFetching)) {
     return <RoomsSkeleton />;

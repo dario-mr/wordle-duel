@@ -12,6 +12,8 @@ import { withMemoryRouter, Route } from '../testUtils/router';
 
 const mocks = vi.hoisted(() => ({
   getCurrentUser: vi.fn(),
+  authError: null as unknown,
+  refetchAuth: vi.fn(),
   getRoom: vi.fn(),
   requestRematch: vi.fn(),
   listRoomMessages: vi.fn(),
@@ -23,9 +25,23 @@ const mocks = vi.hoisted(() => ({
   showToast: vi.fn(),
 }));
 
-vi.mock('../../src/features/auth/useCurrentUser', () => ({
-  useCurrentUser: () =>
-    mocks.getCurrentUser() as { id: string; roles: string[] } | null | undefined,
+vi.mock('../../src/features/auth/queries', () => ({
+  useMeQuery: () => ({
+    data: mocks.getCurrentUser() as { id: string; roles: string[] } | null | undefined,
+    error: mocks.authError,
+    refetch: mocks.refetchAuth,
+  }),
+}));
+
+vi.mock('../../src/features/auth/AuthErrorAlert', () => ({
+  AuthErrorAlert: ({ error, onRetry }: { error: unknown; onRetry: () => void }) => (
+    <div>
+      {`auth-error:${error instanceof Error ? error.message : String(error)}`}
+      <button type="button" onClick={onRetry}>
+        retry-auth
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock('../../src/features/rooms/api', () => ({

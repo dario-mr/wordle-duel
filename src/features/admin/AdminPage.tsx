@@ -3,13 +3,14 @@ import { DoorOpen, Users } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useCurrentUser } from '../auth/useCurrentUser';
+import { AuthErrorAlert } from '../auth/AuthErrorAlert';
+import { useMeQuery } from '../auth/queries';
 import { Card } from '../../shared/ui/Card';
 
 export function AdminPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const me = useCurrentUser();
+  const { data: me, error, refetch } = useMeQuery();
   const isAdmin = me?.roles.includes('ADMIN') ?? false;
 
   useEffect(() => {
@@ -17,6 +18,10 @@ export function AdminPage() {
       void navigate('/', { replace: true });
     }
   }, [me, isAdmin, navigate]);
+
+  if (error && me === undefined) {
+    return <AuthErrorAlert error={error} onRetry={() => void refetch()} />;
+  }
 
   if (!me || !isAdmin) {
     return null;

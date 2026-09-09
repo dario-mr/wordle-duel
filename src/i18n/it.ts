@@ -8,6 +8,7 @@ export default {
     me: 'Profilo',
   },
   common: {
+    retry: 'Riprova',
     theme: 'Tema',
     light: 'Chiaro',
     dark: 'Scuro',
@@ -15,6 +16,9 @@ export default {
     copied: 'Copiato',
     copyLink: 'Copia link',
     share: 'Condividi',
+  },
+  auth: {
+    errorTitle: 'Autenticazione non riuscita',
   },
   errors: {
     unknown: 'Errore sconosciuto',

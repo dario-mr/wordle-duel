@@ -34,6 +34,8 @@ interface MockIntersectionObserverEntry {
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   getCurrentUser: vi.fn(),
+  authError: null as unknown,
+  refetchAuth: vi.fn(),
   queryResult: {
     data: { pages: [] },
     isLoading: false,
@@ -60,8 +62,23 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
 }));
 
-vi.mock('../../../../src/features/auth/useCurrentUser', () => ({
-  useCurrentUser: () => mocks.getCurrentUser() as { id: string; roles: string[] } | null,
+vi.mock('../../../../src/features/auth/queries', () => ({
+  useMeQuery: () => ({
+    data: mocks.getCurrentUser() as { id: string; roles: string[] } | null | undefined,
+    error: mocks.authError,
+    refetch: mocks.refetchAuth,
+  }),
+}));
+
+vi.mock('../../../../src/features/auth/AuthErrorAlert', () => ({
+  AuthErrorAlert: ({ error, onRetry }: { error: unknown; onRetry: () => void }) => (
+    <div>
+      {`auth-error:${error instanceof Error ? error.message : String(error)}`}
+      <button type="button" onClick={onRetry}>
+        retry-auth
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock('../../../../src/shared/api/errors', () => ({
@@ -131,6 +148,8 @@ vi.mock('../../../../src/features/admin/users/UsersTable', () => ({
 describe('UsersPage', () => {
   beforeEach(() => {
     mocks.navigate.mockReset();
+    mocks.authError = null;
+    mocks.refetchAuth.mockReset();
     resetAuthModuleMocks(mocks, { id: 'admin-1', roles: ['ADMIN'] });
     mocks.queryResult = {
       data: {
@@ -188,6 +207,17 @@ describe('UsersPage', () => {
 
     expect(mocks.navigate).not.toHaveBeenCalled();
     expect(mocks.lastQueryArgs?.enabled).toBe(false);
+  });
+
+  it('shows an authentication error with a retry action', () => {
+    mocks.getCurrentUser.mockReturnValue(undefined);
+    mocks.authError = new Error('auth lookup failed');
+
+    render(<UsersPage />);
+
+    expect(screen.getByText('auth-error:auth lookup failed')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'retry-auth' }));
+    expect(mocks.refetchAuth).toHaveBeenCalledTimes(1);
   });
 
   it('redirects away when the admin query returns 403', async () => {

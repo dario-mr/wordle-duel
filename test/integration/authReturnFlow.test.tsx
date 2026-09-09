@@ -17,8 +17,12 @@ vi.mock('../../src/features/auth/oauth', () => ({
   beginGoogleLogin: mocks.beginGoogleLogin,
 }));
 
-vi.mock('../../src/features/auth/useCurrentUser', () => ({
-  useCurrentUser: () => mocks.getCurrentUser() as { id: string } | null | undefined,
+vi.mock('../../src/features/auth/queries', () => ({
+  useMeQuery: () => ({
+    data: mocks.getCurrentUser() as { id: string } | null | undefined,
+    error: null,
+    refetch: vi.fn(),
+  }),
 }));
 
 vi.mock('react-i18next', async () => await import('../testUtils/reactI18nextMock'));

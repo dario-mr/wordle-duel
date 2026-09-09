@@ -8,6 +8,7 @@ export default {
     me: 'Me',
   },
   common: {
+    retry: 'Retry',
     theme: 'Theme',
     light: 'Light',
     dark: 'Dark',
@@ -15,6 +16,9 @@ export default {
     copied: 'Copied',
     copyLink: 'Copy link',
     share: 'Share',
+  },
+  auth: {
+    errorTitle: 'Authentication failed',
   },
   errors: {
     unknown: 'Unknown error',

@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { UNAUTHENTICATED_CODE, WdsApiError } from '../../../shared/api/apiError';
 import { getErrorMessage } from '../../../shared/api/errors';
-import { useCurrentUser } from '../../auth/useCurrentUser';
+import { AuthErrorAlert } from '../../auth/AuthErrorAlert';
+import { useMeQuery } from '../../auth/queries';
 import { ErrorAlert } from '../../../shared/ui/ErrorAlert';
 import { MyRoomsSkeleton } from './MyRoomsSkeleton';
 import { MyRoomsView } from './MyRoomsView';
@@ -12,11 +13,15 @@ import { useMyRoomsQuery } from '../queries';
 export function MyRoomsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const me = useCurrentUser();
+  const { data: me, error: authError, refetch: refetchAuth } = useMeQuery();
 
   const { data, isLoading, isFetching, error } = useMyRoomsQuery({ enabled: me !== undefined });
 
   const rooms = data ?? [];
+
+  if (authError && me === undefined) {
+    return <AuthErrorAlert error={authError} onRetry={() => void refetchAuth()} />;
+  }
 
   if (!data && (isLoading || isFetching)) {
     return <MyRoomsSkeleton />;

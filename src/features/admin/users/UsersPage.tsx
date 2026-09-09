@@ -12,7 +12,8 @@ import {
 import { toggleUsersSort, toUsersSortParam, type UsersSort, type UsersSortField } from './sorts';
 import { UNAUTHENTICATED_CODE, WdsApiError } from '../../../shared/api/apiError';
 import { getErrorMessage } from '../../../shared/api/errors';
-import { useCurrentUser } from '../../auth/useCurrentUser';
+import { AuthErrorAlert } from '../../auth/AuthErrorAlert';
+import { useMeQuery } from '../../auth/queries';
 import { UsersSkeleton } from './UsersSkeleton';
 import { UsersTable } from './UsersTable';
 import { ErrorAlert } from '../../../shared/ui/ErrorAlert';
@@ -21,7 +22,7 @@ import { useAdminUsersQuery } from './queries';
 export function UsersPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const me = useCurrentUser();
+  const { data: me, error: authError, refetch: refetchAuth } = useMeQuery();
   const [sort, setSort] = useState<UsersSort>(null);
   const [filterDraft, setFilterDraft] = useState(EMPTY_USERS_FILTERS);
   const [filters, setFilters] = useState(EMPTY_USERS_FILTERS);
@@ -85,6 +86,10 @@ export function UsersPage() {
     const trimmed = trimUsersFilters(filterDraft);
     setFilters((current) => (usersFiltersEqual(current, trimmed) ? current : trimmed));
   };
+
+  if (authError && me === undefined) {
+    return <AuthErrorAlert error={authError} onRetry={() => void refetchAuth()} />;
+  }
 
   if (!data && (isLoading || isFetching)) {
     return <UsersSkeleton />;

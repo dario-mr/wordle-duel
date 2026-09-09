@@ -5,7 +5,8 @@ import { useParams } from 'react-router-dom';
 import { UNAUTHENTICATED_CODE, WdsApiError } from '../../../shared/api/apiError';
 import { getErrorMessage } from '../../../shared/api/errors';
 import type { GuessLetterStatus } from '../types';
-import { useCurrentUser } from '../../auth/useCurrentUser';
+import { AuthErrorAlert } from '../../auth/AuthErrorAlert';
+import { useMeQuery } from '../../auth/queries';
 import { WORD_LENGTH } from '../constants';
 import { ErrorAlert } from '../../../shared/ui/ErrorAlert';
 import { GuessKeyboard } from './keyboard/GuessKeyboard';
@@ -33,7 +34,7 @@ import { roundAnimations } from './roundAnimations.ts';
 export function RoomPage() {
   const { t } = useTranslation();
   const { roomId } = useParams();
-  const meUser = useCurrentUser();
+  const { data: meUser, error: authError, refetch: refetchAuth } = useMeQuery();
 
   const myPlayerId = meUser?.id ?? '';
   const authResolved = meUser !== undefined;
@@ -217,6 +218,10 @@ export function RoomPage() {
         <ErrorAlert title={t('room.invalidLinkTitle')} message={t('room.invalidLinkMessage')} />
       </Stack>
     );
+  }
+
+  if (authError && meUser === undefined) {
+    return <AuthErrorAlert error={authError} onRetry={() => void refetchAuth()} />;
   }
 
   if (!room && (isLoading || isFetching)) {

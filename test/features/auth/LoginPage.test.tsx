@@ -9,6 +9,8 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   beginGoogleLogin: vi.fn(),
   getCurrentUser: vi.fn(),
+  authError: null as unknown,
+  refetchMe: vi.fn(),
   searchParams: new URLSearchParams(),
 }));
 
@@ -16,8 +18,23 @@ vi.mock('../../../src/features/auth/oauth', () => ({
   beginGoogleLogin: mocks.beginGoogleLogin,
 }));
 
-vi.mock('../../../src/features/auth/useCurrentUser', () => ({
-  useCurrentUser: () => mocks.getCurrentUser() as { id: string } | null | undefined,
+vi.mock('../../../src/features/auth/queries', () => ({
+  useMeQuery: () => ({
+    data: mocks.getCurrentUser() as { id: string } | null | undefined,
+    error: mocks.authError,
+    refetch: mocks.refetchMe,
+  }),
+}));
+
+vi.mock('../../../src/features/auth/AuthErrorAlert', () => ({
+  AuthErrorAlert: ({ error, onRetry }: { error: unknown; onRetry: () => void }) => (
+    <div>
+      {`auth-error:${error instanceof Error ? error.message : String(error)}`}
+      <button type="button" onClick={onRetry}>
+        retry-auth
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -63,6 +80,8 @@ describe('LoginPage', () => {
   beforeEach(() => {
     mocks.navigate.mockReset();
     mocks.beginGoogleLogin.mockReset();
+    mocks.authError = null;
+    mocks.refetchMe.mockReset();
     resetAuthModuleMocks(mocks);
     mocks.searchParams = new URLSearchParams();
     window.sessionStorage.clear();
@@ -97,6 +116,17 @@ describe('LoginPage', () => {
       expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
     });
     expect(container.firstChild).toBeNull();
+  });
+
+  it('shows an authentication error with a retry action', () => {
+    mocks.getCurrentUser.mockReturnValue(undefined);
+    mocks.authError = new Error('auth lookup failed');
+
+    render(<LoginPage />);
+
+    expect(screen.getByText('auth-error:auth lookup failed')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'retry-auth' }));
+    expect(mocks.refetchMe).toHaveBeenCalledTimes(1);
   });
 
   it('clicking login stores a safe returnTo and starts Google login', async () => {
