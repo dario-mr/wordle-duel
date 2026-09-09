@@ -1,11 +1,3 @@
-export const USERS_COL_WIDTHS = {
-  avatar: '60px',
-  fullName: '20%',
-  displayName: '20%',
-  email: '30%',
-  joined: '120px',
-} as const;
-
 export const USERS_COLUMN_SIZING = {
   avatar: { size: 60, minSize: 60, maxSize: 60 },
   fullName: { size: 160, minSize: 120 },

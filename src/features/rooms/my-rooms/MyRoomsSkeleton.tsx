@@ -1,45 +1,103 @@
-import { Box, HStack, Skeleton, Stack } from '@chakra-ui/react';
+import { Box, Heading, Skeleton, Stack } from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../../../shared/ui/Card';
 
+const MY_ROOMS_SKELETON_CARD_COUNT = 3;
+const MY_ROOMS_SKELETON_SIZES = {
+  title: { height: '28px', width: '12rem' },
+  language: '24px',
+  status: { height: '16px', width: '6rem' },
+  score: { height: '24px', width: '5rem' },
+  round: { height: '20px', width: '8rem' },
+  wins: { height: '20px', width: '6rem' },
+  playerNames: ['8rem', '6rem'],
+  playerWins: { height: '24px', width: '1rem' },
+} as const;
+
 export function MyRoomsSkeleton() {
-  const cards = 3;
+  const { t } = useTranslation();
 
   return (
     <Stack gap={4}>
-      <Skeleton height="28px" width="7rem" mx="auto" borderRadius="md" />
+      <Heading size="lg" textAlign="center">
+        {t('myRooms.title')}
+      </Heading>
 
       <Stack gap={4}>
-        {Array.from({ length: cards }).map((_, idx) => (
-          <Card key={idx} borderRadius="3xl">
-            <Stack gap={2} w="full">
-              <Box display="flex" justifyContent="space-between" alignItems="center" gap={3}>
-                <Skeleton height="28px" width="160px" borderRadius="md" />
-                <Skeleton height="24px" width="7rem" borderRadius="full" />
-              </Box>
-
-              <HStack gap={3} alignItems="center" flexWrap="wrap">
-                <Skeleton height="20px" width="120px" borderRadius="md" opacity={0.7} />
-                <Skeleton boxSize="24px" borderRadius="md" opacity={0.7} />
-              </HStack>
-
-              <Box my={2} borderTopWidth="1px" borderColor="border.divider" />
-
-              <Stack gap={3}>
-                <Box display="grid" gridTemplateColumns="auto 1fr auto" alignItems="center" gap={4}>
-                  <Skeleton boxSize={6} borderRadius="full" />
-                  <Skeleton height="24px" width="140px" borderRadius="md" />
-                  <Skeleton height="24px" width="24px" borderRadius="md" />
-                </Box>
-                <Box display="grid" gridTemplateColumns="auto 1fr auto" alignItems="center" gap={4}>
-                  <Skeleton boxSize={6} borderRadius="full" />
-                  <Skeleton height="24px" width="140px" borderRadius="md" />
-                  <Skeleton height="24px" width="24px" borderRadius="md" />
-                </Box>
-              </Stack>
-            </Stack>
-          </Card>
+        {Array.from({ length: MY_ROOMS_SKELETON_CARD_COUNT }).map((_, index) => (
+          <MyRoomCardSkeleton key={index} />
         ))}
       </Stack>
     </Stack>
+  );
+}
+
+function MyRoomCardSkeleton() {
+  const sizes = MY_ROOMS_SKELETON_SIZES;
+
+  return (
+    <Card py={4}>
+      <Stack gap={3} w="full">
+        <Box w="full" display="flex" alignItems="center" justifyContent="space-between">
+          <Skeleton height={sizes.title.height} width={sizes.title.width} borderRadius="md" />
+          <Skeleton boxSize={sizes.language} borderRadius="md" />
+        </Box>
+
+        <Card boxShadow="none" borderRadius="2xl" bg="bg.panel" py={2.5}>
+          <Stack gap={3} w="full">
+            <Stack gap={1} align="center">
+              <Skeleton height={sizes.status.height} width={sizes.status.width} />
+              <Skeleton {...sizes.score} />
+              <Skeleton height={sizes.round.height} width={sizes.round.width} />
+            </Stack>
+          </Stack>
+        </Card>
+
+        <Stack gap={2}>
+          <Box
+            mt={3}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            gap={2}
+            opacity={0.6}
+          >
+            <Skeleton {...sizes.wins} />
+          </Box>
+          <Box borderWidth="1px" borderStyle="dashed" borderColor="border.muted" borderRadius="xl">
+            {sizes.playerNames.map((width, index) => (
+              <Box
+                key={width}
+                px={3}
+                py={2}
+                borderBottomWidth={index === 0 ? '1px' : 0}
+                borderStyle="dashed"
+                borderColor="border.muted"
+              >
+                <Box
+                  display="grid"
+                  gridTemplateColumns="minmax(0, 1fr) 2.5rem"
+                  alignItems="stretch"
+                  gap={4}
+                >
+                  <Skeleton alignSelf="center" height={sizes.score.height} width={width} />
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    borderLeftWidth="1px"
+                    borderStyle="dashed"
+                    borderColor="border.muted"
+                    pl={4}
+                  >
+                    <Skeleton {...sizes.playerWins} />
+                  </Box>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </Stack>
+      </Stack>
+    </Card>
   );
 }

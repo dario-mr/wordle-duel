@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { UsersSortField } from './sorts';
 import { SortHeaderButton } from '../shared/table/SortHeaderButton';
 import {
-  USERS_COL_WIDTHS,
+  USERS_COLUMN_SIZING,
   USERS_HEADER_FILTER_SLOT_HEIGHT,
   USERS_HEADER_GAP,
   USERS_HEADER_LABEL_SLOT_HEIGHT,
@@ -38,17 +38,22 @@ export function UsersSkeleton() {
         {t('admin.users.title')}
       </Heading>
 
-      <Box borderWidth="1px" borderRadius="xl" overflow="hidden">
-        <Table.Root tableLayout="fixed">
+      <Box borderWidth="1px" borderRadius="xl" overflowX="auto" overflowY="hidden">
+        <Table.Root tableLayout="fixed" width="full">
+          <colgroup>
+            {Object.entries(USERS_COLUMN_SIZING).map(([column, { size }]) => (
+              <col key={column} style={{ width: `${String(size)}px` }} />
+            ))}
+          </colgroup>
           <Table.Header>
             <Table.Row bg="bg.mutedCard">
-              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.avatar} p={0}>
+              <Table.ColumnHeader truncate p={0}>
                 <VStack align="stretch" gap={USERS_HEADER_GAP}>
                   <Box height={USERS_HEADER_LABEL_SLOT_HEIGHT} />
                   <Box height={USERS_HEADER_FILTER_SLOT_HEIGHT} />
                 </VStack>
               </Table.ColumnHeader>
-              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.fullName} p={0}>
+              <Table.ColumnHeader truncate p={0}>
                 <VStack align="stretch" gap={USERS_HEADER_GAP} py={2} px={1}>
                   <SortHeaderButton
                     label={t('admin.users.columns.fullName')}
@@ -59,7 +64,7 @@ export function UsersSkeleton() {
                   <FilterInputPlaceholder />
                 </VStack>
               </Table.ColumnHeader>
-              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.displayName} p={0}>
+              <Table.ColumnHeader truncate p={0}>
                 <VStack align="stretch" gap={USERS_HEADER_GAP} py={2} px={1}>
                   <SortHeaderButton
                     label={t('admin.users.columns.displayName')}
@@ -70,7 +75,7 @@ export function UsersSkeleton() {
                   <FilterInputPlaceholder />
                 </VStack>
               </Table.ColumnHeader>
-              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.email} p={0}>
+              <Table.ColumnHeader truncate p={0}>
                 <VStack align="stretch" gap={USERS_HEADER_GAP} py={2} px={1}>
                   <SortHeaderButton
                     label={t('admin.users.columns.email')}
@@ -81,7 +86,7 @@ export function UsersSkeleton() {
                   <FilterInputPlaceholder />
                 </VStack>
               </Table.ColumnHeader>
-              <Table.ColumnHeader truncate width={USERS_COL_WIDTHS.joined} p={0}>
+              <Table.ColumnHeader truncate p={0}>
                 <VStack align="stretch" gap={USERS_HEADER_GAP}>
                   <SortHeaderButton
                     label={t('admin.users.columns.joined')}

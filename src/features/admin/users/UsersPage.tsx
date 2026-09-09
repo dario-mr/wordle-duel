@@ -6,8 +6,8 @@ import {
   EMPTY_USERS_FILTERS,
   getActiveUsersFilters,
   trimUsersFilters,
-  usersFiltersEqual,
   type UsersFilterField,
+  usersFiltersEqual,
 } from './filters';
 import { toggleUsersSort, toUsersSortParam, type UsersSort, type UsersSortField } from './sorts';
 import { UNAUTHENTICATED_CODE, WdsApiError } from '../../../shared/api/apiError';

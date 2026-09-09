@@ -1,5 +1,13 @@
 import { Box, Button, Heading, Skeleton, Stack, Table, Text, VStack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
+import {
+  ROOMS_COLUMN_SIZING,
+  ROOMS_HEADER_CONTROL_HEIGHTS,
+  ROOMS_HEADER_MIN_HEIGHT,
+  ROOMS_ROW_SKELETON_SIZES,
+  ROOMS_STACK_GAP,
+  ROOMS_TABLE_MIN_WIDTH,
+} from './roomsTable.constants';
 
 export function RoomsSkeleton() {
   const { t } = useTranslation();
@@ -9,22 +17,53 @@ export function RoomsSkeleton() {
       <Heading size="lg" textAlign="center">
         {t('admin.rooms.title')}
       </Heading>
-      <Box borderWidth="1px" borderRadius="xl" overflow="hidden">
-        <Table.Root minW="60rem">
+      <Box borderWidth="1px" borderRadius="xl" overflowX="auto" overflowY="hidden">
+        <Table.Root tableLayout="fixed" width="full" minW={ROOMS_TABLE_MIN_WIDTH}>
+          <colgroup>
+            {Object.entries(ROOMS_COLUMN_SIZING).map(([column, { size }]) => (
+              <col key={column} style={{ width: `${String(size)}px` }} />
+            ))}
+          </colgroup>
           <Table.Header>
             <Table.Row bg="bg.mutedCard">
               {[
-                { column: 'status', filterable: true },
-                { column: 'roomId', filterable: true },
-                { column: 'players', filterable: true },
+                {
+                  column: 'status',
+                  filterable: true,
+                  filterHeight: ROOMS_HEADER_CONTROL_HEIGHTS.select,
+                },
+                {
+                  column: 'roomId',
+                  filterable: true,
+                  filterHeight: ROOMS_HEADER_CONTROL_HEIGHTS.text,
+                },
+                {
+                  column: 'players',
+                  filterable: true,
+                  filterHeight: ROOMS_HEADER_CONTROL_HEIGHTS.text,
+                },
                 { column: 'scores', filterable: false },
-                { column: 'rounds', filterable: true },
-                { column: 'language', filterable: true },
+                {
+                  column: 'rounds',
+                  filterable: true,
+                  filterHeight: ROOMS_HEADER_CONTROL_HEIGHTS.select,
+                },
+                {
+                  column: 'language',
+                  filterable: true,
+                  filterHeight: ROOMS_HEADER_CONTROL_HEIGHTS.select,
+                },
                 { column: 'createdAt', filterable: false },
                 { column: 'lastUpdatedAt', filterable: false },
-              ].map(({ column, filterable }) => (
+              ].map(({ column, filterable, filterHeight }) => (
                 <Table.ColumnHeader key={column} p={0}>
-                  <VStack align="stretch" gap={1} py={2} px={1} minH="5.5rem">
+                  <VStack
+                    align="stretch"
+                    gap={ROOMS_STACK_GAP}
+                    py={2}
+                    px={1}
+                    minH={ROOMS_HEADER_MIN_HEIGHT}
+                  >
                     {filterable ? (
                       <Button variant="ghost" w="full" justifyContent="flex-start" px={2}>
                         {t(`admin.rooms.columns.${column}`)}
@@ -34,7 +73,11 @@ export function RoomsSkeleton() {
                         {t(`admin.rooms.columns.${column}`)}
                       </Text>
                     )}
-                    {filterable ? <Skeleton height="32px" /> : <Box height="32px" />}
+                    {filterable ? (
+                      <Skeleton height={filterHeight ?? ROOMS_HEADER_CONTROL_HEIGHTS.text} />
+                    ) : (
+                      <Box height={ROOMS_HEADER_CONTROL_HEIGHTS.text} />
+                    )}
                   </VStack>
                 </Table.ColumnHeader>
               ))}
@@ -42,17 +85,54 @@ export function RoomsSkeleton() {
           </Table.Header>
           <Table.Body>
             {Array.from({ length: 6 }).map((_, index) => (
-              <Table.Row key={index}>
-                {Array.from({ length: 8 }).map((__, cellIndex) => (
-                  <Table.Cell key={cellIndex}>
-                    <Skeleton height="1.25rem" width={cellIndex === 2 ? '8rem' : '5rem'} />
-                  </Table.Cell>
-                ))}
-              </Table.Row>
+              <RoomRowSkeleton key={index} />
             ))}
           </Table.Body>
         </Table.Root>
       </Box>
+    </Stack>
+  );
+}
+
+function RoomRowSkeleton() {
+  const sizes = ROOMS_ROW_SKELETON_SIZES;
+
+  return (
+    <Table.Row>
+      <Table.Cell verticalAlign="top">
+        <Skeleton height={sizes.status.height} width={sizes.status.width} borderRadius="full" />
+      </Table.Cell>
+      <Table.Cell verticalAlign="top">
+        <Skeleton height={sizes.lineHeight} width={sizes.id} />
+      </Table.Cell>
+      <Table.Cell verticalAlign="top">
+        <SkeletonLines widths={sizes.players} />
+      </Table.Cell>
+      <Table.Cell verticalAlign="top">
+        <SkeletonLines widths={sizes.scores} />
+      </Table.Cell>
+      <Table.Cell verticalAlign="top">
+        <Skeleton height={sizes.lineHeight} width={sizes.rounds} />
+      </Table.Cell>
+      <Table.Cell verticalAlign="top">
+        <Skeleton height={sizes.lineHeight} width={sizes.language} />
+      </Table.Cell>
+      <Table.Cell verticalAlign="top">
+        <Skeleton height={sizes.lineHeight} width={sizes.date} />
+      </Table.Cell>
+      <Table.Cell verticalAlign="top">
+        <Skeleton height={sizes.lineHeight} width={sizes.date} />
+      </Table.Cell>
+    </Table.Row>
+  );
+}
+
+function SkeletonLines({ widths }: { widths: readonly string[] }) {
+  return (
+    <Stack gap={ROOMS_STACK_GAP}>
+      {widths.map((width) => (
+        <Skeleton key={width} height={ROOMS_ROW_SKELETON_SIZES.lineHeight} width={width} />
+      ))}
     </Stack>
   );
 }

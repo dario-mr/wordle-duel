@@ -13,6 +13,13 @@ import { ColumnResizeHandle } from '../shared/table/ColumnResizeHandle';
 import { adminTableFeatures } from '../shared/table/features';
 import { SortHeaderButton } from '../shared/table/SortHeaderButton';
 import { RoundTitle } from '../../rooms/shared/RoundTitle';
+import {
+  ROOMS_COLUMN_SIZING,
+  ROOMS_HEADER_CONTROL_HEIGHTS,
+  ROOMS_HEADER_MIN_HEIGHT,
+  ROOMS_STACK_GAP,
+  ROOMS_TABLE_MIN_WIDTH,
+} from './roomsTable.constants';
 
 const columnHelper = createColumnHelper<typeof adminTableFeatures, AdminRoomDto>();
 
@@ -59,8 +66,7 @@ export function RoomsTable(props: {
             />
           ),
           cell: (info) => <RoundTitle roomStatus={info.getValue()} statusOnly />,
-          size: 160,
-          minSize: 150,
+          ...ROOMS_COLUMN_SIZING.status,
         }),
         columnHelper.accessor('id', {
           header: () => (
@@ -82,8 +88,7 @@ export function RoomsTable(props: {
               {info.getValue()}
             </Text>
           ),
-          size: 180,
-          minSize: 150,
+          ...ROOMS_COLUMN_SIZING.id,
         }),
         columnHelper.display({
           id: 'players',
@@ -103,7 +108,7 @@ export function RoomsTable(props: {
             />
           ),
           cell: ({ row }) => (
-            <Stack gap={1}>
+            <Stack gap={ROOMS_STACK_GAP}>
               {row.original.players.map((player) => (
                 <Box key={player.id}>
                   <Text>{player.displayName ?? '—'}</Text>
@@ -111,14 +116,13 @@ export function RoomsTable(props: {
               ))}
             </Stack>
           ),
-          size: 190,
-          minSize: 160,
+          ...ROOMS_COLUMN_SIZING.players,
         }),
         columnHelper.display({
           id: 'scores',
           header: () => <StaticHeader label={t('admin.rooms.columns.scores')} />,
           cell: ({ row }) => (
-            <Stack gap={1}>
+            <Stack gap={ROOMS_STACK_GAP}>
               {row.original.players.map((player) => (
                 <Text key={player.id}>
                   {player.matchScore ?? '—'}{' '}
@@ -129,8 +133,7 @@ export function RoomsTable(props: {
               ))}
             </Stack>
           ),
-          size: 120,
-          minSize: 110,
+          ...ROOMS_COLUMN_SIZING.scores,
         }),
         columnHelper.accessor('configuredRounds', {
           id: 'rounds',
@@ -158,8 +161,7 @@ export function RoomsTable(props: {
             />
           ),
           cell: (info) => t(`admin.rooms.rounds.${String(info.getValue())}`),
-          size: 110,
-          minSize: 100,
+          ...ROOMS_COLUMN_SIZING.rounds,
         }),
         columnHelper.accessor('language', {
           header: () => (
@@ -184,8 +186,7 @@ export function RoomsTable(props: {
             />
           ),
           cell: (info) => t(`roomLanguage.${info.getValue().toLowerCase()}`),
-          size: 110,
-          minSize: 100,
+          ...ROOMS_COLUMN_SIZING.language,
         }),
         columnHelper.accessor('createdAt', {
           header: () => (
@@ -203,8 +204,7 @@ export function RoomsTable(props: {
             />
           ),
           cell: (info) => new Date(info.getValue()).toLocaleDateString(),
-          size: 150,
-          minSize: 140,
+          ...ROOMS_COLUMN_SIZING.createdAt,
         }),
         columnHelper.accessor('lastUpdatedAt', {
           header: () => (
@@ -222,8 +222,7 @@ export function RoomsTable(props: {
             />
           ),
           cell: (info) => new Date(info.getValue()).toLocaleDateString(),
-          size: 150,
-          minSize: 140,
+          ...ROOMS_COLUMN_SIZING.lastUpdatedAt,
         }),
       ]),
     [props, t],
@@ -251,7 +250,7 @@ export function RoomsTable(props: {
 
   return (
     <Box borderWidth="1px" borderRadius="xl" overflowX="auto" overflowY="hidden">
-      <Table.Root tableLayout="fixed" width="full" minW="70rem">
+      <Table.Root tableLayout="fixed" width="full" minW={ROOMS_TABLE_MIN_WIDTH}>
         <colgroup>
           {table.getAllLeafColumns().map((column) => (
             <col key={column.id} style={{ width: `${String(column.getSize())}px` }} />
@@ -313,7 +312,7 @@ export function RoomsTable(props: {
 
 function HeaderStack(props: { children: ReactNode }) {
   return (
-    <VStack align="stretch" gap={1} py={2} px={1} minH="5.5rem">
+    <VStack align="stretch" gap={ROOMS_STACK_GAP} py={2} px={1} minH={ROOMS_HEADER_MIN_HEIGHT}>
       {props.children}
     </VStack>
   );
@@ -345,7 +344,7 @@ function StaticHeader({ label }: { label: string }) {
       <Text fontSize="sm" fontWeight="medium" truncate>
         {label}
       </Text>
-      <Box height="32px" />
+      <Box height={ROOMS_HEADER_CONTROL_HEIGHTS.text} />
     </HeaderStack>
   );
 }
@@ -371,7 +370,7 @@ function DateFilterHeader(props: {
         onChange={(event) => {
           props.onApply(event.currentTarget.value);
         }}
-        height="32px"
+        height={ROOMS_HEADER_CONTROL_HEIGHTS.text}
         size="sm"
         borderWidth="1px"
         borderColor="border.emphasized"
@@ -413,7 +412,7 @@ function TextFilterHeader(props: {
           setDraft(event.target.value);
         }}
         onKeyDown={handleKeyDown}
-        height="32px"
+        height={ROOMS_HEADER_CONTROL_HEIGHTS.text}
         size="sm"
         borderWidth="1px"
         borderColor="border.emphasized"
@@ -442,6 +441,7 @@ function SelectFilterHeader(props: {
     >
       <NativeSelect.Root>
         <NativeSelect.Field
+          height={ROOMS_HEADER_CONTROL_HEIGHTS.select}
           value={props.value}
           aria-label={props.label}
           onChange={(event) => {
