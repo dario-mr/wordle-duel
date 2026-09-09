@@ -53,6 +53,12 @@ export function useRoomTopic(
           }
           void queryClient.invalidateQueries({ queryKey: roomQueryKey(roomId) });
         });
+
+        void Promise.all([
+          queryClient.invalidateQueries({ queryKey: roomQueryKey(roomId) }),
+          queryClient.invalidateQueries({ queryKey: roomMessagesQueryKey(roomId) }),
+          queryClient.invalidateQueries({ queryKey: ['myRooms'] }),
+        ]);
       },
       onStompError: (frame) => {
         console.error('STOMP error:', frame.headers.message);

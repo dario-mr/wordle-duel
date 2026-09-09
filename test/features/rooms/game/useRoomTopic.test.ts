@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => {
   let subscribeHandler: ((message: { body: string }) => void) | undefined;
 
   const invalidateQueries = vi.fn();
+  const subscribeMock = vi.fn();
   const deactivate = vi.fn().mockResolvedValue(undefined);
   const activate = vi.fn();
 
@@ -25,6 +26,7 @@ const mocks = vi.hoisted(() => {
     }
 
     subscribe(destination: string, handler: (message: { body: string }) => void) {
+      subscribeMock(destination, handler);
       subscribeHandler = handler;
       return { unsubscribe: vi.fn(), destination };
     }
@@ -42,6 +44,7 @@ const mocks = vi.hoisted(() => {
     getLastConfig: () => lastConfig,
     getSubscribeHandler: () => subscribeHandler,
     invalidateQueries,
+    subscribeMock,
     deactivate,
     activate,
     getWsBrokerUrl: vi.fn(() => 'ws://localhost/ws'),
@@ -78,6 +81,7 @@ describe('useRoomTopic', () => {
   beforeEach(() => {
     mocks.reset();
     mocks.invalidateQueries.mockReset();
+    mocks.subscribeMock.mockReset();
     mocks.deactivate.mockReset();
     mocks.activate.mockReset();
     mocks.getWsBrokerUrl.mockClear();
@@ -119,6 +123,44 @@ describe('useRoomTopic', () => {
     ).toEqual({});
   });
 
+  it('subscribes and refreshes room data on every connection', () => {
+    renderHook(() => {
+      useRoomTopic('room-1');
+    });
+
+    const config = mocks.getLastConfig() as { onConnect?: () => void };
+    config.onConnect?.();
+    config.onConnect?.();
+
+    expect(mocks.subscribeMock).toHaveBeenCalledTimes(2);
+    expect(mocks.subscribeMock).toHaveBeenNthCalledWith(
+      1,
+      '/topic/rooms/room-1',
+      expect.any(Function),
+    );
+    expect(mocks.subscribeMock).toHaveBeenNthCalledWith(
+      2,
+      '/topic/rooms/room-1',
+      expect.any(Function),
+    );
+    expect(mocks.invalidateQueries).toHaveBeenCalledTimes(6);
+    for (const call of [1, 4]) {
+      expect(mocks.invalidateQueries).toHaveBeenNthCalledWith(call, {
+        queryKey: ['room', 'room-1'],
+      });
+    }
+    for (const call of [2, 5]) {
+      expect(mocks.invalidateQueries).toHaveBeenNthCalledWith(call, {
+        queryKey: ['roomMessages', 'room-1'],
+      });
+    }
+    for (const call of [3, 6]) {
+      expect(mocks.invalidateQueries).toHaveBeenNthCalledWith(call, {
+        queryKey: ['myRooms'],
+      });
+    }
+  });
+
   it.each([
     ['SCORES_UPDATED', [['room', 'room-1']]],
     ['MATCH_FINISHED', [['room', 'room-1'], ['myRooms']]],
@@ -128,6 +170,7 @@ describe('useRoomTopic', () => {
       useRoomTopic('room-1');
     });
     (mocks.getLastConfig() as { onConnect: () => void }).onConnect();
+    mocks.invalidateQueries.mockClear();
     mocks.getSubscribeHandler()?.({ body: JSON.stringify({ type }) });
     expect(mocks.invalidateQueries.mock.calls).toEqual(queryKeys.map((queryKey) => [{ queryKey }]));
   });
@@ -137,6 +180,7 @@ describe('useRoomTopic', () => {
       useRoomTopic('room-1');
     });
     (mocks.getLastConfig() as { onConnect: () => void }).onConnect();
+    mocks.invalidateQueries.mockClear();
     mocks.getSubscribeHandler()?.({ body: 'not-json' });
     expect(mocks.invalidateQueries.mock.calls).toEqual([[{ queryKey: ['room', 'room-1'] }]]);
   });
@@ -148,6 +192,7 @@ describe('useRoomTopic', () => {
 
     const config = mocks.getLastConfig() as { onConnect?: () => void };
     config.onConnect?.();
+    mocks.invalidateQueries.mockClear();
     mocks.getSubscribeHandler()?.({
       body: JSON.stringify({ type: 'MATCH_RESTARTED', payload: { roomId: 'room-2' } }),
     });
@@ -170,6 +215,7 @@ describe('useRoomTopic', () => {
 
     const config = mocks.getLastConfig() as { onConnect?: () => void };
     config.onConnect?.();
+    mocks.invalidateQueries.mockClear();
     mocks.getSubscribeHandler()?.({
       body: JSON.stringify({
         type: 'ROOM_MESSAGE_SENT',
