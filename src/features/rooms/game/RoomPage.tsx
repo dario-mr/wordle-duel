@@ -285,6 +285,7 @@ export function RoomPage() {
             open={chatOpen}
             isLoading={messagesQuery.isLoading}
             isSending={sendMessageMutation.isPending}
+            sendingPreset={sendMessageMutation.variables}
             isSendBlocked={isMessageSendBlocked}
             onOpenChange={handleChatOpenChange}
             onSend={(preset) => {

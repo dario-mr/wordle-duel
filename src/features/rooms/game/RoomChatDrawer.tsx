@@ -28,6 +28,7 @@ interface RoomChatDrawerProps {
   open: boolean;
   isLoading: boolean;
   isSending: boolean;
+  sendingPreset?: RoomMessagePreset;
   isSendBlocked: boolean;
   onOpenChange: (open: boolean) => void;
   onSend: (preset: RoomMessagePreset) => void;
@@ -41,6 +42,7 @@ export function RoomChatDrawer({
   open,
   isLoading,
   isSending,
+  sendingPreset,
   isSendBlocked,
   onOpenChange,
   onSend,
@@ -187,6 +189,7 @@ export function RoomChatDrawer({
                       bg="bg.subtle"
                       borderRadius="xl"
                       transition="background-color 0.2s ease"
+                      loading={isSending && sendingPreset === preset}
                       _hover={{ bg: 'bg.keyboard' }}
                       disabled={isSending || isSendBlocked}
                       onClick={() => {
