@@ -120,6 +120,22 @@ describe('ProfilePopover', () => {
     expect(screen.queryByRole('button', { name: 'profile.logout' })).toBeNull();
   });
 
+  it('shows the signed-in user email below their name', () => {
+    mocks.getCurrentUser.mockReturnValue({
+      id: 'user-1',
+      email: 'john@example.com',
+      fullName: 'John Smith',
+      displayName: 'John',
+      pictureUrl: null,
+      roles: ['USER'],
+    });
+
+    render(<ProfilePopover />);
+
+    expect(screen.getByText('John Smith')).toBeTruthy();
+    expect(screen.getByText('john@example.com')).toBeTruthy();
+  });
+
   it('logout clears queries, removes returnTo, and navigates home', async () => {
     mocks.getCurrentUser.mockReturnValue({ id: 'user-1', roles: ['USER'] });
     sessionStorage.setItem('wd.auth.returnTo', '/rooms/abc');

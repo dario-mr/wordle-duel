@@ -15,6 +15,7 @@ vi.mock('react-i18next', async () => await import('../testUtils/reactI18nextMock
 
 const user: UserMeDto = {
   id: 'admin-1',
+  email: 'admin@example.com',
   fullName: 'Test Admin',
   displayName: 'Admin',
   pictureUrl: null,

@@ -23,6 +23,7 @@ export async function mockAuthenticatedSession(
     roles?: string[];
     fullName?: string;
     displayName?: string;
+    email?: string;
   },
 ) {
   let sessionActive = true;
@@ -30,6 +31,7 @@ export async function mockAuthenticatedSession(
   const roles = args?.roles ?? ['USER'];
   const fullName = args?.fullName ?? 'Alice Example';
   const displayName = args?.displayName ?? 'alice';
+  const email = args?.email ?? 'alice@example.com';
 
   await page.route('**/auth/logout', async (route) => {
     sessionActive = false;
@@ -44,6 +46,7 @@ export async function mockAuthenticatedSession(
 
     await fulfillJson(route, {
       id: userId,
+      email,
       fullName,
       displayName,
       pictureUrl: null,

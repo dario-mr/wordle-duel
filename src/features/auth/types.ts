@@ -1,5 +1,6 @@
 export interface UserMeDto {
   id: string;
+  email: string;
   fullName: string;
   displayName: string;
   pictureUrl: string | null;

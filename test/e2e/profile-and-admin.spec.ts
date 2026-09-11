@@ -46,6 +46,7 @@ test.describe('profile and admin flows', () => {
     });
     await page.getByRole('button', { name: 'Profile' }).click();
     await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
+    await expect(page.getByText('alice@example.com', { exact: true })).toBeVisible();
 
     await page.getByRole('button', { name: 'Logout' }).click();
 

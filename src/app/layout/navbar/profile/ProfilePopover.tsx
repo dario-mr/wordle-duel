@@ -109,9 +109,16 @@ export function ProfilePopover({
             <UserRound size={24} aria-hidden="true" />
           </Avatar.Fallback>
         </Avatar.Root>
-        <Text fontSize="lg" fontWeight="semibold">
-          {profileTitle}
-        </Text>
+        <Stack gap={0} minW={0}>
+          <Text fontSize="lg" fontWeight="semibold" truncate>
+            {profileTitle}
+          </Text>
+          {displayedMe?.email && (
+            <Text fontSize="sm" color="fg.muted" truncate>
+              {displayedMe.email}
+            </Text>
+          )}
+        </Stack>
       </Flex>
       {!isLoggedIn && (
         <AuthActions

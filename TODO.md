@@ -1,0 +1,1 @@
+- pwa push notifications when opponent finished all rounds or when he joined your match; possibly only when app not open
