@@ -154,7 +154,7 @@ export function ProfilePopover({
               <Drawer.Header>
                 <Drawer.Title asChild>{profileHeader}</Drawer.Title>
               </Drawer.Header>
-              <Drawer.Body pb={0}>{profileContent}</Drawer.Body>
+              <Drawer.Body pb="env(safe-area-inset-bottom, 0px)">{profileContent}</Drawer.Body>
             </Drawer.Content>
           </Drawer.Positioner>
         </Portal>

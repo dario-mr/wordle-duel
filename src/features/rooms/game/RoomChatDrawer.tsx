@@ -177,7 +177,11 @@ export function RoomChatDrawer({
                 </Stack>
               )}
             </Drawer.Body>
-            <Drawer.Footer borderTopWidth="1px" borderColor="border.divider">
+            <Drawer.Footer
+              borderTopWidth="1px"
+              borderColor="border.divider"
+              pb="calc(1rem + env(safe-area-inset-bottom, 0px))"
+            >
               <Stack gap={2} w="full">
                 <HStack gap={2} flexWrap="wrap">
                   {ROOM_MESSAGE_PRESETS.map((preset) => (

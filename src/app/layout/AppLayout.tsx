@@ -18,7 +18,11 @@ export function AppLayout() {
     >
       <Box aria-hidden className="background-letters" />
       <Navbar />
-      <Box as="main" flex="1" pb={{ base: '3rem', md: 0 }}>
+      <Box
+        as="main"
+        flex="1"
+        pb={{ base: 'calc(3rem + env(safe-area-inset-bottom, 0px))', md: 0 }}
+      >
         <Container maxW={isWide ? { md: '80rem' } : { md: '50rem' }} py={4} px={4}>
           <Outlet />
         </Container>

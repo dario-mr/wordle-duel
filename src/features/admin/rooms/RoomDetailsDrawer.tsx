@@ -99,7 +99,8 @@ export function RoomDetailsDrawer(props: { room: AdminRoomDto | null; onClose: (
                 </Drawer.Body>
                 <Drawer.Footer
                   px={{ base: 4, md: 6 }}
-                  py={3}
+                  pt={3}
+                  pb="calc(0.75rem + env(safe-area-inset-bottom, 0px))"
                   borderTopWidth="1px"
                   borderColor="border.divider"
                   alignItems={{ base: 'stretch', sm: 'center' }}
