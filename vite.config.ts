@@ -51,6 +51,9 @@ export default defineConfig(({ mode }) => {
         devOptions: {
           enabled: true,
         },
+        workbox: {
+          navigateFallbackDenylist: [/^\/wordle-duel-service(?:\/|$)/],
+        },
         manifest: {
           name: 'Wordle Duel',
           short_name: 'Wordle Duel',
