@@ -9,6 +9,7 @@ const config = defineConfig({
           currentLine: { value: '#30384c' },
           foreground: { value: '#f8f8f2' },
           comment: { value: '#6272a4' },
+          muted: { value: '#a6adbb' },
           cyan: { value: '#8be9fd' },
           green: { value: '#3bd16f' },
           orange: { value: '#ffb86c' },
@@ -75,7 +76,7 @@ const config = defineConfig({
             value: { _light: '{colors.black}', _dark: '{colors.dracula.foreground}' },
           },
           muted: {
-            value: { _light: '{colors.gray.600}', _dark: '{colors.dracula.comment}' },
+            value: { _light: '{colors.gray.600}', _dark: '{colors.dracula.muted}' },
           },
           navigation: {
             value: { _light: '{colors.gray.700}', _dark: '{colors.gray.400}' },

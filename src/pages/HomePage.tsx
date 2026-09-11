@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { CreateRoomForm } from '../features/rooms/create/CreateRoomForm';
 import { type HomeTab, HomeTabs } from './HomeTabs';
 import { JoinRoomForm } from '../features/rooms/join/JoinRoomForm';
+import { PwaInstallPrompt } from '../features/pwa/PwaInstallPrompt';
 import { STORAGE_KEYS } from '../state/storageKeys';
 import { sanitizeReturnTo } from '../features/auth/sanitizeReturnTo';
 
@@ -85,6 +86,8 @@ export function HomePage() {
           </Stack>
         </Stack>
       </Stack>
+
+      <PwaInstallPrompt />
     </Stack>
   );
 }

@@ -70,6 +70,11 @@ export default {
       roomIdLabel: 'Room ID',
       roomIdPlaceholder: 'Room ID',
     },
+    install: {
+      button: 'Install Wordle Duel',
+      quickAccess: 'Quick access from your home screen',
+      iosGuidance: 'Tap Share, then Add to Home Screen to install Wordle Duel.',
+    },
   },
   room: {
     invalidLinkTitle: 'Invalid room link',

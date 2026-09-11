@@ -71,6 +71,11 @@ export default {
       roomIdLabel: 'ID stanza',
       roomIdPlaceholder: 'ID stanza',
     },
+    install: {
+      button: 'Installa Wordle Duel',
+      quickAccess: 'Accesso rapido dalla schermata Home',
+      iosGuidance: 'Premi Condividi, poi Aggiungi alla schermata Home per installare Wordle Duel.',
+    },
   },
   room: {
     invalidLinkTitle: 'Link stanza non valido',
