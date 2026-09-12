@@ -1,4 +1,4 @@
-import { expect, test, type Locator } from '@playwright/test';
+import { expect, type Locator, test } from '@playwright/test';
 import type { GuessDto, RoomDto } from '../../src/features/rooms/types';
 import { liveRoom, openRoom, winningGuess } from './testHelpers';
 
@@ -125,32 +125,36 @@ function runningAnimations(root: Locator) {
   );
 }
 
+function scenarioRooms(scenario: (typeof cases)[number], roomId: string) {
+  const room = liveRoom(roomId);
+  const currentRound = {
+    ...room.currentRound,
+    roundNumber: scenario.scope === 'match' ? 5 : 2,
+    guesses: scenario.guesses.slice(0, -1),
+  };
+  const initial: RoomDto = { ...room, currentRound };
+  const complete: RoomDto = {
+    ...initial,
+    status: scenario.scope === 'match' ? 'MATCH_FINISHED' : 'IN_PROGRESS',
+    players: initial.players.map((player, index) => ({
+      ...player,
+      matchScore: scenario.scores[index === 0 ? 0 : 1],
+    })),
+    currentRound: {
+      ...currentRound,
+      guesses: [...scenario.guesses],
+      playerStatus: scenario.playerStatus,
+      roundStatus: 'ENDED',
+      solution: 'VERDE',
+    },
+  };
+
+  return { initial, complete, word: scenario.word, rootSelector: `[data-${scenario.scope}-end]` };
+}
+
 for (const scenario of cases) {
   test.describe(scenario.name, () => {
-    const room = liveRoom('animation-room');
-    const currentRound = {
-      ...room.currentRound,
-      roundNumber: scenario.scope === 'match' ? 5 : 2,
-      guesses: scenario.guesses.slice(0, -1),
-    };
-    const initial: RoomDto = { ...room, currentRound };
-    const complete: RoomDto = {
-      ...initial,
-      status: scenario.scope === 'match' ? 'MATCH_FINISHED' : 'IN_PROGRESS',
-      players: initial.players.map((player, index) => ({
-        ...player,
-        matchScore: scenario.scores[index === 0 ? 0 : 1],
-      })),
-      currentRound: {
-        ...currentRound,
-        guesses: [...scenario.guesses],
-        playerStatus: scenario.playerStatus,
-        roundStatus: 'ENDED',
-        solution: 'VERDE',
-      },
-    };
-    const word = scenario.word;
-    const rootSelector = `[data-${scenario.scope}-end]`;
+    const { initial, complete, word, rootSelector } = scenarioRooms(scenario, 'animation-room');
 
     test.beforeEach(async ({ page }) => {
       await openRoom(page, initial, complete);
@@ -228,3 +232,32 @@ for (const scenario of cases) {
     });
   });
 }
+
+test.describe('rematch action styling', () => {
+  const { initial, complete, word } = scenarioRooms(cases[0], 'animation-rematch-room');
+
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/api/v1/rooms/animation-rematch-room/rematch', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ started: false }),
+      });
+    });
+    await openRoom(page, initial, complete);
+  });
+
+  test('applies disabled opacity after requesting a rematch', async ({ page }) => {
+    await page.keyboard.type(word);
+    await page.keyboard.press('Enter');
+
+    const button = page.locator('.match-play-again');
+    await expect(button).toBeVisible();
+    await button.click();
+    await expect(button).toHaveText('Waiting for opponent...');
+    await expect(button).toBeDisabled();
+    await expect
+      .poll(() => button.evaluate((element) => getComputedStyle(element).opacity))
+      .toBe('0.5');
+  });
+});

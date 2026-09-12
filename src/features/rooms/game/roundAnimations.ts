@@ -69,6 +69,9 @@ export const roundAnimations: SystemStyleObject = {
       animation: `${arrive} ${String(arriveDuration)}ms ease-out ${String(winActionStart)}ms both`,
     },
   },
+  '& .match-play-again:disabled, & .round-action:disabled': {
+    animation: 'none !important',
+  },
   '&[data-match-end="won"] .winning-row > .guess-tile': {
     animation: `${bounce} ${String(bounceDuration)}ms ease-out`,
     animationDelay: `calc(${String(boardStart)}ms + var(--tile-index) * ${String(bounceStagger)}ms)`,
