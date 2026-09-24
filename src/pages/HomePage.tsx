@@ -8,6 +8,7 @@ import { JoinRoomForm } from '../features/rooms/join/JoinRoomForm';
 import { PwaInstallPrompt } from '../features/pwa/PwaInstallPrompt';
 import { STORAGE_KEYS } from '../state/storageKeys';
 import { sanitizeReturnTo } from '../features/auth/sanitizeReturnTo';
+import packageJson from '../../package.json';
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -88,6 +89,9 @@ export function HomePage() {
       </Stack>
 
       <PwaInstallPrompt />
+      <Text as="footer" color="fg.muted" fontSize="xs" textAlign="center">
+        v{packageJson.version}
+      </Text>
     </Stack>
   );
 }
